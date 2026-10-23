@@ -158,6 +158,8 @@ def run_checks(fx_frames, base_frames, times, contact, duration, a):
     for t, m, bf in zip(times, masks, base_frames):
         if m.mean() > 0.4:  # full-screen event (impact frame, screen flash): not a shape
             continue
+        if (luminance(bf) > 0.85).mean() > 0.5:  # two-tone impact frame: shapes are inked flat by design
+            continue
         # Edges of the scene's own geometry (a character occluding smoke) are not cuts.
         geom = None
         if cv2 is not None:

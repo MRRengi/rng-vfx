@@ -33,8 +33,8 @@ export default {
           }, 0.017 * (k + 1));
         }
         fx.flash({
-          pos: HIT, size: 1.6, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 1.5, blend: 'alpha', bias: 0.6,
-          dir: HIT_DIR, aspect: 1.6, core_color: '#0a0204', coreK: 1, edge_color: '#e01a08', edgeK: 1.0,
+          pos: HIT, size: 1.6, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 0.6, blend: 'alpha', bias: 0.6,
+          dir: HIT_DIR, aspect: 1.6, core_color: '#0a0204', coreK: 1, edge_color: '#b80c04', edgeK: 1.0,
           scaleCurve: [[0, 0.5], [0.03, 1, 'outExpo'], [0.08, 1.15]], alphaCurve: [[0, 1], [0.05, 1], [0.08, 0]],
         }, 0.05);
         fx.flash({
