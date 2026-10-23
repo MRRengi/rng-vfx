@@ -762,6 +762,8 @@ void main() {
     vec2 d = vec2(cos(phi), sin(phi));
     float rr = (p1.x * e.y - p1.y * e.x) / max(d.x * e.y - d.y * e.x, 1e-4);
     rad = rr * (1.0 + uPoly * sin(3.1416 * phi / half_));
+    // Pinched blades are torn shapes: ragged edges, never a ruler line.
+    if (uPoly < 0.0) rad *= 1.0 + 0.07 * sin(ang * 37.0 + uSeed * 3.1) + 0.04 * sin(ang * 83.0 + uSeed * 1.7);
   }
   // Longest spikes point along the hit (local +x is the hit direction).
   rad *= 1.0 + uBias * pow(max(0.0, cos(ang0)), 4.0);

@@ -21,7 +21,7 @@ Checks (thresholds from numbers.md / fundamentals.md):
   frame-border    the effect never touches the frame border (framing)
   white-clip      share of the effect burned to white next to its coloured body <= 15% (OKLab)
   haze            brightness rise outside the effect (bloom spill) at the brightest frame <= +25%
-  hue             on the frame with the most visible effect pixels (impacts: within 0.15 s of contact),
+  hue             on the frame with the most visible effect pixels (impacts: within 0.1 s of contact),
                   >= 15% of them are saturated (OKLab chroma > 0.1) and >= 30% of those within 25 deg of --hue
   static-hold     no unchanged mask and image for longer than 4 frames (full rate) or 2 drawings
   empty-tail      at 90% of the duration the mask still holds >= 2% of its peak area
@@ -303,7 +303,7 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
         # the saturated share only, not against the hue.
         # Impacts: the contact read (contact .. +0.15 s); later frames belong to residue (puffs,
         # smoke) whose shading is not the effect's colour.
-        hw = max(0.15, (2.0 / a.fps_style) if getattr(a, "fps_style", 0) else 0)
+        hw = max(0.1, (2.0 / a.fps_style) if getattr(a, "fps_style", 0) else 0)
         # Explosions: after the flash (contact + 0.1 s); the flash is white by design and judged
         # by white-clip, the body's colour by this.
         if a.kind == "impact":

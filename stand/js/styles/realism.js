@@ -23,12 +23,12 @@ export default {
         // Contact streak: a 2-frame anisotropic flare along the hit, the readable contact shape.
         fx.flash({
           pos: HIT, size: 0.35, spikes: 0, spikeLen: 0, core: 0.45, soft: 4, dir: HIT_DIR, aspect: 3.5,
-          core_color: '#fff6e0', coreK: 1.35, edge_color: '#ffb050', edgeK: 1.0,
+          core_color: '#fff6e0', coreK: 1.2, edge_color: '#ffb050', edgeK: 1.0,
           scaleCurve: [[0, 1]], alphaCurve: [[0, 1], [0.033, 1], [0.034, 0]], order: 8,
         }, 0);
         fx.flash({
           pos: HIT, size: 0.4, spikes: 0, spikeLen: 0, core: 0.6, soft: 5, dir: SPRAY, aspect: 3.6,
-          core_color: '#fff6e0', coreK: 1.35, edge_color: '#ffb050', edgeK: 1.0,
+          core_color: '#fff6e0', coreK: 1.2, edge_color: '#ffb050', edgeK: 1.0,
           scaleCurve: [[0, 1], [0.05, 0.6]], alphaCurve: [[0, 1], [0.033, 1], [0.05, 0]],
         }, 0);
         fx.burst({
@@ -88,21 +88,21 @@ export default {
         // optical-flow in-betweens, so the lobes roll instead of cross-fading. It burns down to
         // soot inside the sheet; the smoke layers take over from there.
         fx.burst({
-          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.7 },
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.5 },
           dir: 'cone', axis: UP, angle: 15, count: 2, sizeDist: [1, 1, 0], seed: 31, origin: at(BLAST, 0, 1.55, 0), spawnR: 0.35,
           speed: [0.2, 0.5], drag: 3, gravity: [0, 0.35, 0], life: [1.7, 2.0], size: [3.6, 4.2], sizeIn: 0.1, spin: 0.1,
           blend: 'alpha', order: 4, fadeDist: 0.4, fade: [0, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.7], [0.35, '#ffffff', 1.25], [1, '#ffffff', 1.0]]),
         }, 0);
         // Mid tier: smaller copies of the same sim, breaking the hero's outline.
         fx.burst({
-          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.7 },
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.5 },
           dir: 'sphere', count: 6, sizeDist: [0, 4, 2], seed: 52, origin: C, spawnR: 0.7, speed: [1.5, 3.5], drag: 3.5,
           gravity: [0, 0.6, 0], life: [1.1, 1.5], size: [1.2, 2.0], sizePow: 0.4, sizeIn: 0.12, spin: 0.4, blend: 'alpha', order: 3, fadeDist: 0.4,
           fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.5], [0.4, '#ffffff', 1.15], [1, '#ffffff', 1.0]]),
         }, 0);
         // Stem and base: small copies of the sim low on the ground tie the fireball down.
         fx.burst({
-          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.7 },
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.5 },
           dir: 'ring', lift: 0.1, count: 5, seed: 77, origin: at(BLAST, 0, 0.45, 0), spawnR: 0.5, speed: [0.6, 1.4], drag: 3,
           gravity: [0, 0.3, 0], life: [1.6, 1.9], size: [1.1, 1.6], sizeIn: 0.12, spin: 0.3, blend: 'alpha', order: 4, fadeDist: 0.3,
           fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.5], [0.4, '#ffffff', 1.15], [1, '#ffffff', 1.0]]),

@@ -66,7 +66,7 @@ export default {
           // Drawn fire puffs (image-model keyframes): pop in, full, holes, bits.
           shape: 'sheet', cel: true, sheet: { url: './textures/toon_fire_2x2.png', grid: [2, 2], frames: 4, stepped: true, ease: 0.5 },
           dir: 'cone', axis: UP, angle: 50, count: 6, sizeDist: [2, 3, 1], origin: C, spawnR: 0.6,
-          speed: [1.8, 3.4], drag: 6, life: [0.6, 0.8], size: [5.2, 4.4], sizeIn: 0.08, sizeRand: 0.2, blend: 'alpha', fadeDist: 0.05, order: 3,
+          speed: [1.8, 3.4], drag: 6, life: [0.6, 0.8], size: [5.6, 4.7], sizeIn: 0.08, sizeRand: 0.2, blend: 'alpha', fadeDist: 0.05, order: 3,
           fade: [0, 0.999], ramp: fx.ramp([[0, '#ffffff', 1.05], [1, '#ffffff', 1.0]]),
         }, 0.02);
         fx.burst({

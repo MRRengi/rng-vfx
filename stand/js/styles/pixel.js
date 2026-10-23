@@ -61,13 +61,13 @@ export default {
         const C = at(BLAST, 0, 0.5, 0);
         fx.celOutline('#0e0e17', 1);
         fx.flash({
-          pos: C, size: 1.3, hard: true, spikes: 0, spikeLen: 0, core: 0.85,
+          pos: C, size: 1.6, hard: true, spikes: 0, spikeLen: 0, core: 0.85,
           core_color: '#ffffff', coreK: 1, edge_color: '#ffe14d', edgeK: 1,
-          scaleCurve: [[0, 0.5], [D, 1], [2 * D, 0.6]], alphaCurve: [[0, 1], [2 * D, 1], [2 * D + 0.001, 0]],
+          scaleCurve: [[0, 0.8], [D, 1], [2 * D, 0.6]], alphaCurve: [[0, 1], [2 * D, 1], [2 * D + 0.001, 0]],
         }, 0);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 11, sizeDist: [2, 4, 6], origin: C, spawnR: 0.75,
-          speed: [0.8, 1.6], drag: 10, life: [5 * D, 8 * D], size: [1.3, 0.3], sizePow: 1.6, bands: 2, outline: 0,
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 12, sizeDist: [2, 4, 6], origin: C, spawnR: 0.95, sizeIn: 0.05,
+          speed: [0.5, 1.0], drag: 10, life: [5 * D, 8 * D], size: [1.5, 0.3], sizePow: 1.6, bands: 2, outline: 0,
           shadow: '#b8261e', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0,
           ramp: fx.ramp([[0, '#ffe14d', 1], [0.4, '#ff7a1a', 1], [1, '#6a1a1a', 1]]),
         }, 0);
