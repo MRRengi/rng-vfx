@@ -19,11 +19,14 @@ Reference points: Battlefield, Call of Duty, The Last of Us Part II, Red Dead Re
 
 ## Signature techniques
 
+- **One temperature particle for fire:** a premultiplied-alpha particle whose emission follows the blackbody ramp of its temperature and whose occlusion grows as it cools, so fire turns into smoke inside the same particle. Two separate sets (orange fire, gray smoke) overlapping is the cheap tell.
+- **Smoke lit by the fire:** add the fire colour to smoke by height above the source, scaled by the fire light's curve, so the column glows from below.
+- **Flash and exposure:** flash 2 - 3 frames, smaller than the fireball; sell brightness with a short exposure dip (1 -> 0.6 -> 1 over ~0.3 s), not a white frame.
 - **Simulated flipbooks:** fire, smoke and explosions from fluid simulations (EmberGen, Houdini, Blender Mantaflow, or the engine's own fluid tools) baked to flipbooks with motion vectors for smooth frame blending. When no sim tool is available, layered fbm puffs with domain warping and fake self-shadow get close for mid-distance effects.
 - **Motion vector flipbook blending** to play low frame count flipbooks smoothly at any speed.
 - **Six-way or normal-mapped smoke lighting** so smoke responds to scene lights.
 - **Soft particles** (depth fade) everywhere particles meet geometry.
-- **Ballistic sparks** with stretched billboards along velocity, bounce or slide on collision.
+- **Ballistic sparks** with stretched billboards along velocity, bounce on collision (restitution 0.2 - 0.4). Orient the spray cone 60 - 90 degrees off the camera axis: a cone pointing at the camera foreshortens every spark into a dot. Add a hero subset (about 25%): faster (12 - 18 m/s), longer stretch, brighter.
 - **Ground dust rings** for explosions and landings: ring emitter, high initial speed, very high drag, low and wide.
 - **Heat distortion** above fires and after explosions.
 - **Light curves:** very short peak (2 to 3 frames), long tail.
@@ -32,8 +35,9 @@ Reference points: Battlefield, Call of Duty, The Last of Us Part II, Red Dead Re
 ## Default numbers
 
 - Spark impact: flash 2 - 4 frames, sparks 0.4 - 1.1 s, dust puff 1 - 1.6 s, chips 0.6 - 1 s.
-- Medium explosion: flash 4 - 9 frames, fireball 0.7 - 1.3 s, smoke 2 - 3 s rising, dust ring 1.2 - 1.8 s, debris 1.2 - 2 s, scorch persistent.
+- Medium explosion: flash 2 - 3 frames, fireball 0.8 - 1.5 s, smoke 3.5 - 4.5 s rising, dust ring 1.2 - 1.8 s, debris 1.2 - 2 s, scorch persistent.
 - Gravity 9.81 m/s^2 at real scale; check the project's unit scale first.
+- Smoke lifetime scales with blast size: a ~3 m fireball's smoke keeps billowing for 3.5 - 4.5 s, rising slowly (buoyancy about 1 - 1.5 m/s^2 against drag 2), not shooting out of frame in a second.
 
 ## Common mistakes
 

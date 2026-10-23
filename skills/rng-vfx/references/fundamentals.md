@@ -76,6 +76,21 @@ Defaults:
 
 Hand-drawn effects animate on twos or threes (a new drawing every 2 or 3 frames at 24 fps, so 12 or 8 drawings per second). Holding drawings gives snap and weight. In real time, quantize the effect's time: `t_held = floor(t * fps) / fps`. Use 12 for anime, 8 to 12 for pixel, full rate for stylized and realism. Never hold the camera or gameplay, only the effect.
 
+**Put every key on the drawing grid** (multiples of 1/fps). A key that falls between drawings is simply lost: the contact drawing never appears, or appears already decaying. Check that the contact drawing exists, is held for at least 2 drawings, and is not hidden under an impact frame (put the colour peak on the drawing after the impact frame).
+
+## Quality floors
+
+Hard minimums. An effect that misses one of these looks cheap regardless of how good the timing is.
+
+- **Screen size.** Nothing thinner than 2 px at the review camera. Sparks at least ~20 px long at peak. Debris and ash big enough to read as shapes (on a 1080p frame at mid distance: 0.05 m chips vanish, 0.1 - 0.3 m read).
+- **Counts per layer.** Explosion: about 3 hero shapes, 6 - 10 mid shapes, 30+ accents. Impact: 1 - 2 hero shapes, 4 - 8 mids, 10 - 30 accents. Uniform counts of identical sizes read as a pattern.
+- **Size tiers.** Use big / mid / small tiers with ratios near 1 : 0.5 : 0.15, not one random range.
+- **Cotton-ball test.** If the peak frame reads as a pile of separate circles, the shapes are wrong. Merge silhouettes (one outline around a cluster), add lobes, tongues and negative space, break the round quad silhouette with noise.
+- **Reticle test.** If the peak frame reads as a target or crosshair (concentric star, ring and disc), offset and tilt the parts and give them a direction.
+- **White budget.** At most ~10% of the effect's area clips to white on the peak frame, and the brightest element sits next to a dark one. Flash radius at most 0.6x the primary shape radius, falloff exponent 4 or more, 3 frames or fewer above HDR 1.
+- **Visible residue.** Dark layers (smoke, blood, ash) must read on dark backgrounds: give them a value floor, a rim, or light from the fire below. Check on a dark and a mid background.
+- **Ground contact.** No hard lines where quads cut the ground or a character (soft particles), and something touches the ground on big events (light pool, dust, scorch, cracks).
+
 ## Layer anatomy
 
 A complete hit or explosion usually has most of these. Each is its own emitter or mesh with its own timing.
@@ -88,9 +103,10 @@ A complete hit or explosion usually has most of these. Each is its own emitter o
 | Secondary | energy and direction | sparks, speed lines, debris |
 | Tertiary / residue | aftermath and grounding | smoke, embers, dust, ash |
 | Light | lights the world | point light with a fast curve |
-| Distortion | heat or shock | screen-space refraction of a ring or puff |
+| Distortion | heat or shock | screen-space refraction of a ring or puff; required for tier 2+ shockwaves and big fires |
 | Decal | lasting mark | scorch, crack, splatter, frost |
-| Camera | weight | shake, hitstop, impact frame, chromatic pulse |
+| Target reaction | sells the hit on the receiver | hit flash or fresnel rim for 2 - 6 frames, jolt, lean away from the hit, wound mark |
+| Camera | weight | shake, hitstop, impact frame, exposure dip |
 
 ## Dissipation catalog
 

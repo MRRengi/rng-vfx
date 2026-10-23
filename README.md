@@ -49,11 +49,11 @@ python -m http.server 8000 -d stand
 - Timeline with play, scrub, frame step (respects the style's drawings per second), slow motion and loop.
 - Four backgrounds (dark, field, mid gray, bright), four cameras (close, gameplay, side, low), grayscale, bloom and exposure controls.
 - Impact frame, camera shake and drawings-per-second toggles.
-- Save frame strips and frames.
+- Save frame strips, peak strips (frames packed around contact) and single frames.
 - **Compare mode:** drop Unity, Unreal or three.js renders next to the live effect; videos follow the stand's timeline frame by frame. Commit renders to `stand/renders/` with a `manifest.json` entry to keep them.
 - `window.rngStand` API for headless checks with Playwright.
 
-Every effect on the stand is a pure function of time with seeded randomness, so any frame can be reproduced exactly.
+Under the hood: a shared tiling noise texture for every eroding body, soft particles from a depth prepass, a distortion buffer for shockwaves and heat, premultiplied fire that cools into smoke, smoke lit by its own fire, a dummy that reacts (flash, rim light, jolt, lean), shadows from big effect lights and a textured floor. Every effect is a pure function of time with seeded randomness, so any frame can be reproduced exactly.
 
 ## Optional tools
 

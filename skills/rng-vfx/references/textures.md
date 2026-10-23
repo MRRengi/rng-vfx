@@ -26,17 +26,35 @@ Effects need few textures, but the right ones. Most good effects are 2 to 5 smal
 - **Compression.** Single-channel masks: BC4 (desktop) or EAC R11 / ASTC (mobile). Two-channel: BC5. Color: BC7 or ASTC. Check that soft gradients survive compression; banding shows first in glows.
 - **Mipmaps on, with alpha coverage** where alpha clip is used, so distant cutout shapes do not vanish.
 
-## Sources, cheapest first
+## Which noise for what
 
-### 1. Procedural in the shader
+| Noise | Looks like | Use for |
+|---|---|---|
+| Value noise | soft blobs on a grid | small masks and holes only; on bodies it gives cotton-ball mush |
+| Perlin (gradient) | smooth clouds | gentle variation, distortion |
+| Billow (`abs(perlin)` fbm) | puffy lobes with creases | smoke and fire bodies |
+| Inverted Worley | round billowy cells (cauliflower done right) | cel puff silhouettes, cartoon smoke, cell-shaped holes |
+| Warped fbm | swirling, smoky streaks | smoke detail, flowing magic |
+| Ridged (`1 - abs(perlin)`) | sharp ridges and veins | lightning, energy, cracks, tearing dissolves |
 
-Circles, rings, stars, gradients and value noise are cheap to compute (`references/shaders.md` > Signed distance shapes). The stand generates almost everything this way. Good when the effect needs to stay crisp at any size or be parameterized live.
+The standard pack: one 512 RGBA tiling texture with R billow, G inverted Worley, B warped fbm, A ridged (`python tools/texgen.py vfxpack -o noise_rgba.png`). It covers almost every eroding body. Sample it with two pans at different scales and directions so it never visibly tiles.
+
+## Sources, best first for bodies
+
+For the bodies of effects (fire, smoke, explosions, puffs, slashes) the order of quality is: simulated or hand-drawn flipbook > painted flipbook from an image model > texture noise with erosion > procedural noise. Procedural shapes in the shader stay the right choice for crisp masks: discs, rings, stars, gradients, spikes.
+
+### 1. Procedural in the shader (masks)
+
+Circles, rings, stars, gradients and spikes are cheap to compute (`references/shaders.md` > Signed distance shapes) and stay crisp at any size. Use them for masks and flashes, not for the textured bodies of fire and smoke.
 
 ### 2. texgen (in this repository)
 
 `tools/texgen.py` (Python, numpy and Pillow, headless, deterministic, MIT):
 
 ```
+python tools/texgen.py vfxpack --size 512 -o T_FX_Noise_RGBA.png   # R billow, G inv. Worley, B warped fbm, A ridged
+python tools/texgen.py noise --kind billow --freq 4 -o T_FX_Billow.png
+python tools/texgen.py noise --kind worley --cells 5 -o T_FX_Worley.png
 python tools/texgen.py noise --kind fbm --freq 4 --size 512 --seamless -o T_FX_Fbm.png
 python tools/texgen.py noise --kind warped --seamless -o T_FX_Warped.png
 python tools/texgen.py noise --kind voronoi --cells 8 --seamless -o T_FX_Voronoi.png
@@ -50,6 +68,7 @@ python tools/texgen.py shape --kind slash -o T_FX_Slash.png
 python tools/texgen.py ramp --stops "0:#ffffff,0.3:#ffd34d,0.7:#ff6a1f,1:#3b0f0f" -o T_FX_Ramp_Fire.png
 python tools/texgen.py flipbook --kind fire --frames 16 --size 1024 -o T_FX_Fire_4x4.png
 python tools/texgen.py flipbook --kind puff --frames 16 --size 1024 -o T_FX_Smoke_4x4.png
+python tools/texgen.py ground -o stage/   # tileable flagstone albedo, normal, roughness for test stands
 python tools/texgen.py pack --r T_FX_Fbm.png --g T_FX_Voronoi.png --b T_FX_Cracks.png --a T_FX_Streak.png -o T_FX_Noise_RGBA.png
 ```
 

@@ -5,7 +5,7 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 ## What defines it
 
 - **Gameplay clarity above everything.** Effects show area, direction, power level and timing. Flavor is added only after the gameplay read is solid.
-- **Painterly shapes from noise.** Shapes come from gradient-mapped, eroding noise textures rather than hard cels. Edges are soft but defined.
+- **Painterly shapes from noise.** Shapes come from gradient-mapped, eroding noise textures rather than hard cels. Edges are soft but defined. Use a large-feature tiling texture (billow Perlin `|n|`, inverted Worley, warped fbm, or painted brush noise) sampled with two pans at scales about 1.0 and 1.7 in different directions. For flames, bias the erosion threshold by height so the tops burn off first. Procedural value noise gives cauliflower mush; do not use it for bodies.
 - **Strong value hierarchy.** White core, saturated mid, darker painted secondary (smoke, outer flames). Three or four value steps.
 - **Full frame rate with punchy curves.** Fast in, slow out. Short holds on peak frames are fine.
 - **Primary and secondary separation.** The primary element (the spell's real area or projectile) gets the clearest shape and contrast; secondary elements (sparks, motes) are smaller, darker or less saturated.
@@ -22,7 +22,8 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 
 - **Erosion with gradient map:** sample a noise, compute `heat = (noise - threshold(life)) / softness`, color from a ramp by heat, alpha from heat. One texture gives shape, color and dissipation.
 - **UV scrolling and panning noise** on meshes (cones, cylinders, half-spheres) for beams, tornadoes, shields.
-- **Distortion** on shockwaves and heat (refraction using a noise normal, masked by a ring).
+- **Shockwaves are distortion first:** a refraction ring that pushes the image outward, plus a thin bright leading edge. A wide soft coloured band on the ground reads as a UI selection circle. Tilt impact rings toward the hit instead of facing the camera.
+- **Slash hold and burn:** hold the slash head at full size for 3 - 4 frames before the tail eats it, and draw a bright burn band at the dissolve edge.
 - **Swept slash mesh:** arc mesh, head and tail masks along U, white core to colored edge along V, erosion as the tail passes.
 - **Ribbon trails** with tapered width and scrolling noise.
 - **Fresnel shells** on characters for buffs and shields.

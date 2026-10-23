@@ -144,7 +144,54 @@ Directed swirls (lava, portals, magic that flows around a shape) without simulat
 
 ## 16. Premultiplied alpha
 
-`color.rgb *= alpha` in the shader with blend `One, OneMinusSrcAlpha`. One material can then be additive in some areas (alpha 0 with color) and occluding in others: a fire with a dark smoky edge and a glowing core in one particle. Cuts the number of materials and draw calls.
+`color.rgb *= alpha` in the shader with blend `One, OneMinusSrcAlpha`. One material can then be additive in some areas (alpha 0 with color) and occluding in others: a fire with a dark smoky edge and a glowing core in one particle. Cuts the number of materials and draw calls. **Fire uses premultiplied by default:**
+
+```
+float occl = mix(0.35, 1.0, smoothstep(0.2, 0.9, 1.0 - heat)); // hot glows through, cool occludes
+gl_FragColor = vec4(rampColor(1.0 - heat) * alpha, alpha * occl);
+```
+
+## 17. Erosion with height bias and burn edge
+
+Flames burn off at the tips: add height to the erosion threshold, `thr += (uv.y - 0.5) * bias` (bias 0.25 - 0.5). For slashes and dissolving shapes, draw a bright band just above the threshold: `if (n < thr + burnWidth) color = burnColor;` (HDR). Use ridged noise for tearing dissolves.
+
+## 18. Billboard puffs that read as one volume
+
+Per-puff sphere normals make a cluster read as separate balls. Bend each puff's normal toward the cluster:
+
+```
+vec3 sphereN = normalize(vec3(q, sqrt(max(0.0, 1.0 - dot(q, q)))));       // q = uv * 2 - 1
+vec3 N = normalize(sphereN + 1.2 * normalize(viewSpace(particlePos - effectCentre)));
+float shade = dot(N, lightDirView);                                      // world light into view space
+```
+
+For cel styles also draw one outline around the union: render the cel puffs into their own target, detect edges on alpha (Sobel or 4-tap difference, 2 - 3 px), composite the outline colour, then composite the puffs.
+
+## 19. Radial cracks (polar-log Voronoi)
+
+```
+float a = atan(c.y, c.x) / 6.2832 + 0.5;          // 0..1 around
+vec2 p = vec2(a * P, log(r) * 2.4) + warp * 0.6;   // P cells around, cells shrink toward the centre
+vec2 v = voronoiWrapX(p, P);                       // hash cell ids with mod(id.x, P): no seam
+float width = mix(0.11, 0.02, r);                  // wide in the middle, thin outside
+float vein = (1.0 - smoothstep(0.0, width, v.x)) * pow(1.0 - r, 1.4);
+float cool = clamp(glow * 1.6 - v.y * 0.6, 0.0, 1.0); // per-cell random cooling offset
+```
+
+## 20. Curl turbulence from a texture
+
+Periodic sine offsets are not turbulence: they are synchronized and visibly repeat. Take the curl of a vector potential sampled from a noise texture (three lookups of one channel with offsets, central differences); the result is divergence-free and varies in space:
+
+```
+vec3 curl(vec3 q) {   // pot(q) = noise texture sampled at a 2D projection of q
+  // (dPz/dy - dPy/dz, dPx/dz - dPz/dx, dPy/dx - dPx/dy) with Px, Py, Pz = pot(q), pot(q + o1), pot(q + o2)
+}
+position += curl(position * freq + seed + vec3(0, age * 0.3, 0)) * amount * pow(age01, 1.2);
+```
+
+## 21. Trails from closed-form motion
+
+When motion is solved in closed form (`physics.md` > Closed form), a trail is free: draw N segments per particle, segment i at position `p(age - i * dt)`. Width tapers to zero along i. The trail bends under gravity exactly like the particle and needs no history buffer.
 
 ## Node map
 

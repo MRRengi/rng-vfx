@@ -19,10 +19,12 @@ Reference points: Dead Cells, Celeste, Hyper Light Drifter, Enter the Gungeon, B
 ## Signature techniques
 
 - **Low-res render target** at the game's native resolution, nearest-neighbour upscale.
-- **Posterize / palette mapping** in a final pass, or a palette lookup texture.
-- **Square particles** whose size steps in whole pixels.
+- **Palette mapping, not posterize:** map each pixel to the nearest colour of a fixed 16 - 24 colour palette (distance in OKLab) in a final pass. Per-channel posterize produces up to 125 arbitrary colours and smears gradients into bands. Turn MSAA off for the low-res target; antialiased edges become noise when quantized.
+- **Square particles** whose size steps in whole pixels, with centres snapped to the pixel grid (`ndc = floor(ndc * res / 2 + 0.5) / (res / 2)`) so they do not shimmer.
+- **Strokes of 2 px or more** with a 1 px dark outline (edge detect on alpha in the low-res target, written with the darkest palette colour).
 - **Stepped animation** at 8 to 12 fps for every effect parameter.
-- **Sprite flash:** the hit target turns white or a palette color for 1 to 3 frames.
+- **Sprite flash (mandatory):** the hit target turns full palette white for 1 to 3 frames. It is the single most important pixel hit cue.
+- **No smooth light falloff on the floor.** Quantized point-light falloff bands into rings. Use a flat floor and dithered light-pool sprites instead.
 - **Dithered dissolve:** Bayer matrix threshold instead of smooth alpha.
 - **Hand-drawn flipbooks:** the gold standard for pixel effects; small (32 to 128 px) frame sequences. An image model can draft them, then they are reduced to the palette.
 

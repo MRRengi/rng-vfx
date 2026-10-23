@@ -20,7 +20,7 @@ Points (`gl_PointSize`) are simplest but cannot rotate or stretch along velocity
 - `side: THREE.DoubleSide` for flat meshes; `frustumCulled = false` for instanced effects whose vertices move in the shader (or set a correct bounding sphere).
 - `renderOrder` controls draw order between transparent objects: dark smoke first, additive glows after.
 - Color management: three converts hex colors from sRGB to linear (`new THREE.Color('#ff6a1f')`). Ramps built as Float textures keep HDR values above 1 for bloom.
-- Soft particles: render a depth texture (`WebGLRenderTarget` with `depthTexture`) and compare in the fragment shader.
+- Soft particles: render a depth texture (`WebGLRenderTarget` with `depthTexture`) and compare in the fragment shader. See the pipeline below.
 
 ## Post-processing
 
@@ -28,6 +28,14 @@ Points (`gl_PointSize`) are simplest but cannot rotate or stretch along velocity
 - Tone mapping: `renderer.toneMapping = THREE.AgXToneMapping` (filmic) or `NeutralToneMapping` (stylized).
 - The `postprocessing` library by pmndrs is a faster alternative (merged passes, SelectiveBloom, depth effects).
 - Pixel style: render at low resolution (`renderer.setSize(w / px, h / px, false)` with CSS `image-rendering: pixelated`) and posterize at the end.
+
+## The frame pipeline (what the stand does)
+
+1. **Opaque depth prepass.** Hide the effect group, set `scene.overrideMaterial` to a `MeshBasicMaterial({ colorWrite: false })`, render into a target with a `DepthTexture` the same size as the composer's render target. Effects read it: `alpha *= clamp((sceneDepth - fragDepth) / 0.3, 0, 1)` with both depths linearized from `near` / `far`.
+2. **Distortion buffer.** Distortion meshes live in their own scene and write signed UV offsets (`gl_FragColor = vec4(offset, 0, 1)`, additive) into a `HalfFloatType` target at half resolution, cleared to zero each frame.
+3. **Composer:** `RenderPass` -> distortion `ShaderPass` (sample the colour at `uv + offset`) -> `UnrealBloomPass` -> custom effect passes on linear HDR (impact frame) -> `OutputPass` (tone mapping, sRGB) -> display-space passes (palette).
+4. **Shared uniforms.** One object holding the noise texture, depth texture, resolution, near / far, world-units-per-pixel and the key light direction in view space, spread into every effect material so they update once per frame. Note: `ShaderPass` clones its uniforms and cannot clone render-target textures; assign those after creating the pass.
+5. **Pixel mode:** a low-res drawing buffer with CSS `image-rendering: pixelated`, palette mapping at the end, flat floor.
 
 ## Determinism and review
 

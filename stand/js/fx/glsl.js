@@ -49,4 +49,40 @@ float voronoiEdge(vec2 p) {
   }
   return md;
 }
+// Voronoi border distance plus a stable random value per cell (x: edge, y: cell id hash).
+vec2 voronoiCell(vec2 p) {
+  vec2 n = floor(p);
+  vec2 f = fract(p);
+  vec2 mg, mr;
+  float md = 8.0;
+  for (int j = -1; j <= 1; j++)
+  for (int i = -1; i <= 1; i++) {
+    vec2 g = vec2(float(i), float(j));
+    vec2 o = vec2(hash12(n + g), hash12(n + g + 19.7));
+    vec2 r = g + o - f;
+    float d = dot(r, r);
+    if (d < md) { md = d; mr = r; mg = g; }
+  }
+  float id = hash12(n + mg + 5.3);
+  md = 8.0;
+  for (int j = -2; j <= 2; j++)
+  for (int i = -2; i <= 2; i++) {
+    vec2 g = mg + vec2(float(i), float(j));
+    vec2 o = vec2(hash12(n + g), hash12(n + g + 19.7));
+    vec2 r = g + o - f;
+    if (dot(mr - r, mr - r) > 0.00001)
+      md = min(md, dot(0.5 * (mr + r), normalize(r - mr)));
+  }
+  return vec2(md, id);
+}
+`;
+
+// Sampling the shared RGBA noise texture (R billow, G inverted worley,
+// B warped fbm, A ridged). Two pans at different scales and speeds hide tiling.
+export const TEXNOISE = /* glsl */ `
+uniform sampler2D uNoise;
+vec4 tn(vec2 uv) { return texture2D(uNoise, uv); }
+vec4 tnDual(vec2 uv, vec2 speedA, vec2 speedB, float t) {
+  return (tn(uv + speedA * t) + tn(uv * 1.7 + vec2(0.37, 0.71) + speedB * t)) * 0.5;
+}
 `;

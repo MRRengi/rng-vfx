@@ -5,7 +5,7 @@ description: Real-time game VFX across styles (anime, toon, stylized, dark fanta
 
 # rng-vfx
 
-A VFX artist's process, written for an agent. The difference between a cheap effect and a good one is almost never the shader. It is the decision chain before it: what the effect has to communicate, which style rules apply, how it is timed, and how its shapes and values read at gameplay distance. Follow the chain in order.
+A VFX artist's process, written for an agent. Two things make an effect look expensive, and both are load-bearing: the decision chain (what the effect communicates, which style rules apply, how it is timed, how it reads at gameplay distance) and the quality of its shapes and surfaces (designed silhouettes, real texture noise or flipbooks, depth-aware blending, distortion, a reacting target). A correct chain rendered as procedural blobs on round quads still looks cheap. Follow the chain in order and meet the quality floors in `references/fundamentals.md`.
 
 ## The chain
 
@@ -55,6 +55,13 @@ A VFX artist's process, written for an agent. The difference between a cheap eff
 - **Light the world.** Bright effects should light the ground and the characters near them (a short-lived point light, emissive decal or vertex color pulse).
 - **Respect the camera.** Design and check at the gameplay camera distance, not only in a close-up.
 - **Deterministic and scrubbable when possible.** Seeded randomness and time-driven parameters make effects reviewable frame by frame and reproducible in tests.
+- **Every impact has a hit vector.** Sprays, flash elongation, sparks and debris follow the direction of the blow. The main spray axis sits at least 45 degrees off the camera axis, or streaks foreshorten into dots.
+- **No concentric equal-radius layers.** A flash and a ring sharing a centre and a radius read as a reticle. Offset rings in time (2 to 3 frames later) and size (1.5x the flash or more), tilt them toward the hit.
+- **Bodies use texture noise or flipbooks.** Fire, smoke, explosion and puff bodies sample a large-feature noise texture (billow, inverted Worley, warped fbm) or a flipbook. Procedural value noise is for small masks and holes only; on bodies it gives the same cotton-ball look in every style.
+- **The target reacts.** Hit flash or fresnel rim, a jolt, a lean away from the hit, a mark. The target's response carries half of an impact.
+- **No white-out frames.** Flashes stay smaller than the primary shape (0.6x its radius or less), have a tight falloff, and live 3 frames or less above HDR 1. Use an exposure dip, not a full-screen white, to sell brightness.
+- **Depth-aware and refractive.** Soft particles wherever quads meet geometry; shockwaves and heat are distortion, not soft additive discs.
+- **Nothing under 2 pixels.** At the review camera, no element is thinner than 2 px and sparks are at least ~20 px long at their peak.
 
 ## Tools this skill can use
 

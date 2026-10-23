@@ -43,6 +43,7 @@ Terminal velocity under linear drag is `g / k`. Pick `k` from the terminal veloc
 
 - **Curl noise** gives divergence-free swirling (no sinks or sources), which looks like air. Use it for smoke, embers, magic motes. Built in: VFX Graph Turbulence block, Niagara Curl Noise Force.
 - Value or Perlin noise used directly as a force creates clumping and dead zones; prefer curl.
+- Periodic sine offsets per particle are not turbulence: they move in sync and repeat. Use curl from a noise texture (`shaders.md` > Curl turbulence).
 - Scale the turbulence frequency to the effect size; low frequency for big plumes, higher for small wisps. Increase turbulence with age so particles start coherent and break up.
 
 ### Other forces
@@ -57,6 +58,7 @@ Terminal velocity under linear drag is `g / k`. Pick `k` from the terminal veloc
 - Cheap: clamp to a ground plane and slide, or kill on contact.
 - GPU depth-buffer collision (VFX Graph Collide with Depth Buffer, Niagara scene depth collision) works for on-screen geometry.
 - Bounce with restitution 0.2 - 0.5 and friction; each bounce should lose energy. Sparks that hit a surface often split into smaller sparks.
+- Closed-form bounce (no simulation state): when the solved position goes below the ground, mirror it, `y = ground + (ground - y) * restitution`, flip and scale the vertical velocity the same way and damp horizontal velocity. Not exact, reads right.
 
 ## Smoke
 

@@ -7,6 +7,7 @@ An effect is checked by looking at frames, not by reading code. Something other 
 The core artifact: 6 to 12 frames evenly spaced over the effect's duration, side by side, labelled with times. It shows timing, shape evolution and dissipation at a glance, and it is diffable between versions.
 
 - **three.js / stand:** `window.rngStand.captureStrip(8)` returns a PNG data URL; the Tools folder in the stand's panel saves one.
+- **Peak strip:** an evenly spaced strip misses 1 - 3 frame peaks. Always also capture frames packed around contact: -1, 0, +1, +2, +3, +5, +8, +12 frames (`window.rngStand.capturePeak()`), at full resolution.
 - **Unity:** `references/engines/unity.md` > Headless frame strips.
 - **Unreal:** Movie Render Queue to a PNG sequence, then tile (`references/engines/unreal.md`).
 - Tiling frames from a folder: `ffmpeg -i frame_%04d.png -vf tile=8x1 strip.png` (pick the 8 frames first), or a few lines of Python with Pillow.
@@ -24,16 +25,34 @@ Check each against the breakdown written before building (SKILL.md step 3):
 7. **Dissipation:** does every layer leave in its designed way? No pops, no hard cut at the end of life, no leftover particles.
 8. **Hierarchy:** next to other effects of its tier, is it weighted correctly?
 9. **Budget:** particle counts, overdraw and lights inside `references/performance.md` limits.
-10. **Reference:** if a reference exists, place its frames under the strip at matching times and compare shape, timing and value.
+10. **Reference (mandatory):** take 2 - 3 frames from the reference games named in the style file (or the user's reference), place them under the strip at matching times, compare shape, timing and value.
+
+## Cheapness checklist
+
+Any yes means the effect still looks cheap:
+
+- Does the peak frame read as balls, discs or cotton (separate round puffs)?
+- Does it read as a reticle (concentric star, ring and disc of similar size)?
+- Are there hard lines where quads cut the ground or the character?
+- Is any element under 2 px, or are sparks dots instead of streaks?
+- Is there a white-out frame or a bloom haze hiding the shape?
+- Do dark layers vanish on the dark background, or bright additive ones on the bright background?
+- Does the target not react?
+- In held-drawing styles, do keys fall between drawings (missing contact drawing)?
+- Does every style use the same noise look (procedural value-noise blobs)?
+- Is the shockwave a soft coloured disc instead of distortion plus a thin edge?
+
+Review on a mid or dusk background by default. Black backgrounds flatter additive effects and hide the problems above.
 
 ## The stand
 
 `stand/index.html` (served statically, also deployed to GitHub Pages) shows the six styles with impact and explosion archetypes.
 
 - Timeline: play, pause, scrub, frame step (respects the style's drawings per second), speed 1 / 0.5 / 0.25 / 0.1, loop.
-- View: four backgrounds, four camera presets including Gameplay (high and far), grayscale toggle, dummy toggle.
+- View: four backgrounds (dusk by default), four camera presets including Gameplay (high and far), grayscale toggle, dummy toggle.
+- Engine: shared RGBA noise texture, soft particles from an opaque depth prepass, a distortion buffer and pass, premultiplied fire, smoke lit by its fire, a reacting dummy (flash, fresnel rim, jolt, lean), shadows from big effect lights, a textured PBR floor.
 - Look: exposure, bloom, drawings per second override, impact frame and camera shake toggles.
-- Tools: save frame strip, save current frame.
+- Tools: save frame strip, save peak strip, save current frame.
 - **Compare mode:** engine renders (videos or strips) sit next to the live effect and follow the timeline. Add renders permanently by placing files in `stand/renders/` and listing them in `stand/renders/manifest.json`:
 
 ```json
@@ -45,7 +64,7 @@ Check each against the breakdown written before building (SKILL.md step 3):
 ```
 
 - Deep links: `#style=darkfantasy&fx=explosion`.
-- Script API (`window.rngStand`): `styles`, `select(style, fx)`, `play()`, `pause()`, `seek(t)`, `duration()`, `set(key, value)` for `background`, `camera`, `grayscale`, `bloom`, `dummy`, `captureFrame()`, `captureStrip(n)`.
+- Script API (`window.rngStand`): `styles`, `select(style, fx)`, `play()`, `pause()`, `seek(t)`, `duration()`, `contact()`, `set(key, value)` for `background`, `camera`, `grayscale`, `bloom`, `dummy`, `softParticles`, `distortion`, `reaction`, `captureFrame()`, `captureStrip(n)`, `capturePeak()`, `captureTimes(times)`.
 
 Headless use with Playwright (Chromium software rendering works for correctness checks):
 
@@ -67,6 +86,6 @@ Serve the folder first (`python -m http.server 8000 -d stand`); ES modules do no
 ## Adding an effect to the stand
 
 1. Open the style file in `stand/js/styles/` and add an entry under `effects` with `duration` and `build(fx)`.
-2. Build it from the primitives: `fx.burst`, `fx.flash`, `fx.ring`, `fx.slash`, `fx.decal`, `fx.light`, plus `fx.shake` and `fx.impactFrame` curves. Every primitive takes a start time as its second argument.
+2. Build it from the primitives: `fx.burst`, `fx.flash`, `fx.ring`, `fx.slash`, `fx.decal`, `fx.distort`, `fx.light`, plus `fx.shake`, `fx.impactFrame`, `fx.exposure` curves and `fx.target` (hit reaction). Every primitive takes a start time as its second argument. Set `contact` on the effect so the peak strip centres on it. Use `HIT_DIR`, `RING_N` and `AWAY` from `layout.js` for directions.
 3. Add the archetype to `ARCHETYPES` in `stand/js/styles/layout.js` (with a stage entry for dummy position and camera focus) if it is new.
 4. Everything must be a function of time (seeded randomness, curves), so the timeline can scrub it.
