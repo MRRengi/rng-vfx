@@ -693,7 +693,7 @@ const [noise, gAlb, gNrm, gRgh] = await Promise.all([
   loadTex('./textures/ground_normal.png', false),
   loadTex('./textures/ground_rough.png', false),
 ]);
-await preloadSheets(['./textures/fire_4x4.png', './textures/puff_4x4.png', './textures/anime_fire_3x2.png', './textures/toon_puff_2x2.png']);
+await preloadSheets(['./textures/fire_4x4.png', './textures/puff_4x4.png', './textures/anime_fire_3x2.png', './textures/toon_puff_2x2.png', './textures/toon_fire_2x2.png', './textures/toon_smoke_2x2.png']);
 G.uNoise.value = noise;
 for (const t of [gAlb, gNrm, gRgh]) t.repeat.set(12, 12);
 groundMaps = [gAlb, gNrm, gRgh];

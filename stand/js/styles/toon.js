@@ -57,31 +57,33 @@ export default {
         fx.celOutline('#3a1e3a', 3);
         // Short pop disc under the puffs, smaller than the fireball.
         fx.flash({
-          pos: C, size: 1.1, hard: true, spikes: 6, spikeLen: 0.35, core: 0.55, sharp: 0.6, outline: 0.1, outlineColor: '#3a1e3a', blend: 'alpha', depthTest: true, order: 0,
+          pos: C, size: 0.7, hard: true, spikes: 6, spikeLen: 0.35, core: 0.55, sharp: 0.6, outline: 0.1, outlineColor: '#3a1e3a', blend: 'alpha', depthTest: true, order: 0,
           core_color: '#ffffff', coreK: 1.0, edge_color: '#fff2a8', edgeK: 1.0,
           scaleCurve: [[0, 0], [0.05, 1, 'outBack'], [0.085, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.085, 1], [0.086, 0]],
         }, 0);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 8, sizeDist: [3, 3, 2], origin: C, spawnR: 0.3,
-          speed: [3, 5], drag: 6, life: [0.7, 0.95], size: [1.7, 0.08], sizePow: 3, sizeIn: 0.12, bands: 2, outline: 0,
-          shadow: '#dd6f5c', erode: 0, noiseScale: 1.4, blend: 'alpha', fadeDist: 0.05,
-          ramp: fx.ramp([[0, '#fff3b0', 1.05], [0.3, '#ffb627', 1.0], [1, '#ff5e3a', 1]]),
+          // Drawn fire puffs (image-model keyframes): pop in, full, holes, bits.
+          shape: 'sheet', cel: true, sheet: { url: './textures/toon_fire_2x2.png', grid: [2, 2], frames: 4, stepped: true },
+          dir: 'cone', axis: UP, angle: 50, count: 6, sizeDist: [2, 3, 1], origin: C, spawnR: 0.6,
+          speed: [1.5, 3], drag: 6, life: [0.6, 0.8], size: [2.8, 2.4], sizeIn: 0.15, sizeRand: 0.2, blend: 'alpha', fadeDist: 0.05, order: 3,
+          fade: [0, 0.999], ramp: fx.ramp([[0, '#ffffff', 1.05], [1, '#ffffff', 1.0]]),
         }, 0.02);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 10, sizeDist: [3, 4, 3], origin: C, spawnR: 0.5,
-          speed: [1.5, 2.5], gravity: [0, 1.5, 0], drag: 3, delay: [0, 0.08], life: [0.7, 1.0], size: [1.0, 0.06],
-          sizePow: 2.5, sizeIn: 0.12, bands: 1, outline: 0, shadow: '#4c4870', erode: 0, noiseScale: 1.4,
-          blend: 'alpha', fadeDist: 0.05, ramp: fx.ramp([[0, '#8a86a8', 1], [1, '#6a6690', 1]]),
-        }, 0.22);
+          // Drawn smoke puffs: 2 tones, outline, holes as they go.
+          shape: 'sheet', cel: true, sheet: { url: './textures/toon_smoke_2x2.png', grid: [2, 2], frames: 4, stepped: true },
+          dir: 'cone', axis: UP, angle: 40, count: 6, sizeDist: [2, 3, 1], origin: at(C, 0, 0.4, 0), spawnR: 0.6,
+          speed: [1.2, 2.2], gravity: [0, 1.5, 0], drag: 3, delay: [0, 0.1], life: [0.6, 0.8], size: [2.0, 2.4], sizeIn: 0.15,
+          blend: 'alpha', fadeDist: 0.05, fade: [0, 0.999], order: 1, ramp: fx.ramp([[0, '#ffffff', 1], [1, '#ffffff', 1]]),
+        }, 0.38);
         // Stem: three puffs that tie the fireball to the ground.
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 10, count: 3, seed: 23, origin: at(BLAST, 0, 0.15, 0), spawnR: 0.1,
-          speed: [3, 4.5], drag: 6, life: [0.5, 0.7], size: [0.8, 0.06], sizePow: 2.5, sizeIn: 0.12, bands: 1, outline: 0,
-          shadow: '#dd6f5c', erode: 0, noiseScale: 1.4, blend: 'alpha', fadeDist: 0.05,
-          ramp: fx.ramp([[0, '#ffd36b', 1.0], [1, '#ff6a3a', 1]]),
+          shape: 'sheet', cel: true, sheet: { url: './textures/toon_fire_2x2.png', grid: [2, 2], frames: 4, stepped: true },
+          dir: 'cone', axis: UP, angle: 10, count: 3, seed: 23, origin: at(BLAST, 0, 0.45, 0), spawnR: 0.1,
+          speed: [1.5, 2.5], drag: 6, life: [0.55, 0.75], size: [1.3, 1.1], sizeIn: 0.12, blend: 'alpha', fadeDist: 0.05, fade: [0, 0.999], order: 2,
+          ramp: fx.ramp([[0, '#ffffff', 1.0], [1, '#ffffff', 1]]),
         }, 0.02);
-        for (const [delay, seed, speed] of [[0.12, 21, [6, 8]], [0.18, 22, [4, 5]]]) {
+        for (const [delay, seed, speed] of [[0.2, 21, [6, 8]], [0.28, 22, [4, 5]]]) {
           fx.burst({
             shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, seed, origin: at(BLAST, 0, 0.38, 0), speed, drag: 6,
             life: [0.45, 0.6], size: [0.35, 0.0], sizePow: 2, sizeIn: 0.15, bands: 1, outline: 0,
