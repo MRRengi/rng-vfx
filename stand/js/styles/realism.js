@@ -32,13 +32,15 @@ export default {
           scaleCurve: [[0, 1], [0.05, 0.6]], alphaCurve: [[0, 1], [0.033, 1], [0.05, 0]],
         }, 0);
         fx.burst({
-          shape: 'streak', dir: 'cone', axis: SPRAY, angle: 50, count: 48, origin: HIT,
+          // Emitted over 3 frames, not all on one pixel in one frame: 50 sparks born together sum
+          // into a ball of bloom at contact.
+          shape: 'streak', dir: 'cone', axis: SPRAY, angle: 50, count: 48, origin: HIT, delay: [0, 0.05],
           speed: [5, 18], gravity: [0, -9.81, 0], dragQ: 1.2, life: [0.25, 0.7], stretch: 0.05, minPx: 3,
           size: [0.03, 0.012], soft: 1, ground: 0, bounce: 0.3, fade: [0, 0.85], ramp: bb,
         }, 0);
         // Hero sparks: a few ribbons whose tails bend under gravity.
         fx.trail({
-          dir: 'cone', axis: SPRAY, angle: 25, count: 12, seed: 31, origin: HIT,
+          dir: 'cone', axis: SPRAY, angle: 25, count: 12, seed: 31, origin: HIT, delay: [0, 0.03],
           speed: [12, 18], gravity: [0, -9.81, 0], dragQ: 1.0, life: [0.4, 0.8], trailTime: 0.08,
           width: 0.022, minPx: 3, ground: 0, bounce: 0.3, fade: [0, 0.8], ramp: bb,
         }, 0);
@@ -88,21 +90,21 @@ export default {
         // optical-flow in-betweens, so the lobes roll instead of cross-fading. It burns down to
         // soot inside the sheet; the smoke layers take over from there.
         fx.burst({
-          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.5 },
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.4 },
           dir: 'cone', axis: UP, angle: 15, count: 2, sizeDist: [1, 1, 0], seed: 31, origin: at(BLAST, 0, 1.55, 0), spawnR: 0.35,
           speed: [0.2, 0.5], drag: 3, gravity: [0, 0.35, 0], life: [1.7, 2.0], size: [3.6, 4.2], sizeIn: 0.1, spin: 0.1,
           blend: 'alpha', order: 4, fadeDist: 0.4, fade: [0, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.7], [0.35, '#ffffff', 1.25], [1, '#ffffff', 1.0]]),
         }, 0);
         // Mid tier: smaller copies of the same sim, breaking the hero's outline.
         fx.burst({
-          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.5 },
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.4 },
           dir: 'sphere', count: 6, sizeDist: [0, 4, 2], seed: 52, origin: C, spawnR: 0.7, speed: [1.5, 3.5], drag: 3.5,
           gravity: [0, 0.6, 0], life: [1.1, 1.5], size: [1.2, 2.0], sizePow: 0.4, sizeIn: 0.12, spin: 0.4, blend: 'alpha', order: 3, fadeDist: 0.4,
           fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.5], [0.4, '#ffffff', 1.15], [1, '#ffffff', 1.0]]),
         }, 0);
         // Stem and base: small copies of the sim low on the ground tie the fireball down.
         fx.burst({
-          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.5 },
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.4 },
           dir: 'ring', lift: 0.1, count: 5, seed: 77, origin: at(BLAST, 0, 0.45, 0), spawnR: 0.5, speed: [0.6, 1.4], drag: 3,
           gravity: [0, 0.3, 0], life: [1.6, 1.9], size: [1.1, 1.6], sizeIn: 0.12, spin: 0.3, blend: 'alpha', order: 4, fadeDist: 0.3,
           fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.5], [0.4, '#ffffff', 1.15], [1, '#ffffff', 1.0]]),

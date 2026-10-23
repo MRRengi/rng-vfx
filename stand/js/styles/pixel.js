@@ -84,14 +84,6 @@ export default {
           life: [6 * D, 10 * D], size: [0.3, 0.24], ground: 0, bounce: 0.3, fade: [0, 0.999], minPx: 3, blend: 'alpha', fadeDist: 0,
           ramp: fx.ramp([[0, '#ffe14d', 1], [0.5, '#ff7a1a', 1], [1, '#3a2a2a', 1]]),
         }, D);
-        fx.ring({
-          // Short broken shock on the ground, smaller than the fire's footprint x2; a big
-          // expanding hoop outlives the fireball and reads as a UI marker.
-          pos: at(BLAST, 0, 0.03, 0), size: 2.6, hard: true, noise: 0, coverage: 0.55, seed: 6,
-          color: '#ffe14d', colorK: 1, color2: '#ff7a1a', color2K: 1,
-          radius: [[0, 0.2], [2 * D, 0.9, 'outQuad']], width: [[0, 0.07], [2 * D, 0.03]],
-          alpha: [[0, 1], [2 * D, 1], [2 * D + 0.001, 0]],
-        }, D);
         fx.target({
           dir: AWAY, color: '#ffffff',
           knock: [[0, 0], [D, 0.15], [5 * D, 0]],

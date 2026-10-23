@@ -86,7 +86,7 @@ Sample at 60 fps around contact (or at the drawing rate for held-drawing styles)
 - **Static hold** in seconds: at most 4 frames at full rate, 2 drawings in held styles, per 8 x 8 region, so a frozen spark is caught even while smoke moves elsewhere.
 - **Empty tail.** At 90% of the duration the mask holds at least 2% of its peak area.
 - **Growth** (explosions). The first frame with content after contact is at most 50% of the peak area.
-- **Time to peak.** The hot body (bright or saturated effect pixels) reaches 60% of its maximum within `--max-rise` of contact: 0.12 s for impacts, 0.2 s for explosions, at least 2 drawings in held styles. Slow swells read as weak.
+- **Time to peak.** The hot body (the largest connected shape of bright or saturated effect pixels, so outward-flying sparks and debris do not count) reaches 60% of its maximum within `--max-rise` of contact: 0.12 s for impacts, 0.2 s for explosions, at least 2 drawings in held styles. Slow swells read as weak.
 - **Blobs.** At the peak and at the handoff: no smooth convex main body (solidity above 0.96 and circularity above 0.82) and no three or more smooth balls at once (a stacked column or a pile of cotton).
 - **Size** by tier: 80 px for impacts, 200 px for explosions at 1080p by default on the stand.
 - **Target flash, target visible, target colour** (stand, or any engine that exports the target's screen box). The target never brightens before contact and stays below 0.75x the spark body; it keeps 70% of its rest luminance; its chroma (OKLab, 85th percentile over its box) rises by at most 0.05, so a hit tints the target instead of repainting it.

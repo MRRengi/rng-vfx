@@ -33,7 +33,7 @@ Checks (thresholds from numbers.md / fundamentals.md):
                   lies on the hit side, within 45 deg of the projected hit direction
   target-visible  (stand) the hit target keeps >= 70% of its rest luminance and >= 0.08 during the hit
   target-colour   (stand) OKLab chroma of the target (85th percentile of its box) rises <= 0.05
-  time-to-peak    hot body reaches 60% of its max within --max-rise of contact
+  time-to-peak    the largest hot shape reaches 60% of its max within --max-rise of contact
   blobs           no smooth convex main body, no 3+ smooth balls at peak and handoff
   closed-ring     (impacts, stand) no closed ring around the hit point for more than one sample
   effect-light    (stand) lit pool < 3x the peak core area and dimmer than the effect's brightest part
@@ -392,7 +392,15 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             continue
         L_, A_, B_ = oklab(f_)
         # Hot = near-white or saturated and bright; light grey smoke (L about 0.75) is not hot.
-        hot.append(int(((L_ > 0.85) | (np.hypot(A_, B_) > 0.12) & (L_ > 0.4))[m_].sum()))
+        # Only the largest connected hot shape counts: sparks and debris flying outward grow the
+        # hot area for a second without the body itself growing.
+        hm = (((L_ > 0.85) | (np.hypot(A_, B_) > 0.12) & (L_ > 0.4)) & m_).astype(np.uint8)
+        if cv2 is not None and hm.any():
+            n_, lab_, st_, _ = cv2.connectedComponentsWithStats(cv2.dilate(hm, np.ones((3, 3), np.uint8)))
+            k_ = 1 + int(np.argmax(st_[1:, cv2.CC_STAT_AREA])) if n_ > 1 else 0
+            hot.append(int((hm.astype(bool) & (lab_ == k_)).sum()) if k_ else 0)
+        else:
+            hot.append(int(hm.sum()))
     hot = np.array(hot, np.float64)
     if hot.max() > 50:
         reach = [t for t, v in zip(times, hot) if t >= contact - 1e-6 and v >= 0.6 * hot.max()]

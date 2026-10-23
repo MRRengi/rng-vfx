@@ -131,6 +131,7 @@ Outlines on cel shapes: max(2 px, 6 - 8% of the shape's radius) at the gameplay 
 - **Length from speed:** `length = max(12 px, |v_screen| * 1.5 / 60 s)` (a streak covers about 1.5 frames of motion), at least 3x its width.
 - **Spread:** lengths vary 0.3 - 1.6x the mean; speeds vary x3; angles jitter by up to ±35% of their spacing. About 25% are heroes (longer, brighter, with a trail); the rest are accents. Equal lengths in an even fan read as a peacock tail.
 - **Birth:** white-hot (cores above B) for the first 20 - 30% of life, then down the blackbody or style ramp.
+- **Emission:** spread the births over 2 - 4 frames. Forty sparks born on one pixel in one frame sum into a ball of bloom at contact, however dim each one is.
 
 ## Effect lights
 
