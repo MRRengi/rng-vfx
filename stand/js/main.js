@@ -71,14 +71,19 @@ const celPass = new ShaderPass({
     void main() {
       vec4 c = texture2D(tDiffuse, vUv);
       vec4 cel = texture2D(tCel, vUv);
-      float m = 0.0;
+      float m = 0.0, around = 0.0;
       for (int i = 0; i < 12; i++) {
         float a = float(i) / 12.0 * 6.2832;
-        m = max(m, texture2D(tCel, vUv + vec2(cos(a), sin(a)) * uTexel * uPx).a);
+        vec2 d = vec2(cos(a), sin(a)) * uTexel;
+        m = max(m, texture2D(tCel, vUv + d * uPx).a);
+        around += step(0.5, texture2D(tCel, vUv + d * uPx * 2.5).a);
       }
       float inside = step(0.5, cel.a);
+      // Alpha close: a gap almost surrounded by the layer is an erosion pinhole,
+      // not silhouette. It gets no ink, so dissolves do not turn into speckle.
+      float pinhole = step(9.5, around);
       vec3 col = mix(c.rgb, cel.rgb / max(cel.a, 0.001), inside);
-      col = mix(col, uOutline, step(0.5, m) * (1.0 - inside));
+      col = mix(col, uOutline, step(0.5, m) * (1.0 - inside) * (1.0 - pinhole));
       gl_FragColor = vec4(col, c.a);
     }`,
 });

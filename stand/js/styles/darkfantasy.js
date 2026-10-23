@@ -18,7 +18,7 @@ export default {
         fx.slash({
           pos: at(HIT, 0, 0, 0.25), rot: [0.2, -0.3, -0.35], scale: 1.05, from: 160, to: -30, rIn: 0.8, rOut: 1.5,
           blend: 'alpha', hard: false, coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1,
-          rimColor: '#ff3a22', rimK: 2.0, rimW: 0.28, noise: 0.3, dissolve: 0.6, thick: 0.85,
+          rimColor: '#ff3a22', rimK: 2.0, rimW: 0.28, noise: 0.3, dissolve: 0.3, thick: 0.85,
           burnColor: '#ff5a2a', burnK: 1.6, burnW: 0.05,
           head: [[0, 0], [0.07, 1.0, 'outQuart'], [0.1, 1.05], [0.26, 1.75, 'inQuad']], alpha: [[0, 1], [0.18, 1], [0.26, 0]], tail: 0.75,
         }, 0);
@@ -33,9 +33,9 @@ export default {
           }, 0.017 * (k + 1));
         }
         fx.flash({
-          pos: HIT, size: 1.2, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 1.5, blend: 'alpha',
+          pos: HIT, size: 1.6, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 1.5, blend: 'alpha', bias: 0.6,
           dir: HIT_DIR, aspect: 1.6, core_color: '#0a0204', coreK: 1, edge_color: '#ff3a22', edgeK: 1.4,
-          scaleCurve: [[0, 0.5], [0.04, 1, 'outExpo'], [0.12, 1.15]], alphaCurve: [[0, 1], [0.07, 1], [0.12, 0]],
+          scaleCurve: [[0, 0.5], [0.03, 1, 'outExpo'], [0.08, 1.15]], alphaCurve: [[0, 1], [0.05, 1], [0.08, 0]],
         }, 0.05);
         fx.flash({
           pos: HIT, size: 0.45, spikes: 0, spikeLen: 0, core: 0.7, soft: 4, core_color: '#ffd8c8', coreK: 2.4, edge_color: '#ff2a1a', edgeK: 1.2,
@@ -43,8 +43,8 @@ export default {
         }, 0.05);
         fx.burst({
           shape: 'streak', dir: 'cone', axis: HIT_DIR, angle: 40, count: 30, origin: HIT,
-          speed: [3, 7], gravity: [0, -14, 0], drag: 1, life: [0.45, 0.8], stretch: 0.06,
-          size: [0.12, 0.05], soft: 0.6, blend: 'alpha', ground: 0, fade: [0, 0.9], minPx: 2,
+          speed: [3, 7], gravity: [0, -14, 0], drag: 1, life: [0.45, 0.8], stretch: 0.03,
+          size: [0.14, 0.06], soft: 0.6, blend: 'alpha', ground: 0, fade: [0, 0.9], minPx: 2,
           ramp: fx.ramp([[0, '#c0101a', 1], [1, '#6a0008', 1]]),
         }, 0.05);
         fx.decal({
@@ -83,6 +83,7 @@ export default {
         const C = at(BLAST, 0, 0.4, 0);
         const fireK = [[0, 0], [T, 0.3], [T + 0.05, 1.4], [T + 1.5, 0.15, 'outQuad'], [3.4, 0]];
         fx.hitstop(T + 0.05, 3);
+        fx.exposure([[0, 1], [T, 1], [T + 0.03, 0.7], [T + 0.45, 1, 'outQuad']]);
         fx.decal({
           pos: at(BLAST, 0, 0.012, 0), size: 4.6, cracks: 1, scorch: 1, hot: '#ff2a10', hotK: 1.6, dark: '#0a0506',
           reveal: [[0, 0], [T, 1.2, 'outQuad']], glow: [[0, 0.35], [T, 1], [3.4, 0.05, 'outQuad']],
@@ -94,19 +95,19 @@ export default {
         }, 0);
         fx.flash({
           pos: C, size: 2.2, spikes: 0, spikeLen: 0, core: 0.7, soft: 4,
-          core_color: '#ffd8c8', coreK: 2.6, edge_color: '#ff1a0a', edgeK: 1.4,
+          core_color: '#ffd8c8', coreK: 1.8, edge_color: '#ff1a0a', edgeK: 1.2,
           scaleCurve: [[0, 0.4], [0.04, 1, 'outExpo']], alphaCurve: [[0, 1], [0.04, 1], [0.08, 0]],
         }, T);
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 55, count: 16, sizeDist: [5, 8, 3], origin: C, spawnR: 0.45,
-          speed: [5, 8], drag: 2.4, gravity: [0, 3, 0], life: [0.9, 1.3], size: [2.6, 4.2], sizePow: 0.45, aspectY: 1.35, upright: true,
+          shape: 'fire', dir: 'cone', axis: UP, angle: 55, count: 9, sizeDist: [3, 5, 1], origin: C, spawnR: 0.45,
+          speed: [5, 8], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.3], size: [2.6, 4.2], sizePow: 0.45, aspectY: 1.35, upright: true,
           soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 3, fadeDist: 0.4,
-          ramp: fx.ramp([[0, '#ffd0b0', 2.2], [0.2, '#ff3b1a', 1.4], [0.5, '#8b0a0a', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
+          ramp: fx.ramp([[0, '#ffd0b0', 1.5], [0.2, '#ff3b1a', 1.3], [0.5, '#8b0a0a', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
         }, T);
         fx.burst({
           shape: 'fire', dir: 'cone', axis: UP, angle: 18, count: 7, origin: C, spawnR: 0.2, speed: [9, 12], drag: 2.5,
           life: [0.6, 0.9], size: [0.9, 1.4], stretch: 0.1, soft: 0.7, erode: 1, noiseScale: 3, vBias: 0.5, blend: 'premul', order: 4,
-          ramp: fx.ramp([[0, '#ffd0b0', 2.0], [0.3, '#ff3b1a', 1.3], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
+          ramp: fx.ramp([[0, '#ffd0b0', 1.4], [0.3, '#ff3b1a', 1.2], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
         }, T + 0.02);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 14, sizeDist: [3, 6, 5], origin: at(C, 0, 0.4, 0), spawnR: 0.5,
@@ -143,7 +144,7 @@ export default {
           radius: [[0, 0.05], [0.45, 0.95, 'outExpo']], width: [[0, 0.02], [0.45, 0.0, 'outQuad']],
           alpha: [[0, 0.5], [0.45, 0]],
         }, T);
-        fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 9, radius: [[0, 0.05], [0.55, 0.95, 'outExpo']], width: [[0, 0.1], [0.55, 0.04]], strength: [[0, 0.035], [0.55, 0]] }, T);
+        fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 9, radius: [[0, 0.05], [0.55, 0.95, 'outExpo']], width: [[0, 0.1], [0.55, 0.04]], strength: [[0, 0.0158], [0.55, 0]] }, T);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.4, 0), size: 4.5, strength: [[0, 0.014], [2.0, 0.006], [2.9, 0]] }, T);
         fx.target({
           dir: AWAY, color: '#400404', rimColor: '#ff3a22',

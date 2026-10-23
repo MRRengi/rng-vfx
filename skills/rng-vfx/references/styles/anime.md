@@ -8,7 +8,7 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 - **Hard edges, flat fills.** Two or three tone bands, no gradients inside a shape except a deliberate glow layer. Edges are crisp; anti-aliasing is fine, softness is not.
 - **Designed shapes per drawing.** Each held drawing is a composed silhouette: asymmetric spikes, curls, teardrop flame tongues. Randomness is art-directed, not uniform noise.
 - **Extreme timing contrast.** The peak drawing arrives instantly and is held; then the effect breaks up fast. Big shapes appear at full size on frame 1 and shrink or shatter rather than grow slowly.
-- **Impact frames.** The biggest hits get 1 to 3 frames of inverted or two-tone (black and white, black and red) image.
+- **Impact frames.** The biggest hits get one drawing of inverted or two-tone (black and white, black and red) image.
 - **Lines.** Speed lines, radial impact lines and outline strokes are part of the effect vocabulary.
 - **Smoke is solid.** Cel smoke is opaque, banded, outlined, and dies by holes opening inside it, then the pieces shrink.
 
@@ -20,12 +20,12 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 
 ## Signature techniques
 
-- **Stepped time:** `t = floor(t * 12) / 12` on the effect clock (shader time, particle time, curve time). Every key goes on the grid (multiples of 1/12 s): contact at 2/12, impact frame from 2/12 to 4/12, the coloured hit spark held from 4/12 for 2 drawings. Off-grid keys silently drop drawings.
+- **Stepped time:** `t = floor(t * 12) / 12` on the effect clock (shader time, particle time, curve time). Every key goes on the grid (multiples of 1/12 s): contact at 2/12, impact frame from 2/12 to 3/12, the coloured hit spark peaking from 3/12 for 2 drawings. Off-grid keys silently drop drawings.
 - **Step-shaded puffs:** sphere-ish normal from the quad UV, `floor(dot(N, L) * bands) / bands`, two colors from a ramp, outline where the noise-distorted silhouette is thin.
 - **Hole erosion:** a second noise compared against a threshold that rises late in life; discard where noise is below it, draw an outline color just above it.
 - **Spiky flash:** polar coordinates with pointed spikes from a triangle wave, `tri = 1 - abs(fract(angle / 2pi * n + 0.5) - 0.5) * 2`, radius = core + spikeLength x `pow(tri, sharpness)`. Use 4 - 6 spikes, sharpness 2 - 3 (concave wedges; 12+ gives hairlines, a cosine gives rounded petals), core 0.15 - 0.3, length jitter so spikes range about 0.4x to 1.6x. Elongate the whole spark along the hit direction (aspect 1.3 - 1.6). Rotate or redraw between drawings, never continuously. No closed ring around the spark: if a ring is used it is a broken arc (40 - 60% of the circle), at most 1.2x the spark, one drawing later, for 2 drawings. Redraw the spark each drawing (new spike lengths, count and angle) rather than rotating one shape: a held star that only turns reads as clip art.
 - **Radial speed lines:** very fast, short-lived stretched particles from the impact point, or a full-screen radial lines texture masked by a noise.
-- **Impact frame:** 2 drawings at contact. The character is forced to one value (black) by its own mask, not by luminance: a luminance threshold turns a mid-gray character white and erases it. Background goes flat (white, or red for the strongest hits), bright effect shapes go black with a crisp edge, optional radial speed lines over it. Turn bloom off for these drawings. The coloured spark peaks on the drawing after the impact frame, so the frame never hides it. A cheap way to get the mask: push the character's emissive to full white for the impact drawings, then the two-tone pass inks it with the effect.
+- **Impact frame:** 1 drawing at contact. The character is forced to one value (black) by its own mask, not by luminance: a luminance threshold turns a mid-gray character white and erases it. Background goes flat (white, or red for the strongest hits), bright effect shapes go black with a crisp edge, optional radial speed lines over it. Turn bloom off for these drawings. The coloured spark peaks on the drawing after the impact frame, so the frame never hides it. A cheap way to get the mask: push the character's emissive to full white for the impact drawings, then the two-tone pass inks it with the effect.
 - **One outline per cluster:** puffs drawn as separate outlined circles read as a bag of oranges. Render the cel puffs into their own target and draw the outline around the union (edge detect on alpha), or use a flipbook drawn as one mass. Shade from the cluster centre (normal = sphere normal + direction from the effect centre), not per puff.
 - **Smears:** a 1 - 2 drawing smeared shape (stretched along motion, single colour) between the anticipation and the contact sells speed better than motion blur.
 - **Hand-drawn flipbooks:** for flame and explosion shapes the best results come from drawn frames (8 to 16 frames) rather than simulation. Generate them with an image model in a consistent style and play them stepped.
@@ -34,7 +34,7 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 ## Default numbers
 
 - Impact: anticipation 0 - 6 frames of inward lines; contact flash 2 drawings held; ring 3 - 4 drawings expanding fast; puffs 5 - 8 drawings; total under 1 s.
-- Explosion: 2 drawings of bright compressed core, impact frame 2 drawings, fireball 6 - 10 drawings, black smoke 10 - 16 drawings rising, all on twos.
+- Explosion: 2 drawings of bright compressed core, impact frame 1 drawing, fireball 6 - 10 drawings, black smoke 10 - 16 drawings rising, all on twos.
 - Bands: 2 for smoke, 3 for fire. Outline width about 5 - 8% of the puff radius.
 
 ## Common mistakes
@@ -44,7 +44,7 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 - Gradient-heavy textures or volumetric smoke.
 - Heavy bloom haze.
 - Uniform random particle size; anime bursts have a few big designed shapes and many tiny accents.
-- An impact frame that inverts the whole screen: mask it to the effect and the character (draw the effect alone into a mask target), not the sky.
+- An impact frame that loses the shapes: the effect and the character must be inked by their own masks (draw the effect alone into a mask target), never found by a luminance threshold. Flat paper fills the rest of the screen for that one drawing; more than one drawing reads as a white-out.
 - Ramps sampled by age alone: in sakuga the colour bands follow the radius of the shape (white core, colour band, dark edge) as well as time.
 - Symmetric protrusions (ears on a puff cluster, a star with even spikes): bias spikes along the hit, jitter their angles, vary their lengths.
 

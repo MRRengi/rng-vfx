@@ -255,7 +255,7 @@ void main() {
   if (holes < thr) discard;
   vec2 q = c * 2.0;
   vec3 sN = normalize(vec3(q, sqrt(max(0.0, 1.0 - dot(q, q)))));
-  vec3 N = normalize(sN + 1.2 * vCenterView);
+  vec3 N = normalize(sN + 2.0 * vCenterView);
   float sh = clamp(dot(N, uLightView) * 0.5 + 0.5, 0.0, 1.0);
   float band = clamp(floor(sh * (uBands + 1.0)) / max(uBands, 1.0), 0.0, 1.0);
   // The shadow side and the rim sit further down the ramp than the lit side,
@@ -313,16 +313,18 @@ void main() {
   vec4 n4 = tnDual(base, vec2(0.0, -0.35), vec2(0.06, -0.55), uTimeAbs + vSeed.z * 3.0);
   float f = n4.r * 0.6 + n4.b * 0.4;
   r = length((vUv - 0.5) * 2.0 + (tn(vUv * 0.3 + vSeed.zw + vec2(0.0, -uTimeAbs * 0.2)).rb - 0.5) * 0.6);
-  float shape = 1.0 - r * 0.9;
+  float shape = 1.0 - r * 1.2;
   // Keep a hot core early in life: threshold stays low for the first ~30%.
   float thr = mix(0.05, 0.95, pow(clamp(vN, 0.0, 1.0), 1.6)) * uErode + (1.0 - uErode) * 0.1
             + (vUv.y - 0.5) * uVBias;
   float heat = (f * shape * 1.9 + (1.0 - r) * 0.4 - thr) / max(uSoft, 0.001);
+  // Window: the body never reaches the quad edge, so no card outline shows.
+  heat *= smoothstep(0.0, 0.18, min(vUv.x, 1.0 - vUv.x)) * smoothstep(0.0, 0.12, min(vUv.y, 1.0 - vUv.y));
   if (heat <= 0.0) discard;
   col = texture2D(uRamp, vec2(clamp(1.0 - heat, 0.0, 1.0), 0.5));
   a = clamp(heat * 3.0, 0.0, 1.0);
   // Hot parts glow through, cooled parts occlude like smoke.
-  occl = mix(0.35, 1.0, smoothstep(0.2, 0.9, 1.0 - clamp(heat, 0.0, 1.0)));
+  occl = mix(0.75, 1.0, smoothstep(0.2, 0.9, 1.0 - clamp(heat, 0.0, 1.0)));
 #elif SHAPE == 8
   // Flipbook: a drawn or simulated sprite sheet. Stepped (anime, pixel) or
   // blended between frames (realism). Grey sheets take colour from the ramp.
@@ -1120,8 +1122,10 @@ void main() {
   float r = length(c);
   vec2 off;
   if (uKind < 0.5) {
-    float band = 1.0 - smoothstep(0.0, max(uW, 0.0001), abs(r - uR));
-    off = (c / max(r, 0.0001)) * band;
+    // Lens profile: pushes out on the outer half and in on the inner half, a
+    // smooth zero-mean bump, so the bend never shows a hard displacement edge.
+    float x = (r - uR) / max(uW, 0.0001);
+    off = (c / max(r, 0.0001)) * x * exp(-x * x * 2.0) * 1.65 * (1.0 - smoothstep(0.85, 1.0, r));
   } else {
     float mask = (1.0 - smoothstep(0.3, 1.0, abs(c.x))) * smoothstep(-1.0, -0.6, c.y) * (1.0 - smoothstep(0.2, 1.0, c.y));
     vec4 n = tnDual(vUv * 0.6, vec2(0.0, -0.5), vec2(0.04, -0.8), uTimeAbs);

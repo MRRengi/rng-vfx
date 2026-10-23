@@ -7,7 +7,7 @@ An effect is checked by looking at frames, not by reading code. Something other 
 The core artifact: 6 to 12 frames evenly spaced over the effect's duration, side by side, labelled with times. It shows timing, shape evolution and dissipation at a glance, and it is diffable between versions.
 
 - **three.js / stand:** `window.rngStand.captureStrip(8)` returns a PNG data URL; the Tools folder in the stand's panel saves one.
-- **Peak strip:** an evenly spaced strip misses 1 - 3 frame peaks. Always also capture frames packed around contact: -1, 0, +1, +2, +3, +5, +8, +12 frames (`window.rngStand.capturePeak()`), at full resolution.
+- **Peak strip:** an evenly spaced strip misses 1 - 3 frame peaks. Always also capture frames packed around contact: -1, 0, +1, +2, +3, +5, +8, +12 frames (`window.rngStand.capturePeak()`; it steps in the style's drawings, so in anime +2 is 2/12 s and in pixel 2/10 s; use `captureTimes` for 60 fps steps), at full resolution.
 - **Unity:** `references/engines/unity.md` > Headless frame strips.
 - **Unreal:** Movie Render Queue to a PNG sequence, then tile (`references/engines/unreal.md`).
 - Tiling frames from a folder: `ffmpeg -i frame_%04d.png -vf tile=8x1 strip.png` (pick the 8 frames first), or a few lines of Python with Pillow.
@@ -61,7 +61,7 @@ Any yes means the effect still looks cheap:
 
 Run these on rendered frames instead of judging by eye:
 
-- **Held shape:** no region of the effect is pixel-identical (or within 1%) across more than 4 frames at 60 fps (2 drawings on twos).
+- **Held shape:** no region of the effect is pixel-identical (or within 1%) across more than 4 frames at 60 fps, or more than 2 drawings in held-drawing styles.
 - **Empty tail:** the effect's mask is non-empty in the frame at 90% of the duration.
 - **Silhouette aspect:** the explosion's bounding box at peak is taller than wide (1.2 or more); the impact spark is longer along the hit than across it.
 - **Post-palette colour (pixel):** sample the effect's main colours after the palette pass. If smoke maps to a hue it was not meant to have, the palette lacks neutrals.

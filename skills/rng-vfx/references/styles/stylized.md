@@ -31,7 +31,7 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 
 ## Default numbers
 
-- Impact: slash or flash 6 - 10 frames, ring 18 - 20 frames, sparks 20 - 35 frames with gravity, motes 40 - 70 frames, smoke 35 - 55 frames.
+- Impact: slash 6 - 10 frames, flash 2 - 4 frames, ring 18 - 20 frames, sparks 20 - 35 frames with gravity, motes 40 - 70 frames, smoke 35 - 55 frames.
 - Explosion: flash 5 - 15 frames, fireball 35 - 60 frames eroding, smoke 70 - 110 frames, embers up to 2 s, scorch 2 - 5 s.
 
 ## Common mistakes

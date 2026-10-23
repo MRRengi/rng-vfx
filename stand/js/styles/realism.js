@@ -19,6 +19,12 @@ export default {
       build(fx) {
         const bb = fx.ramp(BLACKBODY);
         const SPRAY = [1, 0.55, -0.2];
+        // Contact streak: a 2-frame anisotropic flare along the hit, the readable contact shape.
+        fx.flash({
+          pos: HIT, size: 0.5, spikes: 0, spikeLen: 0, core: 0.5, soft: 3, dir: HIT_DIR, aspect: 3,
+          core_color: '#fff6e0', coreK: 2, edge_color: '#ffb050', edgeK: 1.2,
+          scaleCurve: [[0, 1]], alphaCurve: [[0, 1], [0.033, 1], [0.034, 0]], order: 8,
+        }, 0);
         fx.flash({
           pos: HIT, size: 0.6, spikes: 0, spikeLen: 0, core: 0.7, soft: 4, dir: SPRAY, aspect: 3.2,
           core_color: '#fff6e0', coreK: 3, edge_color: '#ffb050', edgeK: 1.4,
@@ -26,7 +32,7 @@ export default {
         }, 0);
         fx.burst({
           shape: 'streak', dir: 'cone', axis: SPRAY, angle: 50, count: 70, origin: HIT,
-          speed: [4, 11], gravity: [0, -9.81, 0], drag: 3.2, life: [0.4, 1.1], stretch: 0.05, minPx: 3,
+          speed: [3, 16], gravity: [0, -9.81, 0], drag: 3.2, life: [0.15, 0.5], stretch: 0.05, minPx: 3,
           size: [0.035, 0.015], soft: 1, ground: 0, bounce: 0.3, fade: [0, 0.85], ramp: bb,
         }, 0);
         // Hero sparks: a few ribbons whose tails bend under gravity.
@@ -78,17 +84,17 @@ export default {
         }, 0);
         fx.exposure([[0, 1], [0.03, 0.6], [0.35, 1, 'outQuad']]);
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 45, count: 18, sizeDist: [4, 8, 6], origin: C, spawnR: 0.45,
-          speed: [5, 8], drag: 2.4, gravity: [0, 3, 0], life: [0.9, 1.5], size: [1.8, 3.4], sizePow: 0.4, aspectY: 1.35, upright: true,
+          shape: 'fire', dir: 'cone', axis: UP, angle: 45, count: 9, sizeDist: [3, 5, 1], origin: C, spawnR: 0.45,
+          speed: [5, 8], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.5], size: [1.8, 3.4], sizePow: 0.4, aspectY: 1.35, upright: true,
           soft: 0.9, erode: 1, noiseScale: 3, vBias: 0.25, blend: 'premul', order: 3, fadeDist: 0.4,
-          ramp: fx.ramp([[0, '#fff8e6', 3], [0.2, '#ffd27a', 2.0], [0.45, '#ff7a1f', 1.3], [0.7, '#a3260f', 0.9], [0.88, '#2a1410', 1], [1, '#161210', 1]]),
+          ramp: fx.ramp([[0, '#fff8e6', 1.8], [0.2, '#ffd27a', 1.5], [0.45, '#ff7a1f', 1.2], [0.7, '#a3260f', 0.9], [0.88, '#2a1410', 1], [1, '#161210', 1]]),
         }, 0);
         // Stem and base: the fireball sits on the ground.
         fx.burst({
           shape: 'fire', dir: 'cone', axis: UP, angle: 15, count: 5, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
-          speed: [5, 8], drag: 2.4, gravity: [0, 3, 0], life: [0.7, 1.0], size: [1.2, 1.8], aspectY: 1.4, upright: true, soft: 0.9, erode: 1, noiseScale: 3,
+          speed: [4, 6], drag: 3.5, gravity: [0, 0.8, 0], life: [0.7, 1.0], size: [1.2, 1.8], aspectY: 1.4, upright: true, soft: 0.9, erode: 1, noiseScale: 3,
           vBias: 0.3, blend: 'premul', order: 4, fadeDist: 0.3,
-          ramp: fx.ramp([[0, '#fff8e6', 2.6], [0.3, '#ffb347', 1.4], [0.7, '#7a200c', 0.9], [1, '#161210', 1]]),
+          ramp: fx.ramp([[0, '#fff8e6', 1.6], [0.3, '#ffb347', 1.3], [0.7, '#7a200c', 0.9], [1, '#161210', 1]]),
         }, 0);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 20, sizeDist: [4, 8, 8], origin: at(C, 0, 0.3, 0), spawnR: 0.35,
@@ -122,7 +128,7 @@ export default {
           shape: 'streak', dir: 'hemi', count: 50, origin: C, speed: [5, 12], gravity: [0, -9.81, 0], drag: 1.8,
           life: [0.5, 1.2], stretch: 0.04, minPx: 3, size: [0.035, 0.015], soft: 1, ground: 0, bounce: 0.3, fade: [0, 0.85], ramp: bb,
         }, 0);
-        fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 12, radius: [[0, 0.05], [0.3, 0.95, 'outExpo']], width: [[0, 0.06], [0.3, 0.03]], strength: [[0, 0.04], [0.3, 0]] }, 0);
+        fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 12, radius: [[0, 0.05], [0.3, 0.95, 'outExpo']], width: [[0, 0.06], [0.3, 0.03]], strength: [[0, 0.018], [0.3, 0]] }, 0);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.4, 0), size: 5, strength: [[0, 0.016], [2.5, 0.006], [3.8, 0]] }, 0.05);
         fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 4, hot: '#ff6a1f', hotK: 1.2, dark: '#0e0b09', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
         fx.decal({ pos: at(BLAST, 0, 0.011, 0), size: 5.5, multiply: true, strength: 0.3, glow: [[0, 0]] }, 0);

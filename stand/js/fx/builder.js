@@ -78,9 +78,11 @@ export function buildEffect(def, scene, distortScene, celScene) {
     layers: () => layers.map((l, i) => ({ i, kind: l.kind, at: l.at })),
     solo: i => { solo = i; },
     update(tReal) {
-      const t = remap(tReal);
+      // Hitstop freezes only what was already playing before contact (the
+      // anticipation, the swing). Layers born at or after contact run on real
+      // time, so the spark blooms through the hold and lands with the reaction.
       layers.forEach(({ prim, at }, i) => {
-        // A layer does not exist before its start time.
+        const t = hold && at >= hold.at - 1e-4 ? tReal : remap(tReal);
         prim.object.visible = t >= at && (solo === null || solo === i);
         prim.update(t - at, t);
       });
