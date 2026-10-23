@@ -15,7 +15,7 @@ export default {
       build(fx) {
         fx.celOutline('#2b2b55', 3);
         fx.flash({
-          pos: HIT, size: 1.2, hard: true, spikes: 5, spikeLen: 0.8, core: 0.3, sharp: 1.0, jitter: 0.5, bias: 0.4,
+          pos: HIT, size: 1.2, hard: true, spikes: 5, spikeLen: 0.8, core: 0.3, sharp: 1.0, jitter: 0.5, bias: 0.4, blend: 'alpha',
           dir: HIT_DIR, aspect: 1.6, core_color: '#fffbd0', coreK: 1.0, edge_color: '#ffc62e', edgeK: 1.0, rot: 0.3, order: 0,
           scaleCurve: [[0, 0], [0.06, 1.12, 'outBack'], [0.09, 0.95], [0.12, 1.06], [0.16, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.16, 1], [0.161, 0]],
@@ -26,14 +26,13 @@ export default {
           radius: [[0, 0.5], [0.1, 0.8, 'outBack']], width: [[0, 0.05], [0.1, 0.0, 'inQuad']],
           alpha: [[0, 1], [0.099, 1], [0.1, 0]],
         }, 0.05);
-        for (const [axis, seed] of [[[1, 0.7, 0.1], 11], [[1, -0.25, 0.5], 12], [[0.6, 0.35, -0.7], 13]]) {
-          fx.burst({
-            shape: 'puff', cel: true, dir: 'cone', axis, angle: 18, count: 5, seed, origin: at(HIT, HIT_DIR[0] * 0.35, HIT_DIR[1] * 0.35, HIT_DIR[2] * 0.35), spawnR: 0.05, speed: [3, 3.6], drag: 6,
-            life: [0.4, 0.5], size: [0.35, 0.03], sizePow: 2.2, sizeIn: 0.14, sizeRand: 0.35, bands: 1, outline: 0,
-            shadow: '#b6c2ff', erode: 0, noiseScale: 1.6, blend: 'alpha', fadeDist: 0.05,
-            ramp: fx.ramp([[0, '#ffffff', 1], [1, '#f2f4ff', 1]]),
-          }, 0.03);
-        }
+        // Drawn puffs (image-model keyframes, recipes/flipbooks.md): pop in, full, holes, bits.
+        fx.burst({
+          shape: 'sheet', cel: true, sheet: { url: './textures/toon_puff_2x2.png', grid: [2, 2], frames: 4, stepped: true },
+          dir: 'cone', axis: HIT_DIR, angle: 45, count: 3, seed: 11, origin: at(HIT, HIT_DIR[0] * 0.35, HIT_DIR[1] * 0.35, HIT_DIR[2] * 0.35),
+          spawnR: 0.05, speed: [2.2, 3.2], drag: 6, life: [0.36, 0.46], size: [0.95, 0.8], sizeIn: 0.15, sizeRand: 0.25,
+          blend: 'alpha', fadeDist: 0.05, fade: [0, 0.999], ramp: fx.ramp([[0, '#ffffff', 1], [1, '#ffffff', 1]]),
+        }, 0.03);
         fx.burst({
           shape: 'sparkle', soft: 100, dir: 'cone', axis: HIT_DIR, angle: 70, count: 7, origin: HIT, speed: [3, 5], drag: 4,
           gravity: [0, -3, 0], life: [0.45, 0.6], size: [0.38, 0.15], sizePow: 1.5, sizeIn: 0.2, spin: 4, fade: [0, 1],
