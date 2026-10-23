@@ -68,7 +68,7 @@ def has_corner(pts, idx, d, k=10, min_deg=35):
     return False
 
 
-def straight_edges(mask, min_frac=0.2, min_px=40, max_ptp=1.6):
+def straight_edges(mask, min_frac=0.2, min_px=40, max_ptp=1.6, geom_edges=None):
     """Dead-straight runs on the mask's outer contour: long (>= min_px and >= min_frac of
     the shape's size) whose points stay within max_ptp pixels of a line (pixel stair-steps
     included). Over that length a curved outline bows by more than that (a chord's sagitta
@@ -81,6 +81,10 @@ def straight_edges(mask, min_frac=0.2, min_px=40, max_ptp=1.6):
     for c in cnts:
         pts = c[:, 0, :].astype(np.float64)
         if len(pts) < min_px:
+            continue
+        # Streaks and speed lines are straight by design: skip thin components.
+        (_, _), (rw, rh), _ = cv2.minAreaRect(c)
+        if min(rw, rh) > 0 and max(rw, rh) / min(rw, rh) > 5:
             continue
         x0, y0, w, h = cv2.boundingRect(c)
         L = int(max(min_px, min_frac * max(w, h)))
@@ -99,7 +103,26 @@ def straight_edges(mask, min_frac=0.2, min_px=40, max_ptp=1.6):
             u, sv, vt = np.linalg.svd(q - mu, full_matrices=False)
             dist = (q - mu) @ vt[1]
             span = np.linalg.norm(q[-1] - q[0])
-            if np.ptp(dist) < max_ptp and span > 0.9 * L and has_corner(pts, idx, vt[0]):
+            on_geom = False
+            if geom_edges is not None:
+                qi = q.astype(int)
+                on_geom = geom_edges[np.clip(qi[:, 1], 0, H - 1), np.clip(qi[:, 0], 0, W - 1)].mean() > 0.6
+            # A quad cut leaves a solid body behind the edge; a thin feature (a streak or a
+            # spike tip) is straight by design. Sample inward from the run's middle third.
+            thick = True
+            if np.ptp(dist) < max_ptp:
+                nrm = vt[1]
+                mid = q[len(q) // 3: 2 * len(q) // 3]
+                inside_hits = []
+                for sgn in (1, -1):
+                    hits = 0
+                    for p_ in mid[::3]:
+                        for dd in (5, 10, 15):
+                            x_, y_ = int(round(p_[0] + nrm[0] * dd * sgn)), int(round(p_[1] + nrm[1] * dd * sgn))
+                            hits += 0 <= x_ < W and 0 <= y_ < H and mask[y_, x_]
+                    inside_hits.append(hits / max(1, len(mid[::3]) * 3))
+                thick = max(inside_hits) > 0.85
+            if np.ptp(dist) < max_ptp and span > 0.9 * L and has_corner(pts, idx, vt[0]) and not on_geom and thick:
                 found.append((int(q[0][0]), int(q[0][1]), int(q[-1][0]), int(q[-1][1]), round(span / max(w, h), 3)))
                 i += L
             else:
@@ -132,10 +155,15 @@ def run_checks(fx_frames, base_frames, times, contact, duration, a):
 
     # straight edges, on every frame with content
     hits = []
-    for t, m in zip(times, masks):
+    for t, m, bf in zip(times, masks, base_frames):
         if m.mean() > 0.4:  # full-screen event (impact frame, screen flash): not a shape
             continue
-        for seg in straight_edges(m):
+        # Edges of the scene's own geometry (a character occluding smoke) are not cuts.
+        geom = None
+        if cv2 is not None:
+            g = cv2.Canny((luminance(bf) * 255).astype(np.uint8), 20, 60)
+            geom = cv2.dilate(g, np.ones((5, 5), np.uint8)) > 0
+        for seg in straight_edges(m, geom_edges=geom):
             hits.append({"t": round(t, 3), "seg": seg})
     res["straight-edges"] = {"pass": len(hits) == 0, "found": hits[:12], "count": len(hits)}
 

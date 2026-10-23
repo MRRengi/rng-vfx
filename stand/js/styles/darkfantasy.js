@@ -11,7 +11,7 @@ export default {
   look: { fps: 0, tone: 'agx', bloom: { strength: 0.4, threshold: 1.2, radius: 0.25 } },
   effects: {
     impact: {
-      duration: 1.2,
+      duration: 0.95,
       contact: 0.05,
       build(fx) {
         fx.hitstop(0.05, 4);
@@ -34,11 +34,11 @@ export default {
         }
         fx.flash({
           pos: HIT, size: 1.6, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 1.5, blend: 'alpha', bias: 0.6,
-          dir: HIT_DIR, aspect: 1.6, core_color: '#0a0204', coreK: 1, edge_color: '#ff3a22', edgeK: 1.4,
+          dir: HIT_DIR, aspect: 1.6, core_color: '#0a0204', coreK: 1, edge_color: '#e01a08', edgeK: 1.0,
           scaleCurve: [[0, 0.5], [0.03, 1, 'outExpo'], [0.08, 1.15]], alphaCurve: [[0, 1], [0.05, 1], [0.08, 0]],
         }, 0.05);
         fx.flash({
-          pos: HIT, size: 0.45, spikes: 0, spikeLen: 0, core: 0.7, soft: 4, core_color: '#ffd8c8', coreK: 2.4, edge_color: '#ff2a1a', edgeK: 1.2,
+          pos: HIT, size: 0.45, spikes: 0, spikeLen: 0, core: 0.7, soft: 4, core_color: '#ffc8a0', coreK: 1.6, edge_color: '#e01a08', edgeK: 1.0,
           scaleCurve: [[0, 1]], alphaCurve: [[0, 1], [0.03, 1], [0.04, 0]], order: 9,
         }, 0.05);
         fx.burst({
@@ -54,7 +54,7 @@ export default {
         fx.burst({
           shape: 'glow', dir: 'cone', axis: HIT_DIR, angle: 80, count: 24, sizeDist: [2, 6, 12], origin: HIT, spawnR: 0.3,
           speed: [1, 3], gravity: [0, 1.5, 0], drag: 2, curl: 0.8, life: [0.8, 1.4], size: [0.1, 0.02], soft: 2.2,
-          ramp: fx.ramp([[0, '#ffb38a', 1.8], [0.5, '#ff2a0a', 1.3], [1, '#400000', 1]]),
+          ramp: fx.ramp([[0, '#ff9a5a', 1.3], [0.5, '#e8200a', 1.05], [1, '#400000', 1]]),
         }, 0.05);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: HIT_DIR, angle: 70, count: 7, origin: HIT, spawnR: 0.2, speed: [0.4, 1], drag: 2,
@@ -100,8 +100,8 @@ export default {
         }, T);
         fx.burst({
           // A few big dark tongues: deep red that stays red under AgX (mid HDR under 1.2), black edges.
-          shape: 'fire', dir: 'cone', axis: UP, angle: 35, count: 6, sizeDist: [2, 4, 0], origin: C, spawnR: 0.35,
-          speed: [3, 5.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.2], size: [2.4, 3.8], sizePow: 0.45, aspectY: 1.6, upright: true,
+          shape: 'fire', dir: 'cone', axis: UP, angle: 35, count: 6, sizeDist: [2, 4, 0], origin: C, spawnR: 0.8,
+          speed: [3, 5.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.2], size: [2.4, 3.8], sizePow: 0.45, aspectY: 1.2, spin: 0.3,
           soft: 0.8, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 3, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#ffd0a0', 1.0], [0.2, '#d8280c', 0.9], [0.5, '#6a0808', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
         }, T);

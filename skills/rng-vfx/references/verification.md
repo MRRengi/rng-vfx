@@ -77,7 +77,7 @@ python tools/vfxcheck.py stand realism explosion --camera Gameplay      # render
 ```
 
 It reports PASS or FAIL and exits 1 on any failure:
-- **Straight edges.** Dead-straight runs on the mask's outline, long (40 px and 20% of the shape) and ending in a corner. Smooth arcs and round shapes pass; a quad, strip or ground cut fails. Full-screen frames (impact frames) are skipped.
+- **Straight edges.** Dead-straight runs on the mask's outline, long (40 px and 20% of the shape) and ending in a corner. Smooth arcs and round shapes pass; a quad, strip or ground cut fails. Exempt by design: full-screen frames (impact frames), thin features (streaks, spike tips: the body behind the edge is under ~15 px thick), and edges that coincide with the scene's own geometry (a character occluding smoke). It was validated on synthetic shapes: discs and blobs pass, discs cut vertically or diagonally fail.
 - **Size.** The effect's height at peak in 1080p-equivalent pixels. Run it once more with the gameplay camera for this check.
 - **White clip.** The share of the effect that clips to white at peak.
 - **Haze.** The brightness rise outside the effect at peak, which is bloom spill.

@@ -27,7 +27,7 @@ export default {
         }, 0);
         fx.impactFrame([[0, 0], [T - 0.001, 0], [T, 1], [T + D - 0.001, 1], [T + D, 0]]);
         fx.flash({
-          pos: HIT, size: 1.1, hard: true, spikes: 4, spikeLen: 0.9, core: 0.16, sharp: 2.2, jitter: 1.0,
+          pos: HIT, size: 1.1, hard: true, spikes: 4, spikeLen: 0.9, core: 0.16, sharp: 3.2, jitter: 1.0,
           dir: HIT_DIR, aspect: 1.6, redraw: 12, bias: 0.85, angJitter: 0.35, depthTest: true, core_color: '#ffffff', coreK: 1.0, edge_color: '#3fd8ff', edgeK: 1.0,
           scaleCurve: [[0, 1], [D, 1.08], [2 * D, 0.5]],
           alphaCurve: [[0, 1], [3 * D, 1], [3 * D + 0.001, 0]],
