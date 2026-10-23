@@ -87,7 +87,12 @@ Hard minimums. An effect that misses one of these looks cheap regardless of how 
 - **Size tiers.** Use big / mid / small tiers with ratios near 1 : 0.5 : 0.15, not one random range.
 - **Cotton-ball test.** If the peak frame reads as a pile of separate circles, the shapes are wrong. Merge silhouettes (one outline around a cluster), add lobes, tongues and negative space, break the round quad silhouette with noise.
 - **Reticle test.** If the peak frame reads as a target or crosshair (concentric star, ring and disc), offset and tilt the parts and give them a direction.
+- **Ring limits.** Rings are small and broken: impact rings stay within 1.2x the primary shape (about 0.5 - 0.8 m around a 1.8 m character), cover 40 - 70% of the circle (a broken arc), are stretched 1.4 - 1.8x along the hit, start 2 - 3 frames after the flash and live 6 frames or less. Ground rings on the biggest explosions reach about 2 m radius at most, at low alpha, or are replaced by a dust skirt plus distortion. A closed even ring larger than the character reads as a selection circle.
 - **White budget.** At most ~10% of the effect's area clips to white on the peak frame, and the brightest element sits next to a dark one. Flash radius at most 0.6x the primary shape radius, falloff exponent 4 or more, 3 frames or fewer above HDR 1.
+- **Bloom adds up.** Many small HDR sources sum into haze: with 30+ additive sparks keep their heads at HDR 2.5 or less and bloom strength at 0.3 or less. Measure it: mean frame luminance at the peak should rise less than ~25% over the frame before contact.
+- **Target flash cap.** The hit character's flash stays at or below HDR 1 (under the bloom threshold), tinted, for 1 - 2 frames. A full-body flash brighter than the spark is a white-out. Rims at modest strength, and none in realism.
+- **No static holds.** Nothing is held unchanged for more than 4 frames at 60 fps (2 drawings on twos). Held shapes drift in scale 5 - 10%, erode, or get redrawn; a frozen shape reads as a sticker.
+- **Smoke has mass.** At its peak a smoke puff covers 55% or more of its quad with alpha 0.8 or more in the core, and differs from the background by at least 0.25 in grayscale value.
 - **Visible residue.** Dark layers (smoke, blood, ash) must read on dark backgrounds: give them a value floor, a rim, or light from the fire below. Check on a dark and a mid background.
 - **Ground contact.** No hard lines where quads cut the ground or a character (soft particles), and something touches the ground on big events (light pool, dust, scorch, cracks).
 
@@ -122,7 +127,7 @@ Choose deliberately per layer:
 
 ## Game feel helpers
 
-- **Hitstop:** freeze or slow both attacker and target for 2 to 6 frames on contact. Scale with damage.
+- **Hitstop:** freeze or slow both attacker and target for 2 to 6 frames on contact, scaled with damage. Defaults per style: anime 4 - 6 frames (2 - 3 drawings), stylized 3 - 4, dark fantasy 3 - 4, realism 2 - 3, toon 2 - 3, pixel 2 drawings. Freeze the effect's own clock too (the spark holds), but keep camera shake running.
 - **Camera shake:** short, high frequency for hits; longer, lower frequency for explosions. Decay fast (outQuad or exponential). Shake along the hit direction reads better than random.
 - **Impact frame:** 1 to 3 frames of inverted or high contrast image on the biggest hits. Anime signature; use sparingly elsewhere.
 - **Screen flash:** a brief full-screen tint at very low alpha. Never on tier 0 to 1 effects.

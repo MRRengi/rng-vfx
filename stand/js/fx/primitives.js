@@ -72,6 +72,8 @@ uniform float uGround;
 uniform float uBounce;
 uniform float uMinPx;
 uniform float uPxScale;
+uniform float uSizeIn;
+uniform vec2 uSnapRes;
 attribute vec4 aSeed;
 attribute vec3 aDir;
 attribute float aScale;
@@ -113,6 +115,11 @@ void main() {
   vec3 vel = v0 * e + uGravity * (1.0 - e) / k;
   if (uCurl > 0.0) p += curlAt(p * 0.8 + aSeed.xyz * 9.0 + vec3(0.0, age * 0.3, 0.0)) * uCurl * pow(n, 1.2);
   float sz = mix(uSize.x, uSize.y, pow(clamp(n, 0.0, 1.0), uSizePow)) * aScale;
+  if (uSizeIn > 0.0 && n < uSizeIn) {
+    // Pop in with overshoot (outBack) over the first part of life.
+    float x = n / uSizeIn - 1.0;
+    sz *= 1.0 + 2.70158 * x * x * x + 1.70158 * x * x;
+  }
   if (p.y < uGround) {
     // Mirror below the ground: a cheap closed-form bounce with energy loss.
     p.y = uGround + (uGround - p.y) * uBounce;
@@ -131,7 +138,9 @@ void main() {
   float sp = length(vv.xy);
   if (uStretch > 0.0 && sp > 0.0001) {
     vec2 ax = vv.xy / sp;
-    vec2 perp = vec2(-ax.y, ax.x);
+    // Keep det(perp, ax) > 0: a mirrored basis flips the winding and the
+    // quad is back-face culled, silently hiding every stretched particle.
+    vec2 perp = vec2(ax.y, -ax.x);
     float wid = max(sz, minSz);
     float len = max(wid + sp * uStretch, minSz * 3.0);
     mv.xy += ax * (corner.y - 0.5) * len + perp * corner.x * wid;
@@ -142,6 +151,13 @@ void main() {
     mv.xy += mat2(c, s, -s, c) * corner * sz;
   }
   gl_Position = projectionMatrix * mv;
+  if (uSnapRes.x > 0.0) {
+    // Pixel style: snap the particle centre to the pixel grid so it does not shimmer.
+    vec4 cc = projectionMatrix * (modelViewMatrix * vec4(p, 1.0));
+    vec2 ndc = cc.xy / cc.w;
+    vec2 snapped = floor(ndc * uSnapRes * 0.5 + 0.5) / (uSnapRes * 0.5);
+    gl_Position.xy += (snapped - ndc) * gl_Position.w;
+  }
 }`;
 
 const BURST_FS = /* glsl */ `
@@ -213,8 +229,8 @@ void main() {
   vec4 nB = tnDual(base + toL, vec2(0.0, -0.05), vec2(0.02, -0.08), tt);
   float f = nA.r * 0.55 + nA.b * 0.45;
   float f2 = nB.r * 0.55 + nB.b * 0.45;
-  float dens = clamp((f * 1.7 - 0.3 - r * 1.05 - vN * uErode * 0.55) * 2.4, 0.0, 1.0);
-  float lit = clamp(0.75 + (f - f2) * 6.0, 0.3, 1.3);
+  float dens = clamp((f * 1.7 - 0.3 - r * 1.05 - vN * uErode * 0.55) * 3.5, 0.0, 1.0);
+  float lit = clamp(0.7 + (f - f2) * 6.0, 0.15, 1.1);
   col.rgb *= mix(uShadow, vec3(1.0), lit);
   col.rgb += uFireColor * uFireK * (1.0 - smoothstep(0.0, uFireH, vHeight)) * (1.0 - vN * 0.6);
   a = dens;
@@ -239,14 +255,15 @@ void main() {
 #elif SHAPE == 7
   // Fire: billow noise scrolling up, eroded by a threshold that rises with age
   // and with height (tips burn off first), coloured by heat through the ramp.
-  vec2 base = vUv * 0.2 * uNoiseScale + vSeed.xy;
+  vec2 base = vUv * 0.12 * uNoiseScale + vSeed.xy;
   vec4 n4 = tnDual(base, vec2(0.0, -0.35), vec2(0.06, -0.55), uTimeAbs + vSeed.z * 3.0);
   float f = n4.r * 0.6 + n4.b * 0.4;
   r = length((vUv - 0.5) * 2.0 + (tn(vUv * 0.3 + vSeed.zw + vec2(0.0, -uTimeAbs * 0.2)).rb - 0.5) * 0.6);
   float shape = 1.0 - r * 0.9;
-  float thr = mix(0.18, 0.95, pow(clamp(vN, 0.0, 1.0), 0.8)) * uErode + (1.0 - uErode) * 0.18
+  // Keep a hot core early in life: threshold stays low for the first ~30%.
+  float thr = mix(0.05, 0.95, pow(clamp(vN, 0.0, 1.0), 1.6)) * uErode + (1.0 - uErode) * 0.1
             + (vUv.y - 0.5) * uVBias;
-  float heat = (f * shape * 1.9 - thr) / max(uSoft, 0.001);
+  float heat = (f * shape * 1.9 + (1.0 - r) * 0.4 - thr) / max(uSoft, 0.001);
   if (heat <= 0.0) discard;
   col = texture2D(uRamp, vec2(clamp(1.0 - heat, 0.0, 1.0), 0.5));
   a = clamp(heat * 3.0, 0.0, 1.0);
@@ -351,6 +368,7 @@ export function burst(o) {
       uGround: { value: o.ground ?? -100 },
       uBounce: { value: o.bounce ?? 0 },
       uMinPx: { value: o.minPx ?? 2 },
+      uSizeIn: { value: o.sizeIn ?? 0 },
       uRamp: { value: o.ramp },
       uOpacity: { value: o.opacity ?? 1 },
       uFade: { value: new THREE.Vector2(Math.max(0.001, fade[0]), Math.min(0.999, fade[1])) },
@@ -379,6 +397,7 @@ export function burst(o) {
   mesh.renderOrder = o.order ?? 0;
   return {
     object: mesh,
+    scene: o.cel ? 'cel' : undefined,
     update(t, tAbs) {
       mat.uniforms.uTime.value = t;
       mat.uniforms.uTimeAbs.value = tAbs;
@@ -488,6 +507,13 @@ export function flash(o) {
       mat.uniforms.uScale.value = scale(t);
       mat.uniforms.uAlpha.value = alpha(t);
       mat.uniforms.uRot.value = (o.rot ?? 0) + rotSpeed * t;
+      if (o.redraw) {
+        // A new designed drawing each held frame: new spike lengths, count and angle.
+        const k = Math.floor(Math.max(0, t) * o.redraw + 1e-6);
+        mat.uniforms.uSeed.value = (o.seed ?? 3) + k * 7.31;
+        mat.uniforms.uSpikes.value = (o.spikes ?? 5) + [0, -1, 1][k % 3];
+        mat.uniforms.uRot.value = (o.rot ?? 0) + k * 0.9;
+      }
     },
     dispose() { geo.dispose(); mat.dispose(); },
   };
@@ -510,12 +536,15 @@ uniform float uErode;
 uniform float uFill;
 uniform float uSeed;
 uniform float uEdge;
+uniform float uCoverage;
+uniform float uAspect;
 uniform vec3 uColor;
 uniform vec3 uColor2;
 varying vec2 vUv;
 ${TEXNOISE}
 void main() {
   vec2 c = (vUv - 0.5) * 2.0;
+  c.x /= max(uAspect, 0.01);
   float r = length(c);
   float ang01 = atan(c.y, c.x) / 6.2832 + 0.5;
   float reps = max(1.0, floor(uNoiseFreq * 0.5 + 0.5));
@@ -530,6 +559,11 @@ void main() {
   a += uFill * (1.0 - smoothstep(0.0, max(uR, 0.0001), r)) * (1.0 - a);
   float holes = tn(c * 0.45 + uSeed * 0.31).g;
   if (holes < uErode) a = 0.0;
+  // Broken arc: only part of the circle exists. A closed even hoop reads as UI.
+  if (uCoverage < 0.999) {
+    float cv = tn(vec2(ang01 * 2.0, uSeed * 0.29 + 0.5)).r;
+    a *= smoothstep(1.0 - uCoverage - 0.04, 1.0 - uCoverage + 0.04, cv);
+  }
   float alpha = a * uAlpha * step(r, 1.0);
   if (alpha < 0.002) discard;
   gl_FragColor = vec4(col, alpha);
@@ -571,6 +605,8 @@ export function ring(o) {
     uNoiseAmt: { value: o.noise ?? 0.3 }, uNoiseFreq: { value: o.noiseFreq ?? 4 },
     uErode: { value: 0 }, uFill: { value: o.fill ?? 0 }, uSeed: { value: o.seed ?? 1 },
     uEdge: { value: o.edge ?? 0 },
+    uCoverage: { value: o.coverage ?? 1 },
+    uAspect: { value: o.aspect ?? 1 },
     uColor: { value: color3(o.color || '#ffffff', o.colorK ?? 1.5) },
     uColor2: { value: color3(o.color2 || o.color || '#ffffff', o.color2K ?? o.colorK ?? 1.5) },
     uPos: { value: v3(o.pos || [0, 1, 0]) },
@@ -730,6 +766,7 @@ uniform float uSeed;
 uniform float uCracks;
 uniform float uReveal;
 uniform float uScorch;
+uniform float uSplat;
 uniform vec3 uDark;
 uniform vec3 uHot;
 varying vec2 vUv;
@@ -771,17 +808,28 @@ void main() {
   float vein = 0.0;
   float cellCool = 1.0;
   if (uCracks > 0.0) {
-    const float P = 9.0;
+    const float P = 6.0;
     float ang01 = atan(c.y, c.x) / 6.2832 + 0.5;
     vec2 warp = vec2(tn(c * 0.3 + uSeed * 0.1).b, tn(c * 0.3 + uSeed * 0.1 + 0.5).b) - 0.5;
-    vec2 pp = vec2(ang01 * P, log(max(r, 0.015)) * 2.4) + warp * vec2(1.2, 0.6);
+    vec2 pp = vec2(ang01 * P, log(max(r, 0.015)) * 1.3) + warp * vec2(1.2, 0.6);
     vec2 vc = voronoiWrap(pp + vec2(0.0, uSeed), P);
-    float width = mix(0.11, 0.02, clamp(r, 0.0, 1.0));
+    float width = mix(0.06, 0.015, clamp(r, 0.0, 1.0));
     vein = (1.0 - smoothstep(0.0, width, vc.x)) * pow(1.0 - clamp(r, 0.0, 1.0), 1.4)
          * (0.55 + tn(c * 0.6).r * 0.9) * uCracks;
+    // Prune some borders so it branches instead of forming a web.
+    vein *= step(0.35, hash12(floor(pp + vec2(0.0, uSeed)) + 3.7));
     cellCool = clamp(uGlow * 1.6 - vc.y * 0.6, 0.0, 1.0);
   }
   float molten = (1.0 - smoothstep(0.0, 0.3, r)) * uGlow * uCracks;
+  if (uSplat > 0.0) {
+    // Splat: thresholded warped blob plus satellite drops, hard edged.
+    float blob = tn(c * 0.35 + uSeed * 0.17).b * (1.25 - r * 1.15);
+    float sat = tn(c * 1.3 + uSeed * 0.23).g * (1.0 - smoothstep(0.5, 1.0, r));
+    float m = step(0.62, max(blob, sat * 0.85)) * reveal;
+    if (m < 0.5) discard;
+    gl_FragColor = vec4(uDark * (0.8 + 0.4 * tn(c * 2.0).r), uAlpha);
+    return;
+  }
   vec3 col = uDark + uHot * (vein * 3.0 * cellCool + molten * 2.0 + scorch * 0.3 * uGlow * (1.0 - r));
   float a = max(max(scorch * 0.9, vein * max(cellCool, 0.25)), molten) * uAlpha * reveal;
   if (a < 0.002) discard;
@@ -794,7 +842,7 @@ export function decal(o) {
     uniforms: {
       uNoise: G.uNoise,
       uAlpha: { value: 0 }, uGlow: { value: 0 }, uSeed: { value: o.seed ?? 4 },
-      uCracks: { value: o.cracks ?? 0 }, uReveal: { value: 0 }, uScorch: { value: o.scorch ?? 1 },
+      uCracks: { value: o.cracks ?? 0 }, uReveal: { value: 0 }, uScorch: { value: o.scorch ?? 1 }, uSplat: { value: o.splat ? 1 : 0 },
       uDark: { value: color3(o.dark || '#120c0a', 1) },
       uHot: { value: color3(o.hot || '#ff5a1f', o.hotK ?? 2) },
     },

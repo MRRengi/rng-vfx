@@ -14,6 +14,10 @@ The stand in this repository (`stand/`) is a working reference for everything be
 
 Points (`gl_PointSize`) are simplest but cannot rotate or stretch along velocity and have size limits; prefer instanced quads.
 
+**Winding trap:** when the vertex shader builds a quad from a custom basis (velocity-stretched sparks: `right = perp(velocity)`, `up = velocity`), keep `det(right, up) > 0` or set `side: THREE.DoubleSide`. A mirrored basis flips the triangle winding and the default back-face culling silently removes every instance: no error, the layer just never appears. `perp = vec2(ax.y, -ax.x)` with `up = ax` is correct; `vec2(-ax.y, ax.x)` is mirrored.
+
+**Flipbook sprites** for designed shapes (anime sparks, pixel hits, drawn fire): a quad sampling a sprite sheet with `frame = floor(age01 * frames)`, UV = cell offset + uv / grid, no blending between frames for anime and pixel (stepped), frame blending or motion vectors for realism. Without a flipbook path every style ends up drawn with the same procedural shapes.
+
 ## Materials and blending
 
 - `ShaderMaterial` with `transparent: true`, `depthWrite: false`; `blending: THREE.AdditiveBlending` for light, `NormalBlending` for smoke. Premultiplied alpha: `premultipliedAlpha: true` and `CustomBlending` with `OneFactor` / `OneMinusSrcAlphaFactor`, and multiply rgb by alpha in the shader.

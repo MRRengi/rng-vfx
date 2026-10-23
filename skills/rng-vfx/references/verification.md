@@ -27,6 +27,16 @@ Check each against the breakdown written before building (SKILL.md step 3):
 9. **Budget:** particle counts, overdraw and lights inside `references/performance.md` limits.
 10. **Reference (mandatory):** take 2 - 3 frames from the reference games named in the style file (or the user's reference), place them under the strip at matching times, compare shape, timing and value.
 
+## Layer census
+
+Once per effect, solo each layer (all other layers hidden) and render it across its lifetime on a dark and a mid background. Every layer must visibly appear. A layer that never shows is a bug (culling, blending, a wrong start time, zero alpha), not a tuning problem, and no look review is valid until the census passes. The stand exposes `window.rngStand.layers()` and `window.rngStand.solo(i)` for this.
+
+The stand (or any reference implementation) is not proof that a rule is implemented: check the rule in the code.
+
+## Required outputs per review
+
+An even strip, a peak strip around contact, and one strip from the gameplay camera. Close-ups alone hide readability problems.
+
 ## Cheapness checklist
 
 Any yes means the effect still looks cheap:
@@ -41,6 +51,11 @@ Any yes means the effect still looks cheap:
 - In held-drawing styles, do keys fall between drawings (missing contact drawing)?
 - Does every style use the same noise look (procedural value-noise blobs)?
 - Is the shockwave a soft coloured disc instead of distortion plus a thin edge?
+- Is there a closed ring larger than the character (a selection circle)?
+- Does the target flash brighter than the spark?
+- Is any shape held unchanged for more than 4 frames?
+- Does the fire have no hot core at its peak (islands)?
+- Did the layer census pass?
 
 Review on a mid or dusk background by default. Black backgrounds flatter additive effects and hide the problems above.
 

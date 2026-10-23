@@ -153,7 +153,7 @@ gl_FragColor = vec4(rampColor(1.0 - heat) * alpha, alpha * occl);
 
 ## 17. Erosion with height bias and burn edge
 
-Flames burn off at the tips: add height to the erosion threshold, `thr += (uv.y - 0.5) * bias` (bias 0.25 - 0.5). For slashes and dissolving shapes, draw a bright band just above the threshold: `if (n < thr + burnWidth) color = burnColor;` (HDR). Use ridged noise for tearing dissolves.
+Flames burn off at the tips: add height to the erosion threshold, `thr += (uv.y - 0.5) * bias` (bias 0.25 - 0.5). **Preserve the core:** keep the threshold at 0.1 or less for the first 25 - 30% of life, for example `thr = mix(0.05, 0.95, pow(age01, 1.6))`, add a radial bias `heat += (1 - r) * 0.4`, and keep noise features at least a third of the particle size. Fire that erodes into islands at its peak reads as embers, not flame. For slashes and dissolving shapes, draw a bright band just above the threshold: `if (n < thr + burnWidth) color = burnColor;` (HDR). Use ridged noise for tearing dissolves.
 
 ## 18. Billboard puffs that read as one volume
 

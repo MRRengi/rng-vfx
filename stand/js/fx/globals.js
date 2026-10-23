@@ -10,10 +10,15 @@ export const G = {
   uFar: { value: 200 },
   uPxScale: { value: 0.001 },                 // world units per pixel at distance 1
   uLightView: { value: new THREE.Vector3(-0.4, 0.7, 0.6).normalize() }, // key light, view space
+  uSnapRes: { value: new THREE.Vector2(0, 0) }, // pixel style: snap particle centres to this grid
 };
 
 // Effects that render into the distortion buffer instead of the colour image.
 export const distortScene = new THREE.Scene();
+
+// Cel layers (anime, toon, pixel puffs) render here so one outline can be
+// drawn around their union instead of one per puff.
+export const celScene = new THREE.Scene();
 
 // Soft-particle and screen-size helpers used by several fragment shaders.
 export const SOFT = /* glsl */ `

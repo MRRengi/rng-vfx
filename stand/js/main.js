@@ -7,7 +7,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import GUI from 'lil-gui';
 import { buildEffect } from './fx/builder.js';
-import { G, distortScene } from './fx/globals.js';
+import { G, distortScene, celScene } from './fx/globals.js';
 import { STAGE, ARCHETYPES } from './styles/layout.js';
 import anime from './styles/anime.js';
 import toon from './styles/toon.js';
@@ -54,6 +54,36 @@ const distortPass = new ShaderPass({
 distortPass.uniforms.tDistort.value = distortTarget.texture;
 composer.addPass(distortPass);
 
+// Cel layers render on their own, then one outline is drawn around the union
+// of everything in that layer (edge detection on alpha), and the result is
+// laid over the scene before bloom.
+const celTarget = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
+const celPass = new ShaderPass({
+  uniforms: {
+    tDiffuse: { value: null }, tCel: { value: null }, uTexel: { value: new THREE.Vector2(1, 1) },
+    uOutline: { value: new THREE.Color('#1a1630') }, uPx: { value: 2.5 },
+  },
+  vertexShader: FULL_VS,
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform sampler2D tCel; uniform vec2 uTexel; uniform vec3 uOutline; uniform float uPx;
+    varying vec2 vUv;
+    void main() {
+      vec4 c = texture2D(tDiffuse, vUv);
+      vec4 cel = texture2D(tCel, vUv);
+      float m = 0.0;
+      for (int i = 0; i < 12; i++) {
+        float a = float(i) / 12.0 * 6.2832;
+        m = max(m, texture2D(tCel, vUv + vec2(cos(a), sin(a)) * uTexel * uPx).a);
+      }
+      float inside = step(0.5, cel.a);
+      vec3 col = mix(c.rgb, cel.rgb / max(cel.a, 0.001), inside);
+      col = mix(col, uOutline, step(0.5, m) * (1.0 - inside));
+      gl_FragColor = vec4(col, c.a);
+    }`,
+});
+celPass.uniforms.tCel.value = celTarget.texture;
+composer.addPass(celPass);
+
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.4, 1.0);
 composer.addPass(bloom);
 
@@ -77,15 +107,38 @@ const impactPass = new ShaderPass({
 composer.addPass(impactPass);
 composer.addPass(new OutputPass());
 
-// Limited palette for the pixel style, applied after tone mapping.
+// Pixel style palette: every pixel maps to the nearest colour of a fixed
+// palette, compared in OKLab (perceptual), after tone mapping.
+const PAL_MAX = 32;
 const posterPass = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uLevels: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uCount: { value: 0 }, uPal: { value: Array.from({ length: PAL_MAX }, () => new THREE.Vector3()) } },
   vertexShader: FULL_VS,
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float uLevels; varying vec2 vUv;
+    #define PAL_MAX ${PAL_MAX}
+    uniform sampler2D tDiffuse; uniform int uCount; uniform vec3 uPal[PAL_MAX]; varying vec2 vUv;
+    vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
+    vec3 oklab(vec3 c) {
+      vec3 l = vec3(0.4122214708 * c.r + 0.5363325363 * c.g + 0.0514459929 * c.b,
+                    0.2119034982 * c.r + 0.6806995451 * c.g + 0.1073969566 * c.b,
+                    0.0883024619 * c.r + 0.2817188376 * c.g + 0.6299787005 * c.b);
+      l = pow(max(l, 0.0), vec3(1.0 / 3.0));
+      return vec3(0.2104542553 * l.x + 0.7936177850 * l.y - 0.0040720468 * l.z,
+                  1.9779984951 * l.x - 2.4285922050 * l.y + 0.4505937099 * l.z,
+                  0.0259040371 * l.x + 0.7827717662 * l.y - 0.8086757660 * l.z);
+    }
     void main() {
       vec4 c = texture2D(tDiffuse, vUv);
-      if (uLevels > 0.5) c.rgb = floor(c.rgb * uLevels + 0.5) / uLevels;
+      if (uCount > 0) {
+        vec3 q = oklab(toLinear(c.rgb));
+        float best = 1e9; vec3 pick = c.rgb;
+        for (int i = 0; i < PAL_MAX; i++) {
+          if (i >= uCount) break;
+          vec3 d = oklab(toLinear(uPal[i])) - q;
+          float e = dot(d, d);
+          if (e < best) { best = e; pick = uPal[i]; }
+        }
+        c.rgb = pick;
+      }
       gl_FragColor = c;
     }`,
 });
@@ -223,7 +276,12 @@ function applyLook() {
   params.bloomThreshold = look.bloom.threshold;
   params.bloomRadius = look.bloom.radius;
   syncBloom();
-  posterPass.uniforms.uLevels.value = look.posterize || 0;
+  const pal = look.palette || [];
+  posterPass.uniforms.uCount.value = pal.length;
+  pal.forEach((hex, i) => {
+    const n = parseInt(hex.slice(1), 16);
+    posterPass.uniforms.uPal.value[i].set((n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255);
+  });
   impactPass.uniforms.uMode.value = look.impactMode === 'red' ? 1 : 0;
   canvas.classList.toggle('pixel', !!look.pixel);
   // Pixel art: a flat floor; a detailed texture turns to noise when quantized.
@@ -252,7 +310,9 @@ function effectFps() {
 function load() {
   state.effect?.dispose();
   const def = state.style.effects[state.fxId];
-  state.effect = buildEffect(def, scene, distortScene);
+  state.effect = buildEffect(def, scene, distortScene, celScene);
+  const co = state.effect.celOutline();
+  celPass.uniforms.uOutline.value.copy(co.color);
   dummy.position.set(...STAGE[state.fxId].dummy);
   state.t = 0;
   scrub.max = String(def.duration);
@@ -383,6 +443,9 @@ function resize() {
   const rw = composer.renderTarget1.width, rh = composer.renderTarget1.height;
   depthTarget.setSize(rw, rh);
   distortTarget.setSize(Math.max(1, rw >> 1), Math.max(1, rh >> 1));
+  celTarget.setSize(rw, rh);
+  celPass.uniforms.uTexel.value.set(1 / rw, 1 / rh);
+  G.uSnapRes.value.set(px ? rw : 0, px ? rh : 0);
   G.uRes.value.set(rw, rh);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
@@ -403,8 +466,9 @@ function renderAt(t) {
   dummyMat.emissive.setRGB(0, 0, 0);
   rimUniform.value.setRGB(0, 0, 0);
   if (tr) {
-    dummyMat.emissive.copy(tr.color).multiplyScalar(tr.flash * 2.5);
-    rimUniform.value.copy(tr.rimColor).multiplyScalar(tr.rim * 4);
+    // Capped under the bloom threshold: a target brighter than the spark is a white-out.
+    dummyMat.emissive.copy(tr.color).multiplyScalar(Math.min(tr.flash, 1) * 0.9);
+    rimUniform.value.copy(tr.rimColor).multiplyScalar(Math.min(tr.rim, 1) * 1.5);
     const j = tr.jolt * Math.sin(te * 95);
     dummyBody.position.set(tr.dir.x * j, 0, tr.dir.z * j);
     dummyBody.rotation.z = -tr.knock * tr.dir.x;
@@ -444,6 +508,15 @@ function renderAt(t) {
   scene.overrideMaterial = null;
   scene.background = bg;
   state.effect.group.visible = true;
+
+  // Cel layer for the union outline.
+  const co = state.effect.celOutline();
+  const dpr = state.style.look.pixel ? 1 : Math.min(devicePixelRatio, 2);
+  celPass.uniforms.uPx.value = state.style.look.pixel ? 1 : co.px * dpr;
+  renderer.setRenderTarget(celTarget);
+  renderer.setClearColor(0x000000, 0);
+  renderer.clear();
+  renderer.render(celScene, camera);
 
   // Distortion offsets.
   renderer.setRenderTarget(distortTarget);
@@ -564,4 +637,6 @@ window.rngStand = {
   captureStrip,
   capturePeak,
   captureTimes,
+  layers: () => state.effect.layers(),
+  solo: i => { state.effect.solo(i); renderAt(state.t); },
 };
