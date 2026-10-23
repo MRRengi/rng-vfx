@@ -19,7 +19,13 @@ Conversions:
 - **UE5:** lock exposure first (Min EV100 = Max EV100 in a post-process volume, or Manual metering). Emissive values are then relative to that fixed exposure. With the default bloom threshold of -1 (everything blooms a little), measure B as the value where the bloom halo becomes clearly visible.
 - **three.js:** with `EffectComposer`, B is `UnrealBloomPass.threshold`, compared against linear luminance (`LuminosityHighPassShader`). `toneMappingExposure` is applied later in `OutputPass`, so it does not change what blooms; an exposure dip there darkens the frame but not the bloom input (scale the effect's emissive too, or apply exposure before the bloom pass).
 
-**Bloom thresholds luminance, not channels.** three.js `UnrealBloomPass`, URP and HDRP bloom all compare luminance (`0.2126 R + 0.7152 G + 0.0722 B`) against the threshold. Every level in the table above is a luminance. For a saturated colour, scale its channels by `level / lum(colour)`:
+**What the threshold measures depends on the engine.**
+- **three.js** (`UnrealBloomPass`) and **Unreal** compare luminance (`0.2126 R + 0.7152 G + 0.0722 B`). Every level in the table above is then a luminance; for a saturated colour, scale its channels by `level / lum(colour)` (table below).
+- **Unity URP and HDRP** prefilter on the brightest channel (`max(r, g, b)` with a soft knee). There the levels apply to the max channel directly, and the table below does not apply: a pure red at 1.2 B in its red channel blooms like white at 1.2 B.
+
+three.js also has a hard knee: `UnrealBloomPass` passes the whole pixel once it crosses the threshold (`smoothWidth` 0.01), so anything sitting right at B flickers in and out of bloom with a hard contour. Raise `bloom.highPassUniforms.smoothWidth` to about 0.15x the threshold, and keep body levels below 0.85 B or above 1.15 B.
+
+Luminance engines (three.js, Unreal), channel scale per colour:
 
 | Colour | lum per unit | channel scale for 1 B of luminance |
 |---|---|---|

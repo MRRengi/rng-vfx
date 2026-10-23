@@ -41,7 +41,7 @@ WebGL builds: VFX Graph does not run on WebGL; use Shuriken there.
 
 ## Brightness, materials and sorting
 
-- **HDR colour picker:** intensity is in stops; +1 doubles the value. With URP's default bloom threshold of 0.9, a core at 2 B is about intensity +1, a body at 0.7 B about -0.4. Write values from `numbers.md` in these terms. HDR must be on in the URP asset and on the camera.
+- **HDR colour picker:** intensity is in stops; +1 doubles the value. URP's bloom threshold is in gamma space (0.9 is about 0.79 linear) and compares the brightest channel, not luminance. With the default 0.9, a core at 2 B is about intensity +0.66, a body at 0.7 B about -0.86 relative to 1.0. Write values from `numbers.md` in these terms. HDR must be on in the URP asset and on the camera.
 - **Lock exposure while designing in HDRP** (Exposure override: Fixed), or values drift between scenes.
 - **URP Particles shaders** (Particles/Unlit, Particles/Lit):
   - Blending Mode: Alpha, Premultiply, Additive or Multiply.

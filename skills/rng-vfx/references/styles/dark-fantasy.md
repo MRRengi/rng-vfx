@@ -26,7 +26,7 @@ Reference points: Diablo II, III and IV, Path of Exile, Grim Dawn, Dark Souls, E
 - **Torn splash instead of a lens flare:** the contact flash is an alpha-blended dark torn shape with a hot rim, stretched along the swing, plus a tiny additive core for 2 frames. A generic sparkle star has no menace.
 - **Radial cracks:** Voronoi evaluated in polar-log space (`x = angle / 2pi * P` with the cells wrapped in x so there is no seam, `y = log(r) * k`, plus a little domain warp) so cracks branch outward and get finer toward the centre. Line width tapers with radius (wide in the middle, thin at the edge), brightness falls off as `(1 - r)^1.5`, a molten pool sits in the centre, and each cell cools at its own pace (offset by a per-cell random). Put a dark scorch bed under them. Plain Cartesian Voronoi with equal cells reads as a tiled floor.
 - **Ember fields:** many tiny additive particles with curl noise drifting up, long lives, cooling ramp.
-- **Blood:** alpha-blended stretched droplets with gravity, a value floor around #c0101a (darker vanishes on dark ground), a tiny specular highlight, a cone along the swing, splat decals on landing. Never additive.
+- **Blood:** alpha-blended stretched droplets with gravity, a value range #7a0a10 to #3a0206 with a small specular glint and a dark rim (neon red like #c0101a reads as glowing sparks, not blood) (darker vanishes on dark ground), a tiny specular highlight, a cone along the swing, splat decals on landing. Never additive.
 - **Ash fall:** small gray shards drifting down slowly with curl noise after big events.
 - **Corruption:** noise-eroded black tendrils (ribbons with scrolling noise, or meshes with vertex offset) creeping outward.
 

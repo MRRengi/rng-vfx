@@ -21,7 +21,7 @@ Do this before designing anything in someone else's project. Every number in thi
 ## Turning it into numbers
 
 1. Measure B: place an unlit quad with a value you control at the effect's position, raise it until the bloom halo appears, and record that value.
-2. Write the brightness table from `numbers.md` in project values (for example "core 1.5 - 2.5 B = 1.35 - 2.25 in URP" when the threshold is 0.9).
+2. Write the brightness table from `numbers.md` in project values (for example, URP's threshold 0.9 is entered in gamma space, so B is about 0.79 linear and "core 1.5 - 2.5 B" is 1.2 - 2.0 in its max channel).
 3. Compute pixels per metre at the gameplay camera, then check that the minimum sizes in `numbers.md` (40 px primary shape, 12 px sparks) are reachable at the world sizes you plan. If they are not, scale the effect or clamp its screen size (`recipes/screen-size.md`). Do not hope it reads.
 4. Put the existing effects' strips next to yours at every review.
 
