@@ -24,13 +24,14 @@ A correct chain rendered as procedural blobs on round quads still looks cheap. F
 2. **References.** Ask the user for 2 - 3 reference clips or frames of the look they want, unless they already gave some.
    - If a shell with network access exists, `yt-dlp` plus `ffmpeg -ss <time> -frames:v 24` cuts frames around contact.
    - Break each reference down as frames: what is on screen at contact, +2, +6, the end.
-   - With no references, write the breakdown from the style file and say that you did.
+   - With no references, use the reference silhouettes in `references/shape-keys.md` for the style, and say that you did.
 3. **Style.** Pick exactly one style file and follow its rules. Mixing rules from two styles is the most common reason an effect looks "off". When the references contradict the style file, the references win; note where.
 4. **Engine and system.** Decide where it is built: VFX Graph or Shuriken, Niagara, three.js instancing, meshes or sprites, which blend modes and post effects exist (`references/engines/*.md`).
 5. **Layers.** Decide the layer stack (core, flash, shape, secondary, residue, light, distortion, decal, target reaction, camera). Each layer has one job. Construction rules for the common ones are in `references/recipes/`.
 6. **Timing.** Anticipation, contact, follow-through, dissipation per layer, with numbers from `references/numbers.md`.
-7. **Blockout with motion.** Before any texture or shader work:
+7. **Shape keys, then blockout.** Draw three shape keys (contact, peak, break-up) and the line of action as flat masks (`references/shape-keys.md`). Then, before any texture or shader work:
    - flat, unlit, grayscale shapes with the final timing and motion (`references/physics.md`), seen through the gameplay camera;
+   - the rendered mask at each key overlaps its drawing by about 60% or more;
    - check the silhouette, the size on screen, the hit direction, the framing, the grounding;
    - run the mechanical checks (`tools/vfxcheck.py`, `references/verification.md`).
 
@@ -46,7 +47,7 @@ A correct chain rendered as procedural blobs on round quads still looks cheap. F
 
 | Task | Read |
 |---|---|
-| Any effect, first time in a session | `references/fundamentals.md`, `references/numbers.md` |
+| Any effect, first time in a session | `references/fundamentals.md`, `references/numbers.md`, `references/shape-keys.md` |
 | Working in an existing project | `references/audit.md` |
 | Anime, sakuga, cel-shaded 3D, fighting games | `references/styles/anime.md` |
 | Cartoon, toon, Wind Waker, bouncy | `references/styles/toon.md` |

@@ -35,6 +35,14 @@ The transition is the explosion's tell. A pop from fire to a separate smoke clou
 - **Cel styles:** cel smoke keeps 2 shading bands and the outline; a single flat value reads as a cardboard cutout.
 - **Realism:** the temperature particle cools into smoke itself (premultiplied: hot parts glow, cool parts occlude), so the handoff is continuous.
 
+## Smoke mass
+
+- **Area:** at the fire's end + 0.2 s, the smoke's silhouette covers at least 1.3x the fireball's peak area. Less reads as wisps detached from a ball.
+- **Base:** the smoke base keeps touching the stem or the fire for at least 60% of the smoke's life.
+- **Cel smoke:** at least 2 shading bands, each covering 20% or more of the smoke mask, plus the union outline.
+- **Fire light on smoke:** only in the bottom 30% of the column, plus a hot rim at most 0.4 of the fire glow. Smoke tinted by fire all over reads as more fire, not smoke.
+- **Dark smoke** keeps a value floor (luminance 0.08 - 0.12 on a dark background) and is checked on the darkest level background.
+
 ## Ground ring
 
 On the biggest explosions only:

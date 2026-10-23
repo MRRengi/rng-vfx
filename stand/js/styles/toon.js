@@ -15,7 +15,7 @@ export default {
       build(fx) {
         fx.celOutline('#2b2b55', 3);
         fx.flash({
-          pos: HIT, size: 1.2, hard: true, spikes: 5, spikeLen: 0.75, core: 0.4, sharp: 0.6, jitter: 0.5, bias: 0.4, blend: 'alpha', outline: 0.1, outlineColor: '#2b2b55', redraw: 20,
+          pos: HIT, size: 0.85, hard: true, spikes: 5, spikeLen: 0.75, core: 0.4, sharp: 0.9, jitter: 0.5, bias: 0.4, blend: 'alpha', outline: 0.1, outlineColor: '#2b2b55', redraw: 20,
           dir: HIT_DIR, aspect: 1.6, core_color: '#fffbd0', coreK: 1.0, edge_color: '#ffc62e', edgeK: 1.0, rot: 0.3, order: 0,
           scaleCurve: [[0, 0], [0.06, 1.12, 'outBack'], [0.09, 0.95], [0.12, 1.06], [0.16, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.16, 1], [0.161, 0]],
@@ -40,7 +40,7 @@ export default {
         }, 0.04);
         fx.target({
           dir: HIT_DIR, color: '#fff3c0', rimColor: '#ffd84a',
-          flash: [[0, 1], [0.033, 1], [0.034, 0]],
+          flash: [[0, 0.4], [0.033, 0.4], [0.034, 0]],
           rim: [[0, 0], [0.034, 1], [0.15, 0]],
           knock: [[0, 0], [0.06, 0.2, 'outQuad'], [0.4, -0.05, 'inOutSine'], [0.6, 0, 'inOutSine']],
           squash: [[0, 0], [0.04, 1, 'outQuad'], [0.14, -0.5, 'inOutSine'], [0.26, 0.2, 'inOutSine'], [0.38, 0, 'inOutSine']],
@@ -63,8 +63,8 @@ export default {
           alphaCurve: [[0, 1], [0.085, 1], [0.086, 0]],
         }, 0);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 12, sizeDist: [3, 5, 4], origin: C, spawnR: 0.3,
-          speed: [3, 5], drag: 6, life: [0.7, 0.95], size: [1.25, 0.08], sizePow: 3, sizeIn: 0.12, bands: 1, outline: 0,
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 8, sizeDist: [3, 3, 2], origin: C, spawnR: 0.3,
+          speed: [3, 5], drag: 6, life: [0.7, 0.95], size: [1.7, 0.08], sizePow: 3, sizeIn: 0.12, bands: 2, outline: 0,
           shadow: '#dd6f5c', erode: 0, noiseScale: 1.4, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff3b0', 1.05], [0.3, '#ffb627', 1.0], [1, '#ff5e3a', 1]]),
         }, 0.02);
@@ -73,7 +73,7 @@ export default {
           speed: [1.5, 2.5], gravity: [0, 1.5, 0], drag: 3, delay: [0, 0.08], life: [0.7, 1.0], size: [1.0, 0.06],
           sizePow: 2.5, sizeIn: 0.12, bands: 1, outline: 0, shadow: '#4c4870', erode: 0, noiseScale: 1.4,
           blend: 'alpha', fadeDist: 0.05, ramp: fx.ramp([[0, '#8a86a8', 1], [1, '#6a6690', 1]]),
-        }, 0.06);
+        }, 0.22);
         // Stem: three puffs that tie the fireball to the ground.
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 10, count: 3, seed: 23, origin: at(BLAST, 0, 0.15, 0), spawnR: 0.1,
@@ -81,12 +81,12 @@ export default {
           shadow: '#dd6f5c', erode: 0, noiseScale: 1.4, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#ffd36b', 1.0], [1, '#ff6a3a', 1]]),
         }, 0.02);
-        for (const [delay, seed, speed] of [[0.03, 21, [6, 8]], [0.1, 22, [4, 5]]]) {
+        for (const [delay, seed, speed] of [[0.12, 21, [6, 8]], [0.18, 22, [4, 5]]]) {
           fx.burst({
             shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, seed, origin: at(BLAST, 0, 0.38, 0), speed, drag: 6,
-            life: [0.45, 0.6], size: [0.6, 0.0], sizePow: 2, sizeIn: 0.15, bands: 1, outline: 0,
-            shadow: '#b6c2ff', erode: 0, noiseScale: 1.4, blend: 'alpha', ground: 0, fadeDist: 0.05,
-            ramp: fx.ramp([[0, '#ffffff', 1], [1, '#eef0ff', 1]]),
+            life: [0.45, 0.6], size: [0.35, 0.0], sizePow: 2, sizeIn: 0.15, bands: 1, outline: 0,
+            shadow: '#a89cc0', erode: 0, noiseScale: 1.4, blend: 'alpha', ground: 0, fadeDist: 0.05,
+            ramp: fx.ramp([[0, '#ffffff', 1], [1, '#d8d0e6', 1]]),
           }, delay);
         }
         fx.burst({

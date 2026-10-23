@@ -722,4 +722,24 @@ window.rngStand = {
   captureTimes,
   layers: () => state.effect.layers(),
   solo: i => { state.effect.solo(i); renderAt(state.t); },
+  // Geometry for mechanical checks (tools/vfxcheck.py): everything in normalized
+  // screen coordinates (0..1, y down) for the current camera.
+  info: () => {
+    const proj = v => { const p = new THREE.Vector3(...v).project(camera); return [(p.x + 1) / 2, (1 - p.y) / 2]; };
+    const box = new THREE.Box3().setFromObject(dummy);
+    const xs = [], ys = [];
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+      const q = proj([x, y, z]); xs.push(q[0]); ys.push(q[1]);
+    }
+    const dir = state.effect.targetDir();
+    const hit = [0, 1.15, 0.35];
+    return {
+      target: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)],
+      hit: proj(hit),
+      hitDir: dir ? proj(hit.map((c, k) => c + dir[k] * 0.5)) : null,
+      slashes: state.effect.probes().map(p => ({ at: p.at, mid: proj(p.mid), swingEnd: p.swing ? proj(p.mid.map((c, k) => c + p.swing[k] * 0.5)) : null })),
+      contact: state.effect.contact,
+      fps: state.style.look.fps || 0,
+    };
+  },
 };

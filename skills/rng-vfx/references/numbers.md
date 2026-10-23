@@ -50,7 +50,7 @@ Summed brightness counts too. Ten overlapping fire quads at 1.2 B add up to a wh
 | Target flash | 1 drawing | 1 - 2 frames | 1 - 2 frames | 1 - 2 frames, dark tint | 1 drawing, flat white | none or 1 frame |
 | Rim | 1 - 2 drawings | 4 - 6 frames | 3 - 5 frames | 4 - 6 frames | none | none |
 | Hit puffs / smoke | 5 - 8 drawings | 20 - 30 frames | 35 - 55 frames | 40 - 70 frames | 4 - 6 drawings | 1 - 1.6 s |
-| Impact total | 0.6 - 0.9 s | 0.4 - 0.6 s | 0.6 - 0.9 s | 0.8 - 1.2 s | 0.5 - 0.8 s | 1.2 - 1.8 s |
+| Impact total (tier 2; scale x0.6 for tier 1 basic hits) | 0.6 - 0.9 s | 0.4 - 0.6 s | 0.6 - 0.9 s | 0.8 - 1.2 s | 0.5 - 0.8 s | 1.2 - 1.8 s |
 | Explosion fireball | 6 - 10 drawings | 0.5 - 0.8 s | 0.6 - 1.0 s | 0.8 - 1.2 s | 5 - 8 drawings | 0.8 - 1.5 s |
 | Explosion smoke | 10 - 16 drawings | 0.6 - 1.0 s | 1.2 - 1.8 s | 2 - 3 s | 8 - 11 drawings | 3.5 - 4.5 s |
 | Explosion total | 1.3 - 1.8 s | 1.0 - 1.4 s | 2 - 3 s | 2.5 - 3.5 s | 1.2 - 1.6 s | 3.5 - 4.5 s |

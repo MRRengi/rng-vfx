@@ -79,7 +79,7 @@ export default {
         const fireK = [[0, 1.4], [0.4, 0.8], [1.3, 0.15, 'outQuad'], [3, 0]];
         fx.flash({
           pos: C, size: 2.2, spikes: 0, spikeLen: 0, core: 0.8, soft: 4,
-          core_color: '#fffaf0', coreK: 3.5, edge_color: '#ffcf7a', edgeK: 1.6,
+          core_color: '#fffaf0', coreK: 2.2, edge_color: '#ffcf7a', edgeK: 1.3,
           scaleCurve: [[0, 0.6], [0.03, 1, 'outExpo']], alphaCurve: [[0, 1], [0.03, 1], [0.05, 0]],
         }, 0);
         fx.exposure([[0, 1], [0.03, 0.6], [0.35, 1, 'outQuad']]);

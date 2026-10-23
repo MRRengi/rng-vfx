@@ -9,7 +9,7 @@ Everything on screen competes for attention. Rank the effect before designing it
 | Tier | Examples | Brightness ceiling | Screen area | Duration | Shake |
 |---|---|---|---|---|---|
 | 0 Ambient | torches, dust motes, idle auras | low, no pure white | small | looping | none |
-| 1 Basic | basic attacks, footsteps, small hits | mid | under ~5% of screen | 0.2 - 0.5 s | none or tiny |
+| 1 Basic | basic attacks, footsteps, small hits | mid | under ~5% of screen | 0.2 - 0.5 s (residue may linger longer at low alpha) | none or tiny |
 | 2 Ability | skills, projectiles, buffs | high | 5 - 15% | 0.4 - 1.2 s | small |
 | 3 Signature | ultimates, boss attacks, big explosions | pure white allowed | 15 - 40% | 1 - 3 s | strong |
 | 4 Cinematic | finishers, cutscene moments | anything | full screen | as needed | as needed |
@@ -95,6 +95,8 @@ Shape:
 - **Slashes cross the target.** Built from the swing (`recipes/slash.md`); the projected arc midpoint lies inside the target's silhouette.
 - **Redraw designed shapes.** A spark, star or splash visible for more than 2 drawings (or 4 frames) changes every drawing: new point lengths, rotation, or silhouette (`recipes/spark-star.md` > Life).
 - **Bystanders** near an effect who were not hit get light only, never a flash, rim or reaction.
+- **One hit vector.** Define `hitDir` once (the swing direction at contact, or the projectile's velocity) and derive every layer from it: spray axis, flash elongation, blood, puff side, ring tilt, target lean. The slash swing and the spray point the same way; a slash moving left with blood spraying right reads as two different hits.
+- **Target flash.** It starts on the contact frame, never before, and its luminance stays below 0.75x the spark's body. Dark tints keep the body at luminance 0.08 or more on a dark background, or the target vanishes.
 - **No static holds.** Nothing is held unchanged for more than 4 frames at 60 fps, including frames frozen by hitstop, or for more than 2 drawings in held-drawing styles. Held shapes drift in scale 5 - 10%, erode, or get redrawn.
 - **Explosions are grounded and hand over to smoke.** Construction rules and checks in `recipes/explosion.md`.
 - **Explosion silhouette.** Ground explosions are taller than wide (about 1.3 - 1.4) and sit on a stem that touches the ground. Air bursts are round with a dust ring below. Toon may stay round but squashes and stretches.

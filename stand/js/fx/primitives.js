@@ -32,10 +32,13 @@ export function ramp(stops, size = 256) {
 // Sprite sheets are loaded once and shared. main.js preloads them at boot.
 const SHEETS = new Map();
 const loader = new THREE.TextureLoader();
+// Colour art sheets decode as sRGB; grayscale data sheets (density, life maps)
+// would stay linear: name them *_data.png.
+const sheetSpace = url => (/_data\./.test(url) ? THREE.NoColorSpace : THREE.SRGBColorSpace);
 export function sheet(url) {
   if (!SHEETS.has(url)) {
     const t = loader.load(url);
-    t.colorSpace = THREE.SRGBColorSpace;
+    t.colorSpace = sheetSpace(url);
     SHEETS.set(url, t);
   }
   return SHEETS.get(url);
@@ -43,7 +46,7 @@ export function sheet(url) {
 export function preloadSheets(urls) {
   return Promise.all(urls.map(u => new Promise(res => {
     const t = loader.load(u, () => res(t), undefined, () => res(t));
-    t.colorSpace = THREE.SRGBColorSpace;
+    t.colorSpace = sheetSpace(u);
     SHEETS.set(u, t);
   })));
 }
@@ -1086,6 +1089,8 @@ export function slash(o) {
   return {
     object: mesh,
     update(t) { mat.uniforms.uHead.value = H(t); mat.uniforms.uAlpha.value = A(t); },
+    // For checks: the arc's midpoint (the mesh origin) and the swing direction.
+    probe: () => ({ mid: mesh.position.toArray(), swing: o.swing || null }),
     dispose() { geo.dispose(); mat.dispose(); },
   };
 }

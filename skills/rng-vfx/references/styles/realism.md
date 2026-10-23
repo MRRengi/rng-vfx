@@ -19,7 +19,7 @@ Reference points: Battlefield, Call of Duty, The Last of Us Part II, Red Dead Re
 
 ## Signature techniques
 
-- **One temperature particle for fire:** a premultiplied-alpha particle whose emission follows the blackbody ramp of its temperature and whose occlusion grows as it cools, so fire turns into smoke inside the same particle. Two separate sets (orange fire, gray smoke) overlapping is the cheap tell.
+- **One temperature particle for fire:** a premultiplied-alpha particle whose emission follows the blackbody ramp of its temperature and whose occlusion grows as it cools, so fire turns into smoke inside the same particle. Two separate sets (orange fire, gray smoke) that do not overlap, or overlap only as a pop, is the cheap tell. When separate smoke is used for the column and the dust, it follows the handoff rules in `recipes/explosion.md` (spawned inside the fire, overlapping for 6 - 10 frames).
 - **Smoke lit by the fire:** add the fire colour to smoke by height above the source, scaled by the fire light's curve, so the column glows from below.
 - **Flash and exposure:** flash 2 - 3 frames, smaller than the fireball; sell brightness with a short exposure dip (1 -> 0.6 -> 1 over ~0.3 s), not a white frame.
 - **Simulated flipbooks:** fire, smoke and explosions from fluid simulations (EmberGen, Houdini, Blender Mantaflow, or the engine's own fluid tools) baked to flipbooks with motion vectors for smooth frame blending. When no sim tool is available, layered fbm puffs with domain warping and fake self-shadow get close for mid-distance effects.

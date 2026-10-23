@@ -69,37 +69,37 @@ Any yes means the effect still looks cheap:
 
 ### Mechanical checks (script)
 
-`tools/vfxcheck.py` runs these on any frame sequence. Give it the effect frames and matching frames of the same shot without the effect; it derives the effect mask by difference:
+`tools/vfxcheck.py` runs these on any frame sequence. Give it the effect frames and matching frames of the same shot without the effect (effect layers hidden; target reaction, effect lights and decals still on). It derives the effect mask by difference:
 
 ```
-python tools/vfxcheck.py frames --fx out/fx --base out/base --fps 60 --contact 0.1 --hue 25
-python tools/vfxcheck.py stand realism explosion --camera Gameplay      # renders the stand itself
+python tools/vfxcheck.py frames --fx out/fx --base out/base --fps 60 --contact 0.1 --hue 30 --kind explosion
+python tools/vfxcheck.py stand realism explosion        # renders the stand itself, gameplay camera + close-up pass
 ```
 
-It reports PASS or FAIL and exits 1 on any failure:
-- **Straight edges.** Dead-straight runs on the mask's outline, long (40 px and 20% of the shape) and ending in a corner. Smooth arcs and round shapes pass; a quad, strip or ground cut fails. Exempt by design: full-screen and two-tone impact frames (inked flat on purpose), thin features (streaks, spike tips: the body behind the edge is under ~15 px thick), and edges that coincide with the scene's own geometry (a character occluding smoke). It was validated on synthetic shapes: discs and blobs pass, discs cut vertically or diagonally fail.
-- **Size.** The effect's height at peak in 1080p-equivalent pixels. Run it once more with the gameplay camera for this check.
-- **White clip.** The share of the effect that clips to white at peak.
-- **Haze.** The brightness rise outside the effect at peak, which is bloom spill.
-- **Hue at peak.** Hue and saturation of the hot body (60 - 90th brightness percentile), so white cores are allowed. Pass `--min-sat 0` for effects whose body is neutral by design: white puffs, grey smoke, white sparks.
-- **Static hold.** No unchanged mask or image for more than 4 frames.
-- **Empty tail.** Content left at 90% of the duration.
+Sample at 60 fps around contact (or at the drawing rate for held-drawing styles); `--times` takes a file of per-frame times for mixed sampling. It reports PASS or FAIL and exits 1 on any failure:
 
-Render the base frames with the effect hidden but the target reaction, lights and decals still on, from the same camera and times. Lights change the whole floor; decals are residue meant to stay still.
+- **Straight edges.** Dead-straight runs on the mask outline that end in a corner with a solid body behind them (a quad, strip or ground cut). Exempt by design: full-screen and two-tone impact frames, thin features (streaks, spike tips), edges that coincide with scene geometry. Run on close-up frames.
+- **Size.** Primary shape height at peak in 1080p pixels at the gameplay camera, from a strict mask without the bloom halo (`--min-px` 40 / 80 / 200 by tier).
+- **Frame border.** The effect never touches the frame border.
+- **White clip and haze** on the effect's brightest frame: at most 10% of the effect clipped to white; brightness outside the effect rises at most 25%.
+- **Hue.** On the frame with the most visible effect pixels (impacts: within 0.25 s of contact), 15% or more of those pixels are saturated and their hue is within 25 degrees of `--hue`. Required; `--hue none` only for neutral effects. This catches AgX turning red into salmon and orange into white.
+- **Static hold** in seconds: at most 4 frames at full rate, 2 drawings in held styles.
+- **Empty tail.** At 90% of the duration the mask holds at least 2% of its peak area.
+- **Growth** (`--kind explosion`). The first frame with content after contact is at most 50% of the peak area.
+- **Target flash, slash crossing, hit vector** (stand, which exports the target's screen box, slash midpoints and swing directions, and the projected hit direction). The target never brightens before contact and stays below 0.75x the spark body. Every slash midpoint lies inside the target box. The spray leaves the target within 60 degrees of the hit direction, and no slash swings against it. In another engine, export the same points and add them to the run.
 
-### Mechanical checks
+Passing is necessary, not sufficient. The script finds known cheap tells; the shape keys and the references judge the rest.
 
-Run these on rendered frames instead of judging by eye:
+### Checks the script does not do
 
-- **Held shape:** no region of the effect is pixel-identical (or within 1%) across more than 4 frames at 60 fps, or more than 2 drawings in held-drawing styles.
-- **Empty tail:** the effect's mask is non-empty in the frame at 90% of the duration.
-- **Silhouette aspect:** the explosion's bounding box at peak is taller than wide (1.2 or more); the impact spark is longer along the hit than across it.
-- **Post-palette colour (pixel):** sample the effect's main colours after the palette pass. If smoke maps to a hue it was not meant to have, the palette lacks neutrals.
+Judge these on the strips, against the shape keys (SKILL.md step 7) and the references:
+
+- **Silhouette proportions:** the effect mask at contact, +3 and +8 frames matches the shape keys (overlap about 60% or more); the explosion is taller than wide; the impact spark is longer along the hit than across it.
+- **Post-palette colour (pixel):** sample the main colours after the palette pass. If smoke maps to a hue it was not meant to have, the palette lacks neutrals.
 - **Grayscale separation:** the main shape and its shadow side differ by 0.25 or more in grayscale; smoke and background differ by 0.25 or more on the mid background.
+- **Reticle and cotton balls:** no concentric star-ring-disc, no pile of round blobs.
 
 Review on a mid or dusk background by default: black backgrounds flatter additive effects and hide the problems above. Dark styles (dark fantasy, horror) are reviewed on a dark background as well, because that is where their smoke and blood vanish.
-
-- **Straight cuts:** no straight edge appears on any frame where an effect ends on its quad or strip border (stars, puffs, ring gaps, streak and slash heads, smoke and fire bodies, heat haze).
 
 ## The stand
 

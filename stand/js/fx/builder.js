@@ -70,18 +70,24 @@ export function buildEffect(def, scene, distortScene, celScene, overScene) {
   overScene?.add(overGroup);
   const remap = t => (!hold || t <= hold.at ? t : t < hold.at + hold.dur ? hold.at : t - hold.dur);
 
+  // Lead-in: effects whose contact is at 0 get a few empty frames in front, so
+  // strips and checks see what comes before contact.
+  const lead = def.lead ?? ((def.contact ?? 0) < 0.01 ? 0.05 : 0);
   return {
     group,
-    duration: def.duration,
-    contact: def.contact ?? 0,
+    duration: def.duration + lead,
+    contact: (def.contact ?? 0) + lead,
     celGroup,
     overGroup,
     celOutline: () => celOutline,
     // Layer census: solo one layer (index) or null for all. Used to prove every
     // layer actually renders; a layer that never shows is a bug, not tuning.
     layers: () => layers.map((l, i) => ({ i, kind: l.kind, at: l.at })),
+    probes: () => layers.filter(l => l.prim.probe).map(l => ({ kind: l.kind, at: l.at, ...l.prim.probe() })),
+    targetDir: () => target ? target.dir.toArray() : null,
     solo: i => { solo = i; },
-    update(tReal) {
+    update(tIn) {
+      const tReal = tIn - lead;
       // Hitstop freezes only what was already playing before contact (the
       // anticipation, the swing). Layers born at or after contact run on real
       // time, so the spark blooms through the hold and lands with the reaction.
@@ -90,17 +96,17 @@ export function buildEffect(def, scene, distortScene, celScene, overScene) {
         const t = hold && at >= hold.at - 1e-4 ? tReal
           : kind === 'slash' && hold ? (tReal <= hold.at ? tReal : Math.max(hold.at, tReal - 2 / 60))
           : remap(tReal);
-        prim.object.visible = t >= at && (solo === null || solo === i || (Array.isArray(solo) && solo.includes(i)));
+        prim.object.visible = tReal >= 0 && t >= at && (solo === null || solo === i || (Array.isArray(solo) && solo.includes(i)));
         prim.update(t - at, t);
       });
     },
-    shakeAt: t => shake(t),
-    impactAt: t => impact(t),
-    exposureAt: t => exposure(t),
-    targetAt: t => target && {
+    shakeAt: t => (t < lead ? 0 : shake(t - lead)),
+    impactAt: t => (t < lead ? 0 : impact(t - lead)),
+    exposureAt: t => (t < lead ? 1 : exposure(t - lead)),
+    targetAt: tIn => { const t = tIn - lead; return t < 0 ? null : target && {
       color: target.color, flash: target.flash(t), rim: target.rim(t), rimColor: target.rimColor,
       jolt: target.jolt(t), knock: target.knock(t), squash: target.squash(t), dir: target.dir,
-    },
+    }; },
     dispose() {
       scene.remove(group);
       distortScene.remove(distortGroup);

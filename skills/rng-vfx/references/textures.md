@@ -62,7 +62,7 @@ python tools/texgen.py noise --kind cracks --cells 6 --edge 0.04 -o T_FX_Cracks.
 python tools/texgen.py noise --kind ridged --seamless -o T_FX_Ridged.png
 python tools/texgen.py shape --kind glow --falloff 2.5 -o T_FX_Glow.png
 python tools/texgen.py shape --kind ring --radius 0.7 --width 0.06 -o T_FX_Ring.png
-python tools/texgen.py shape --kind star --spikes 6 --sharp 12 -o T_FX_Star.png
+python tools/texgen.py shape --kind star --spikes 6 --sharp 3 -o T_FX_Star.png
 python tools/texgen.py shape --kind streak -o T_FX_Streak.png
 python tools/texgen.py shape --kind slash -o T_FX_Slash.png
 python tools/texgen.py ramp --stops "0:#ffffff,0.3:#ffd34d,0.7:#ff6a1f,1:#3b0f0f" -o T_FX_Ramp_Fire.png

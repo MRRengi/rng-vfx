@@ -7,7 +7,7 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 - **Drawn on twos or threes.** Effects change drawing every 2 or 3 frames (12 or 8 per second). Quantize effect time. Smooth 60 fps motion instantly reads as "3D game", not anime.
 - **Hard edges, flat fills.** Two or three tone bands, no gradients inside a shape except a deliberate glow layer. Edges are crisp; anti-aliasing is fine, softness is not.
 - **Designed shapes per drawing.** Each held drawing is a composed silhouette: asymmetric spikes, curls, teardrop flame tongues. Randomness is art-directed, not uniform noise.
-- **Extreme timing contrast.** The peak drawing arrives instantly and is held; then the effect breaks up fast. Big shapes appear at full size on frame 1 and shrink or shatter rather than grow slowly.
+- **Extreme timing contrast.** The peak drawing arrives instantly and is held; then the effect breaks up fast. Contact sparks and impact shapes appear at full size on their first drawing and shrink or shatter rather than grow slowly. Explosions are the exception: one drawing of compressed core, then the full fireball on the next drawing (`recipes/explosion.md` > Growth), never a slow grow.
 - **Impact frames.** The biggest hits get one drawing of inverted or two-tone (black and white, black and red) image.
 - **Lines.** Speed lines, radial impact lines and outline strokes are part of the effect vocabulary.
 - **Smoke is solid.** Cel smoke is opaque, banded, outlined, and dies by holes opening inside it, then the pieces shrink.

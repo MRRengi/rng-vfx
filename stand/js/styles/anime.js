@@ -113,13 +113,13 @@ export default {
           ramp: fx.ramp([[0, '#fff2c0', 1.2], [0.5, '#ffb02a', 1.0], [1, '#c2401a', 0.9]]),
         }, T);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [2, 4, 6], origin: at(BLAST, 0, 0.9, 0),
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [2, 4, 6], origin: at(BLAST, 0, 0.6, 0),
           spawnR: 0.6, speed: [1.5, 2.6], gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [10 * D, 14 * D],
-          size: [1.2, 2.1], sizePow: 0.5, sizeIn: 0.1, bands: 2, outline: 0, order: 0, shadow: '#2a1a30',
+          size: [1.6, 2.4], sizePow: 0.5, sizeIn: 0.1, bands: 2, outline: 0, order: 0, shadow: '#1e1424', holeScale: 0.45,
           erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
-          fireGlow: { color: '#e07a50', intensity: 0.6, height: 0.8, k: [[0, 1], [1.5, 0]] },
+          fireGlow: { color: '#e07a50', intensity: 1.0, height: 0.5, k: [[0, 1], [1.0, 0]] },
           ramp: fx.ramp([[0, '#6a5878', 1], [1, '#3a2e40', 1]]),
-        }, T + 4 * D);
+        }, T + 2 * D);
         // Dust skirt instead of a giant ground hoop.
         fx.burst({
           shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, origin: at(BLAST, 0, 0.42, 0), speed: [6, 8], drag: 5,
@@ -143,7 +143,7 @@ export default {
           jolt: [[0, 0], [T, 0.05], [T + 6 * D, 0]],
           knock: [[0, 0], [T, 0], [T + 2 * D, 0.18, 'outQuad'], [T + 14 * D, 0, 'inOutSine']],
         });
-        fx.light({ pos: C, color: '#ffb35c', distance: 10, shadow: true, intensity: [[0, 0], [T, 3], [T + 0.001, 45], [1.4, 0, 'outQuad']] });
+        fx.light({ pos: C, color: '#ffb35c', distance: 10, shadow: true, intensity: [[0, 0], [T, 3], [T + 0.001, 45], [T + 12 * D, 0, 'outQuad']] });
         fx.shake([[0, 0], [T, 0], [T + 0.001, 0.22], [T + 10 * D, 0, 'outQuad']]);
       },
     },
