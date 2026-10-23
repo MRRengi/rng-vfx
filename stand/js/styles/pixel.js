@@ -66,14 +66,16 @@ export default {
           scaleCurve: [[0, 0.5], [D, 1], [2 * D, 0.6]], alphaCurve: [[0, 1], [2 * D, 1], [2 * D + 0.001, 0]],
         }, 0);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 11, sizeDist: [2, 4, 6], origin: C, spawnR: 0.4,
-          speed: [1.6, 3], drag: 8, life: [5 * D, 8 * D], size: [1.3, 0.3], sizePow: 1.6, bands: 2, outline: 0,
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 11, sizeDist: [2, 4, 6], origin: C, spawnR: 0.75,
+          speed: [0.8, 1.6], drag: 10, life: [5 * D, 8 * D], size: [1.3, 0.3], sizePow: 1.6, bands: 2, outline: 0,
           shadow: '#b8261e', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0,
           ramp: fx.ramp([[0, '#ffe14d', 1], [0.4, '#ff7a1a', 1], [1, '#6a1a1a', 1]]),
         }, 0);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 8, origin: at(C, 0, 0.6, 0), spawnR: 0.5, speed: [1.2, 2],
-          gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [8 * D, 11 * D], size: [1.1, 0.2], sizePow: 2, bands: 2, outline: 0,
+          // Smoke cluster: born inside the fire's footprint, 1.3x its area, rising slowly while its
+          // base stays on the ground; never one floating bean.
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 55, count: 14, sizeDist: [3, 6, 5], origin: at(BLAST, 0, 0.35, 0), spawnR: 0.7, speed: [0.6, 1.6],
+          gravity: [0, 0.7, 0], drag: 2.5, delay: [0, 3 * D], life: [8 * D, 11 * D], size: [1.2, 0.35], sizePow: 1.4, bands: 2, outline: 0,
           shadow: '#5c5a66', erode: 0.4, noiseScale: 2, blend: 'alpha', fadeDist: 0,
           ramp: fx.ramp([[0, '#b4b2bc', 1], [1, '#8a8894', 1]]),
         }, 3 * D);

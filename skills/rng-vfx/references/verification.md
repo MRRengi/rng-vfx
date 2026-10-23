@@ -82,7 +82,7 @@ Sample at 60 fps around contact (or at the drawing rate for held-drawing styles)
 - **Size.** Primary shape height at peak in 1080p pixels at the gameplay camera, from a strict mask without the bloom halo (`--min-px` 40 / 80 / 200 by tier).
 - **Frame border.** The effect never touches the frame border.
 - **White clip and haze** on the effect's brightest frame: at most 15% of the effect burned to white (OKLab L above 0.9 and chroma under 0.035) next to its coloured body (designed white puffs do not count); brightness outside the effect rises at most 25%, and the bloom halo covers at most 4x the core's area.
-- **Hue.** On the frame with the most visible effect pixels (impacts: within 0.25 s of contact), 15% or more of those pixels are saturated, and 30% or more of the saturated ones sit within 25 degrees of `--hue` (so two-colour designs pass, drifted colours do not). Required; `--hue none` only for neutral effects. This catches AgX turning red into salmon and orange into white.
+- **Hue.** On the frame with the most visible effect pixels (impacts: within 0.15 s of contact, the contact read), 15% or more of those pixels are saturated, and 30% or more of the saturated ones sit within 25 degrees of `--hue` (so two-colour designs pass, drifted colours do not). Required; `--hue none` only for neutral effects. This catches AgX turning red into salmon and orange into white.
 - **Static hold** in seconds: at most 4 frames at full rate, 2 drawings in held styles, per 8 x 8 region, so a frozen spark is caught even while smoke moves elsewhere.
 - **Empty tail.** At 90% of the duration the mask holds at least 2% of its peak area.
 - **Growth** (explosions). The first frame with content after contact is at most 50% of the peak area.
@@ -96,6 +96,7 @@ Sample at 60 fps around contact (or at the drawing rate for held-drawing styles)
 - **Drawing grid** (held styles). Contact falls on a drawing; off the grid, the contact drawing is never shown.
 - **Dark blood** (dark fantasy impacts). Saturated reds after contact have median OKLab L of 0.5 or less and chroma of 0.2 or less (`#7a0a10 - #3a0206`, never neon).
 - **Dark background** (dark fantasy and realism by default, `--dark` for others). At five moments the effect keeps at least half of its visible area on the darkest background.
+- **Shape keys** (`--keys file.json`, default `stand/keys/<style>-<fx>.json` on the stand). Silhouette overlap with the contact, peak and break-up keys of at least 0.3 (aim 0.6); writes `keys.png` with the keys outlined over the frames, which is the side-by-side every review shows (`shape-keys.md`).
 - In another engine, export the same points (target box, hit point and direction, blast ground point, slash midpoints) and add them to the run.
 
 Passing is necessary, not sufficient. The script finds known cheap tells; the shape keys and the references judge the rest.

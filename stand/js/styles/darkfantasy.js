@@ -16,7 +16,7 @@ export default {
       build(fx) {
         fx.hitstop(0.05, 4);
         fx.slash({
-          through: at(HIT, 0, 0.05, 0.15), swing: [0.95, -0.3, -0.2], normal: [0.2, 0.45, 1], scale: 1.05, from: 118, to: 22, rIn: 1.95, rOut: 2.28,
+          through: at(HIT, 0, 0.05, 0.15), swing: [0.95, -0.28, -0.2], normal: [0.2, 0.75, 1], scale: 1.05, from: 118, to: 22, rIn: 1.95, rOut: 2.28,
           blend: 'alpha', hard: false, coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1,
           rimColor: '#ff2a10', rimK: 1.2, rimW: 0.28, noise: 0.3, dissolve: 0.3, thick: 0.85,
           burnColor: '#ff3a10', burnK: 1.1, burnW: 0.05,
@@ -25,7 +25,7 @@ export default {
         // Claw strands: thin torn arcs riding the main slash, each a frame late.
         for (const [k, rIn, rOut] of [[0, 2.4, 2.46], [1, 1.78, 1.84]]) {
           fx.slash({
-            through: at(HIT, 0, 0.05, 0.15), throughR: 2.115, swing: [0.95, -0.3, -0.2], normal: [0.2, 0.45, 1], scale: 1.05, from: 114, to: 26,
+            through: at(HIT, 0, 0.05, 0.15), throughR: 2.115, swing: [0.95, -0.28, -0.2], normal: [0.2, 0.75, 1], scale: 1.05, from: 114, to: 26,
             rIn, rOut, torn: 0.4, blend: 'alpha', hard: false,
             coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1, rimColor: '#ff2a10', rimK: 1.1, rimW: 0.6,
             noise: 0.4, dissolve: 0.8, thick: 1,
@@ -70,7 +70,7 @@ export default {
           // A pale value flash for one frame, tinted only slightly: the hit reads by value and
           // the hot rim, the target is never repainted red (dark-fantasy.md > Common mistakes).
           dir: HIT_DIR, color: '#e6d6cf', rimColor: '#ff3a22',
-          flash: [[0, 0], [0.049, 0], [0.05, 0.35], [0.067, 0.35], [0.068, 0]],
+          flash: [[0, 0], [0.049, 0], [0.05, 0.15], [0.067, 0.15], [0.068, 0]],
           rim: [[0, 0], [0.05, 1], [0.15, 0]],
           squash: [[0, 0], [0.05, 0], [0.08, 0.6], [0.3, 0, 'outQuad']],
           jolt: [[0, 0], [0.05, 0.05], [0.3, 0]],
@@ -106,7 +106,7 @@ export default {
         fx.burst({
           // Hero tongues: drawn dark-fire keyframes (image model), red that stays red under AgX,
           // turning to black smoke in the last keys.
-          shape: 'sheet', sheet: { url: './textures/dark_fire_3x2.png', grid: [3, 2], frames: 5, ease: 0.55 },
+          shape: 'sheet', sheet: { url: './textures/dark_fire_3x2.png', grid: [3, 2], frames: 5, ease: 0.45 },
           dir: 'cone', axis: UP, angle: 18, count: 3, sizeDist: [1, 2, 0], origin: at(BLAST, 0, 1.75, 0), spawnR: 0.5,
           speed: [0.1, 0.4], drag: 3, gravity: [0, 0.15, 0], life: [1.2, 1.5], size: [3.6, 4.4], sizeIn: 0.15, spin: 0, upright: true,
           blend: 'alpha', order: 3, fadeDist: 0.4, fade: [0, 0.92], ramp: fx.ramp([[0, '#ffffff', 1.1], [1, '#ffffff', 0.9]]),

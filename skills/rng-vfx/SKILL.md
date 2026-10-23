@@ -29,9 +29,9 @@ A correct chain rendered as procedural blobs on round quads still looks cheap. F
 4. **Engine and system.** Decide where it is built: VFX Graph or Shuriken, Niagara, three.js instancing, meshes or sprites, which blend modes and post effects exist (`references/engines/*.md`).
 5. **Layers.** Decide the layer stack (core, flash, shape, secondary, residue, light, distortion, decal, target reaction, camera). Each layer has one job. Construction rules for the common ones are in `references/recipes/`.
 6. **Timing.** Anticipation, contact, follow-through, dissipation per layer, with numbers from `references/numbers.md` and starting curves from `references/curves.md`.
-7. **Shape keys, then blockout.** Draw three shape keys (contact, peak, break-up) and the line of action as flat masks (`references/shape-keys.md`). Then, before any texture or shader work:
+7. **Shape keys, then blockout.** Draw three shape keys (contact, peak, break-up) and the line of action as flat masks, and write them as key JSON so the overlap is measured (`references/shape-keys.md`). Then, before any texture or shader work:
    - flat, unlit, grayscale shapes with the final timing and motion (`references/physics.md`), seen through the gameplay camera;
-   - the rendered mask at each key overlaps its drawing by about 60% or more;
+   - the rendered mask at each key overlaps its drawing by about 60% or more (`vfxcheck --keys`);
    - check the silhouette, the size on screen, the hit direction, the framing, the grounding;
    - run the mechanical checks (`tools/vfxcheck.py`, `references/verification.md`).
 

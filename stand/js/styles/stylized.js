@@ -16,14 +16,14 @@ export default {
       build(fx) {
         fx.hitstop(0.08, 4);
         fx.slash({
-          through: at(HIT, 0, 0.05, 0.15), swing: [0.9, -0.38, -0.15], normal: [0.25, 0.4, 1], scale: 1.1, from: 118, to: 22, rIn: 1.9, rOut: 2.25, torn: 0.15,
+          through: at(HIT, 0, 0.05, 0.15), swing: [0.95, -0.28, -0.15], normal: [0.2, 0.75, 1], scale: 1.1, from: 118, to: 22, rIn: 1.9, rOut: 2.25, torn: 0.15,
           coreColor: '#e6dcff', coreK: 1.2, edgeColor: '#6a3cff', edgeK: 1.0, noise: 0.25, dissolve: 0.7,
           burnColor: '#d9ccff', burnK: 1.6, burnW: 0.06,
           head: [[0, 0], [0.08, 1, 'outQuart'], [0.2, 1.7]], alpha: [[0, 1], [0.1, 1], [0.17, 0]], tail: 0.7,
         }, 0);
         // Secondary arcs: thinner, offset, a frame behind; they give the swing volume.
         fx.slash({
-          through: at(HIT, 0, 0.05, 0.15), throughR: 2.075, swing: [0.9, -0.38, -0.15], normal: [0.25, 0.4, 1], scale: 1.1, from: 114, to: 26, rIn: 2.38, rOut: 2.46, torn: 0.3,
+          through: at(HIT, 0, 0.05, 0.15), throughR: 2.075, swing: [0.95, -0.28, -0.15], normal: [0.2, 0.75, 1], scale: 1.1, from: 114, to: 26, rIn: 2.38, rOut: 2.46, torn: 0.3,
           coreColor: '#d9ccff', coreK: 1.1, edgeColor: '#6a4cff', edgeK: 1.0, noise: 0.35, dissolve: 0.8,
           head: [[0, 0], [0.08, 1, 'outQuart'], [0.18, 1.6]], alpha: [[0, 0.8], [0.09, 0.8], [0.15, 0]], tail: 0.5,
         }, 0.017);

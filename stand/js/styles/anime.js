@@ -115,10 +115,13 @@ export default {
         fx.burst({
           // Drawn smoke (image-model keyframes): 2 bands, outline, breaking into chunks.
           shape: 'sheet', cel: true, sheet: { url: './textures/anime_smoke_3x2.png', grid: [3, 2], frames: 6, stepped: true },
-          dir: 'cone', axis: UP, angle: 35, count: 4, sizeDist: [2, 2, 0], origin: at(BLAST, 0, 1.0, 0), spawnR: 0.5,
-          speed: [1.0, 1.8], gravity: [0, 1.5, 0], drag: 2, delay: [0, 2 * D], life: [12 * D, 14 * D],
-          size: [2.6, 3.4], sizeIn: 0.1, blend: 'alpha', order: 0, fadeDist: 0.05, fade: [0, 0.999],
-          ramp: fx.ramp([[0, '#ffffff', 1], [1, '#ffffff', 1]]),
+          // Several drawn clouds at different sizes and heights so the silhouette stays lumpy, the
+          // lowest ones sitting on the stem so the smoke stays on the ground while the top rises.
+          dir: 'cone', axis: UP, angle: 45, count: 7, sizeDist: [2, 3, 2], origin: at(BLAST, 0, 0.95, 0), spawnR: 0.9,
+          speed: [0.2, 0.9], gravity: [0, 0.35, 0], drag: 2.5, delay: [0, 3 * D], life: [12 * D, 15 * D],
+          size: [3.0, 4.2], sizeIn: 0.1, blend: 'alpha', order: 0, fadeDist: 0.05, fade: [0, 0.999],
+          // The drawn greys arrive light; anime smoke sits in the dark purple-grey band.
+          ramp: fx.ramp([[0, '#b8b0c8', 1], [1, '#a8a0b8', 1]]),
         }, T + 2 * D);
         // Dust skirt instead of a giant ground hoop.
         fx.burst({

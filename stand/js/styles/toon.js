@@ -66,7 +66,7 @@ export default {
           // Drawn fire puffs (image-model keyframes): pop in, full, holes, bits.
           shape: 'sheet', cel: true, sheet: { url: './textures/toon_fire_2x2.png', grid: [2, 2], frames: 4, stepped: true, ease: 0.5 },
           dir: 'cone', axis: UP, angle: 50, count: 6, sizeDist: [2, 3, 1], origin: C, spawnR: 0.6,
-          speed: [1.8, 3.4], drag: 6, life: [0.6, 0.8], size: [4.2, 3.6], sizeIn: 0.08, sizeRand: 0.2, blend: 'alpha', fadeDist: 0.05, order: 3,
+          speed: [1.8, 3.4], drag: 6, life: [0.6, 0.8], size: [4.8, 4.0], sizeIn: 0.08, sizeRand: 0.2, blend: 'alpha', fadeDist: 0.05, order: 3,
           fade: [0, 0.999], ramp: fx.ramp([[0, '#ffffff', 1.05], [1, '#ffffff', 1.0]]),
         }, 0.02);
         fx.burst({
@@ -101,7 +101,7 @@ export default {
           knock: [[0, 0], [0.08, 0.25, 'outQuad'], [0.45, -0.06, 'inOutSine'], [0.7, 0, 'inOutSine']],
           squash: [[0, 0], [0.06, 1, 'outQuad'], [0.2, -0.6, 'inOutSine'], [0.34, 0.25, 'inOutSine'], [0.5, 0, 'inOutSine']],
         });
-        fx.light({ pos: C, color: '#ffd38a', distance: 5.5, shadow: true, intensity: [[0, 0], [0.03, 12], [0.15, 5], [0.45, 0]] });
+        fx.light({ pos: C, color: '#ffd38a', distance: 4.5, shadow: true, intensity: [[0, 0], [0.03, 7], [0.1, 9], [0.25, 4], [0.45, 0]] });
         fx.shake([[0, 0.1], [0.4, 0, 'outQuad']]);
       },
     },

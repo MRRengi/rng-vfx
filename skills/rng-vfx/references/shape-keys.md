@@ -19,6 +19,22 @@ Design the silhouette before touching parameters. A shape key is a flat, single-
 
 After the blockout (SKILL.md step 7), the rendered effect mask at each key should overlap its drawing by about 60% or more (intersection over union). Below that, change the blockout, not the drawing, unless the drawing was wrong.
 
+### Keys as data (checked by `tools/vfxcheck.py`)
+
+Write the three keys as a small JSON file, so the overlap is measured instead of eyeballed. Units are target heights (H); for an impact the origin is the hit point with +x along the hit direction on screen, for an explosion the origin is the blast's ground point; +y is up; `t` is seconds after contact:
+
+```json
+{
+  "contact": {"t": 0.0,   "shapes": [{"star": [0.05, 0, 0.32, 0.1, 5, 0]}, {"ellipse": [0.12, 0, 0.32, 0.08]}]},
+  "peak":    {"t": 0.083, "shapes": [{"ellipse": [0, 0.85, 0.65, 0.85]}]},
+  "breakup": {"t": 0.333, "shapes": [{"circle": [0.3, 0.05, 0.15]}, {"poly": [[0, 0], [0.8, 0.2], [0.6, -0.4]]}]}
+}
+```
+
+Shapes: `circle [x, y, r]`, `ellipse [x, y, rx, ry]`, `poly [[x, y], ...]`, `star [x, y, rOuter, rInner, points, rotationDeg]`. vfxcheck compares the effect's silhouette (gaps between sparks closed, holes filled) with each key at its best frame within ±50% of the key's time (timing itself is judged by `time-to-peak`), fails under 0.3 and aims for 0.6, and saves `keys.png`, the frames with each key outlined, for the review. An inked impact frame at contact counts as the designed contact shape and is skipped. The stand's keys are in `stand/keys/`.
+
+Make the keys physically possible: sparks at 10 - 15 m/s cover about 0.35 H in 3 frames, so a peak key that already shows the full 1 H spray is wrong, not the effect.
+
 ## Reference silhouettes per style
 
 Use these when the user gives no references. Sizes are fractions of the target's height (H, about 1.8 m); "hit" is the hit direction.

@@ -12,7 +12,7 @@ export default {
   id: 'realism',
   name: 'Realism',
   blurb: 'Sparks across the view with gravity, drag and bounce, blackbody cooling, premultiplied fire into dense lit smoke, distortion.',
-  look: { fps: 0, tone: 'agx', bloom: { strength: 0.25, threshold: 1.1, radius: 0.2 } },
+  look: { fps: 0, tone: 'agx', bloom: { strength: 0.2, threshold: 1.1, radius: 0.14 } },
   effects: {
     impact: {
       duration: 1.8,
@@ -28,7 +28,7 @@ export default {
         }, 0);
         fx.flash({
           pos: HIT, size: 0.4, spikes: 0, spikeLen: 0, core: 0.6, soft: 5, dir: SPRAY, aspect: 3.6,
-          core_color: '#fff6e0', coreK: 1.6, edge_color: '#ffb050', edgeK: 1.05,
+          core_color: '#fff6e0', coreK: 1.35, edge_color: '#ffb050', edgeK: 1.0,
           scaleCurve: [[0, 1], [0.05, 0.6]], alphaCurve: [[0, 1], [0.033, 1], [0.05, 0]],
         }, 0);
         fx.burst({
@@ -157,7 +157,7 @@ export default {
           jolt: [[0, 0.05], [0.5, 0]],
           knock: [[0, 0], [0.1, 0.16, 'outQuad'], [1.0, 0, 'inOutSine']],
         });
-        fx.light({ pos: C, color: '#ffa860', distance: 7, shadow: true, flicker: 0.15, intensity: [[0, 0], [0.02, 42], [0.3, 17, 'outQuad'], [1.8, 0, 'outQuad']] });
+        fx.light({ pos: C, color: '#ffa860', distance: 5.5, shadow: true, flicker: 0.15, intensity: [[0, 0], [0.02, 28], [0.3, 13, 'outQuad'], [1.8, 0, 'outQuad']] });
         fx.shake([[0, 0.28], [1.0, 0, 'outQuad']]);
       },
     },

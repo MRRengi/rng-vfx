@@ -21,7 +21,7 @@ Checks (thresholds from numbers.md / fundamentals.md):
   frame-border    the effect never touches the frame border (framing)
   white-clip      share of the effect burned to white next to its coloured body <= 15% (OKLab)
   haze            brightness rise outside the effect (bloom spill) at the brightest frame <= +25%
-  hue             on the frame with the most visible effect pixels (impacts: within 0.25 s of contact),
+  hue             on the frame with the most visible effect pixels (impacts: within 0.15 s of contact),
                   >= 15% of them are saturated and >= 30% of the saturated ones are within 25 deg of --hue
   static-hold     no unchanged mask and image for longer than 4 frames (full rate) or 2 drawings
   empty-tail      at 90% of the duration the mask still holds >= 2% of its peak area
@@ -42,6 +42,8 @@ Checks (thresholds from numbers.md / fundamentals.md):
   grounded        (explosions, stand) the effect touches the blast's ground point for >= 60% of
                   the time from contact until it falls under 20% of its peak area
   dark-background (dark styles, stand) the effect keeps >= half its visible area on Night arena
+  shape-keys      (stand, --keys) silhouette IoU with the contact / peak / break-up keys >= 0.3 (aim 0.6);
+                  writes keys.png with the keys outlined over the matched frames
   static-hold is per region (8x8 tiles), so a frozen spark fails even while smoke moves
 Exit code 1 when any check fails.
 """
@@ -285,7 +287,9 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
     # Bloom spill: the soft mask (bloom included) against the hard core. A halo much
     # wider than the shape is haze even when it sits "inside" the soft mask.
     cb = cores[bright].sum()
-    halo = float(m.sum() / max(cb, 1)) if cb > 30 else 1.0
+    # Only soft pixels that brighten the frame are glow; dark smoke around the core is not haze.
+    glow = m & ~cores[bright] & ((luminance(f) - luminance(base[bright])) > 0.03)
+    halo = float((glow.sum() + cb) / max(cb, 1)) if cb > 30 else 1.0
     res["haze"] = {"pass": rise <= 0.25 and halo <= 4.0, "rise_outside_effect": round(rise, 3),
                    "halo_over_core": round(halo, 2), "t": round(times[bright], 3)}
 
@@ -297,11 +301,15 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
         # with the most visible effect pixels. Colour is judged on the effect's visible
         # pixels (luminance > 0.3), so white cores and flat-white palettes count against
         # the saturated share only, not against the hue.
-        win = [i for i, t in enumerate(times) if a.kind != "impact" or contact - 1e-6 <= t <= contact + 0.25] or list(range(len(fx)))
+        # Impacts: the contact read (contact .. +0.15 s); later frames belong to residue (puffs,
+        # smoke) whose shading is not the effect's colour.
+        hw = max(0.15, (2.0 / a.fps_style) if getattr(a, "fps_style", 0) else 0)
+        win = [i for i, t in enumerate(times) if a.kind != "impact" or contact - 1e-6 <= t <= contact + hw] or list(range(len(fx)))
         bi = max(win, key=lambda i: int((luminance(fx[i])[masks[i]] > 0.3).sum()) if masks[i].any() else 0)
         px = fx[bi][masks[bi]]
         px = px[luminance(px) > 0.3] if len(px) else px
-        if len(px) < 20:
+        min_px_ = max(5, int(20 * H * W / (640 * 360)))  # pixel-art frames are captured at sprite resolution
+        if len(px) < min_px_:
             res["hue"] = {"pass": False, "note": "no visible effect pixels"}
         else:
             h, s_, _ = rgb_to_hsv(px)
@@ -747,6 +755,7 @@ def cmd_stand(a):
     if a.hue == "auto":
         a.hue = STAND_HUES.get(f"{a.style}-{a.fx}")
     a.hold_seconds = (2.0 / fps_style) if fps_style else 4.0 / 60
+    a.fps_style = fps_style
     if a.min_px is None:
         a.min_px = 200 if a.kind == "explosion" else 80  # tier 3 explosion, tier 2 impact
     if a.max_rise is None:
