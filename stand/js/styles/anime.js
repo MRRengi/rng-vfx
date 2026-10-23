@@ -113,12 +113,12 @@ export default {
           ramp: fx.ramp([[0, '#fff2c0', 1.2], [0.5, '#ffb02a', 1.0], [1, '#c2401a', 0.9]]),
         }, T);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [2, 4, 6], origin: at(BLAST, 0, 0.6, 0),
-          spawnR: 0.6, speed: [1.5, 2.6], gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [10 * D, 14 * D],
-          size: [1.6, 2.4], sizePow: 0.5, sizeIn: 0.1, bands: 2, outline: 0, order: 0, shadow: '#1e1424', holeScale: 0.45,
-          erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
-          fireGlow: { color: '#e07a50', intensity: 1.0, height: 0.5, k: [[0, 1], [1.0, 0]] },
-          ramp: fx.ramp([[0, '#6a5878', 1], [1, '#3a2e40', 1]]),
+          // Drawn smoke (image-model keyframes): 2 bands, outline, breaking into chunks.
+          shape: 'sheet', cel: true, sheet: { url: './textures/anime_smoke_2x2.png', grid: [2, 2], frames: 4, stepped: true },
+          dir: 'cone', axis: UP, angle: 35, count: 4, sizeDist: [2, 2, 0], origin: at(BLAST, 0, 1.0, 0), spawnR: 0.5,
+          speed: [1.0, 1.8], gravity: [0, 1.5, 0], drag: 2, delay: [0, 2 * D], life: [12 * D, 14 * D],
+          size: [2.6, 3.4], sizeIn: 0.1, blend: 'alpha', order: 0, fadeDist: 0.05, fade: [0, 0.999],
+          ramp: fx.ramp([[0, '#ffffff', 1], [1, '#ffffff', 1]]),
         }, T + 2 * D);
         // Dust skirt instead of a giant ground hoop.
         fx.burst({

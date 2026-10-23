@@ -13,10 +13,28 @@ import numpy as np
 from PIL import Image
 
 
-def to_rgba(path, bg, tol, soft):
+HOLES = False
+
+
+def to_rgba(path, bg, tol, soft, flood=True):
     im = np.asarray(Image.open(path).convert("RGB")).astype(np.float32) / 255.0
     d = np.sqrt(((im - bg) ** 2).sum(-1))
     a = np.clip((d - tol) / soft, 0.0, 1.0)
+    if flood:
+        # Only background connected to the image border is removed, so grey parts
+        # inside the shape (smoke highlights close to the backdrop) stay opaque.
+        from scipy import ndimage
+        bgish = d < tol + soft
+        lab, _ = ndimage.label(bgish)
+        border = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))
+        outside = np.isin(lab, border[border > 0])
+        # Enclosed holes (dissolve holes inside a puff) are keyed only when they are the
+        # backdrop colour almost exactly and not tiny.
+        exact = d < (tol + soft if HOLES else 0.03)
+        lab2, n2 = ndimage.label(exact & ~outside)
+        sizes = ndimage.sum(np.ones_like(d), lab2, index=np.arange(1, n2 + 1)) if n2 else []
+        holes = np.isin(lab2, [k + 1 for k, sz in enumerate(sizes) if sz >= 30])
+        a = np.where(outside | holes, a, 1.0)
     return im, a
 
 
@@ -30,10 +48,14 @@ def main():
     ap.add_argument("--soft", type=float, default=0.08, help="width of the alpha ramp above tol")
     ap.add_argument("--pad", type=float, default=0.04, help="empty border inside each cell, fraction")
     ap.add_argument("--cols", type=int, default=0)
+    ap.add_argument("--no-flood", action="store_true", help="key every background-coloured pixel, not only those connected to the border")
+    ap.add_argument("--holes", action="store_true", help="also key enclosed backdrop-coloured regions (drawn dissolve holes); leave off for grey smoke whose highlights match the backdrop")
     a = ap.parse_args()
+    global HOLES
+    HOLES = a.holes
 
     bg = np.array([int(a.bg[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
-    frames = [to_rgba(p, bg, a.tol, a.soft) for p in a.frames]
+    frames = [to_rgba(p, bg, a.tol, a.soft, not a.no_flood) for p in a.frames]
 
     # Union bounding box, made square around its centre.
     ys, xs = [], []
