@@ -16,7 +16,7 @@ export default {
       build(fx) {
         fx.hitstop(0.05, 4);
         fx.slash({
-          pos: at(HIT, 0, 0, 0.25), rot: [0.2, -0.3, -0.35], scale: 1.05, from: 160, to: -30, rIn: 0.8, rOut: 1.5,
+          pos: at(HIT, 0, 0, 0.2), swing: [-0.6, -0.8, 0], normal: [0.2, 0.45, 1], scale: 1.05, from: 160, to: -30, rIn: 0.8, rOut: 1.5,
           blend: 'alpha', hard: false, coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1,
           rimColor: '#ff3a22', rimK: 2.0, rimW: 0.28, noise: 0.3, dissolve: 0.3, thick: 0.85,
           burnColor: '#ff5a2a', burnK: 1.6, burnW: 0.05,
@@ -25,7 +25,7 @@ export default {
         // Claw strands: thin torn arcs riding the main slash, each a frame late.
         for (const [k, rIn, rOut] of [[0, 1.56, 1.64], [1, 0.64, 0.72]]) {
           fx.slash({
-            pos: at(HIT, 0, 0, 0.25), rot: [0.2, -0.3, -0.35], scale: 1.05, from: 150, to: -20,
+            pos: at(HIT, 0, 0, 0.2), swing: [-0.6, -0.8, 0], normal: [0.2, 0.45, 1], scale: 1.05, from: 150, to: -20,
             rIn, rOut, torn: 0.4, blend: 'alpha', hard: false,
             coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1, rimColor: '#ff3a22', rimK: 1.8, rimW: 0.6,
             noise: 0.4, dissolve: 0.8, thick: 1,
@@ -99,22 +99,24 @@ export default {
           scaleCurve: [[0, 0.4], [0.04, 1, 'outExpo']], alphaCurve: [[0, 1], [0.04, 1], [0.08, 0]],
         }, T);
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 55, count: 9, sizeDist: [3, 5, 1], origin: C, spawnR: 0.45,
-          speed: [5, 8], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.3], size: [2.6, 4.2], sizePow: 0.45, aspectY: 1.35, upright: true,
-          soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 3, fadeDist: 0.4,
-          ramp: fx.ramp([[0, '#ffb070', 1.2], [0.2, '#e8300f', 1.1], [0.5, '#8b0a0a', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
+          // A few big dark tongues: deep red that stays red under AgX (mid HDR under 1.2), black edges.
+          shape: 'fire', dir: 'cone', axis: UP, angle: 35, count: 6, sizeDist: [2, 4, 0], origin: C, spawnR: 0.35,
+          speed: [3, 5.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.2], size: [2.4, 3.8], sizePow: 0.45, aspectY: 1.6, upright: true,
+          soft: 0.8, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 3, fadeDist: 0.4,
+          ramp: fx.ramp([[0, '#ffd0a0', 1.0], [0.2, '#d8280c', 0.9], [0.5, '#6a0808', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
         }, T);
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 18, count: 7, origin: C, spawnR: 0.2, speed: [9, 12], drag: 2.5,
-          life: [0.6, 0.9], size: [0.9, 1.4], stretch: 0.1, soft: 0.7, erode: 1, noiseScale: 3, vBias: 0.5, blend: 'premul', order: 4,
-          ramp: fx.ramp([[0, '#ffd0b0', 1.4], [0.3, '#ff3b1a', 1.2], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
+          // Stem: tongues licking up from the cracks, tied to the ground.
+          shape: 'fire', dir: 'cone', axis: UP, angle: 14, count: 4, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.25, speed: [4, 6], drag: 3,
+          life: [0.6, 0.9], size: [1.0, 1.5], aspectY: 1.8, upright: true, soft: 0.7, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 4,
+          ramp: fx.ramp([[0, '#ffd0a0', 1.0], [0.3, '#d8280c', 0.9], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
         }, T + 0.02);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 20, sizeDist: [5, 8, 7], origin: C, spawnR: 0.5,
           speed: [1, 2.2], gravity: [0, 1.4, 0], drag: 1.8, delay: [0.03, 0.6], life: [2.0, 2.8], size: [1.6, 3.2], sizePow: 0.45,
           shadow: '#4a2020', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
-          fireGlow: { color: '#ff2a12', intensity: 2.2, height: 1.2, rim: 0.8, k: fireK },
-          ramp: fx.ramp([[0, '#3a1c1c', 1, 0.95], [0.7, '#2a1414', 1, 0.9], [1, '#140a0c', 1, 0]]),
+          fireGlow: { color: '#ff2a12', intensity: 2.2, height: 1.4, rim: 1.2, k: fireK },
+          ramp: fx.ramp([[0, '#4a2a2a', 1, 0.95], [0.7, '#2e1a1a', 1, 0.9], [1, '#1a0e0e', 1, 0]]),
         }, T);
         fx.burst({
           shape: 'smoke', dir: 'ring', lift: 0.05, count: 18, origin: at(BLAST, 0, 0.25, 0), speed: [5, 8], drag: 5,

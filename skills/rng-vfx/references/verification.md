@@ -67,7 +67,9 @@ Run these on rendered frames instead of judging by eye:
 - **Post-palette colour (pixel):** sample the effect's main colours after the palette pass. If smoke maps to a hue it was not meant to have, the palette lacks neutrals.
 - **Grayscale separation:** the main shape and its shadow side differ by 0.25 or more in grayscale; smoke and background differ by 0.25 or more on the mid background.
 
-Review on a mid or dusk background by default. Black backgrounds flatter additive effects and hide the problems above.
+Review on a mid or dusk background by default: black backgrounds flatter additive effects and hide the problems above. Dark styles (dark fantasy, horror) are reviewed on a dark background as well, because that is where their smoke and blood vanish.
+
+- **Straight cuts:** no straight edge appears on any frame where an effect ends on its quad or strip border (stars, puffs, ring gaps, streak and slash heads, smoke and fire bodies, heat haze).
 
 ## The stand
 

@@ -53,6 +53,9 @@ Rules:
 - Give the silhouette a direction. Radial symmetry is static; bias the burst toward the hit direction or upward.
 - Avoid tangents and mush: shapes that barely touch, or overlap into an even blob, destroy readability. Clusters with gaps read better than even spreads.
 - Negative space is part of the shape. Holes in smoke and gaps between flame tongues make them read as volume.
+- **No straight cuts.** Every procedural shape fades or narrows to zero before the edge of its quad or strip: stars fit their longest spike, lobed puffs get a margin, bodies get a round window, broken rings narrow to a point at each gap, streak, trail and slash heads close to a rounded tip. A straight line on a frame that is not a designed hard edge is the quad showing through, and it is the fastest giveaway of cheap VFX.
+- **Slashes are oriented by the swing.** Define a slash by the direction the blade travels at contact and the swing plane's normal, not by Euler angles picked by eye (those drift into vertical or edge-on arcs). The arc runs diagonally, 20 - 50 degrees from horizontal for most melee swings, passes through the target's centre of mass, and is seen at least 30 degrees off edge-on from the gameplay camera.
+- **Dissolve stays out of the body.** Erosion holes belong to the tail of a slash or the end of a body's life. Holes in the body read as dirt on additive shapes and as outlined pockmarks on alpha shapes.
 
 ## Timing
 
@@ -80,7 +83,7 @@ Defaults:
 
 Hand-drawn effects animate on twos or threes (a new drawing every 2 or 3 frames at 24 fps, so 12 or 8 drawings per second). Holding drawings gives snap and weight. In real time, quantize the effect's time: `t_held = floor(t * fps) / fps`. Use 12 for anime, 8 to 12 for pixel, full rate for stylized and realism. Never hold the camera or gameplay, only the effect.
 
-**Put every key on the drawing grid** (multiples of 1/fps). A key that falls between drawings is simply lost: the contact drawing never appears, or appears already decaying. Check that the contact drawing exists, is held for at least 2 drawings, and is not hidden under an impact frame (put the colour peak on the drawing after the impact frame).
+**Put every key on the drawing grid** (multiples of 1/fps). A key that falls between drawings is simply lost: the contact drawing never appears, or appears already decaying. Check that the contact drawing exists and is not hidden under an impact frame (put the colour peak on the drawing after the impact frame). The coloured spark lives 2 - 3 drawings in total, but only its first drawing may be above HDR 1; the next ones shrink, break or darken (see No white-out frames in SKILL.md).
 
 ## Quality floors
 
@@ -102,6 +105,7 @@ Hard minimums. An effect that misses one of these looks cheap regardless of how 
 - **No visible quads.** Every procedural body (fire, puff, smoke) is windowed to zero before the quad edge (`smoothstep` on the distance to the UV border), not just faded by radius. Soft particles only hide edges against geometry; a window hides them against everything.
 - **Sort alpha-blended instances.** Alpha smoke, cel puffs and blood are drawn back to front within the layer as well as between layers, or dust draws through fire. Sort instances by view depth per frame (or use weighted blended OIT); additive layers do not need it.
 - **HDR overdraw budget.** Overlapping additive or premultiplied bodies sum: with 10+ fire quads keep the hottest ramp stop at HDR 1.5 - 1.8, fire `occlusion` near 0.75 or more, and 3 hero plus 6 mid quads rather than 15 equal ones. Bloom gets clamped input. Check the hue at the peak: if the core of an orange fireball reads white, lower the K values, not the bloom.
+- **Fire noise leads.** Heat is noise first, masked by the radius (`heat = (noise - bias) * mask - threshold`); a strong radial term (`+ (1 - r) * k`) maps the ramp into concentric rings, the fried-egg look. Test: if the fire shows rings around its centre at any frame, the radial term is too strong.
 - **Fireball rise budget.** Fire hangs; smoke rises. A fireball body travels 1.5 - 2.5 m (buoyancy around +0.8 m/s^2, drag 3 - 3.5); the smoke column carries the height. Fire that rises 4 - 5 m leaves the gameplay frame.
 - **Smoke wraps the fire.** On explosions the smoke is emitted from the fireball itself, starting within 2 - 4 frames of the peak and continuing for about half a second, with 30 - 40% of puffs inside the fire's footprint at the fire's size or bigger. Delayed smoke spawned above the fire leaves bare fire balloons with a separate cloud on top.
 - **One fire per style.** Fire bodies differ by style in shape language, value, timing and texture, not only in ramp colours. Copying one emitter template (counts, sizes, speeds) between styles makes every style read the same.

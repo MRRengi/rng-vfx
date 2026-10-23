@@ -137,8 +137,8 @@ export default {
         }, 0);
         fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 12, radius: [[0, 0.05], [0.3, 0.95, 'outExpo']], width: [[0, 0.06], [0.3, 0.03]], strength: [[0, 0.018], [0.3, 0]] }, 0);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.4, 0), size: 5, strength: [[0, 0.016], [2.5, 0.006], [3.8, 0]] }, 0.05);
-        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 4, hot: '#ff6a1f', hotK: 1.2, dark: '#0e0b09', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
-        fx.decal({ pos: at(BLAST, 0, 0.011, 0), size: 5.5, multiply: true, strength: 0.55, glow: [[0, 0]] }, 0);
+        // Scorch darkens the ground (multiply) with ejecta streaks; never an alpha-black disc.
+        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 5, multiply: true, strength: 0.55, hot: '#ff6a1f', hotK: 1.2, dark: '#0e0b09', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
         fx.target({
           dir: AWAY,
           jolt: [[0, 0.05], [0.5, 0]],

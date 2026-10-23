@@ -33,7 +33,7 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 
 ## Default numbers
 
-- Impact: anticipation 0 - 6 frames of inward lines; contact flash 2 drawings held; ring 3 - 4 drawings expanding fast; puffs 5 - 8 drawings; total under 1 s.
+- Impact: anticipation 0 - 6 frames of inward lines; contact spark 2 - 3 drawings (first drawing hot, then shrinking and breaking); ring 3 - 4 drawings expanding fast; puffs 5 - 8 drawings; total under 1 s.
 - Explosion: 2 drawings of bright compressed core, impact frame 1 drawing, fireball 6 - 10 drawings, black smoke 10 - 16 drawings rising, all on twos.
 - Bands: 2 for smoke, 3 for fire. Outline width about 5 - 8% of the puff radius.
 

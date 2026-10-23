@@ -24,6 +24,10 @@ export const celScene = new THREE.Scene();
 // layer is composited, so cel puffs never cover the spark.
 export const overScene = new THREE.Scene();
 
+// The camera effects are viewed from (main.js sets it); bursts use it to sort
+// their instances back to front.
+export const VIEW = { camera: null };
+
 // Soft-particle and screen-size helpers used by several fragment shaders.
 export const SOFT = /* glsl */ `
 uniform sampler2D uDepth;

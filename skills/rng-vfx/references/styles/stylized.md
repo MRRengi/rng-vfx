@@ -23,7 +23,7 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 - **Erosion with gradient map:** sample a noise, compute `heat = (noise - threshold(life)) / softness`, color from a ramp by heat, alpha from heat. One texture gives shape, color and dissipation.
 - **UV scrolling and panning noise** on meshes (cones, cylinders, half-spheres) for beams, tornadoes, shields.
 - **Shockwaves are distortion first:** a refraction ring that pushes the image outward, plus a thin bright leading edge. A wide soft coloured band on the ground reads as a UI selection circle. Tilt impact rings toward the hit instead of facing the camera.
-- **Slash hold and burn:** hold the slash head at full size for 3 - 4 frames before the tail eats it, and draw a bright burn band at the dissolve edge.
+- **Slash wipe and burn:** the head reaches full length at contact and the tail starts eating it within 2 frames (hitstop counts toward that), with a bright burn band at the dissolve edge in the tail only.
 - **Swept slash mesh:** arc mesh, head and tail masks along U, white core to colored edge along V, erosion as the tail passes.
 - **Ribbon trails** with tapered width and scrolling noise.
 - **Fresnel shells** on characters for buffs and shields.

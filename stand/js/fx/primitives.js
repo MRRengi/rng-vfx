@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { NOISE, TEXNOISE } from './glsl.js';
-import { G, SOFT, distortScene } from './globals.js';
+import { G, VIEW, SOFT, distortScene } from './globals.js';
 import { rng, curve } from './math.js';
 
 // ---------------------------------------------------------------------------
@@ -209,6 +209,7 @@ uniform vec3 uFireColor;
 uniform float uFireK;
 uniform float uFireH;
 uniform float uFireRim;
+uniform float uPoster;
 uniform vec3 uLightView;
 uniform float uHoleScale;
 uniform float uRampShade;
@@ -272,7 +273,9 @@ void main() {
   a = 1.0;
 #elif SHAPE == 2
   // Streak: bright head, tapered tail. Sparks and speed lines.
-  float w = 1.0 - abs(c.x) * 2.0;
+  // Width closes to a rounded tip at the head (top of the quad), so the bright
+  // head never ends on the quad's straight edge.
+  float w = 1.0 - abs(c.x) * 2.0 / max(sqrt(clamp((1.0 - vUv.y) / 0.12, 0.0, 1.0)), 0.001);
   a = pow(clamp(w, 0.0, 1.0), uSoft) * pow(vUv.y, 1.6);
   col.rgb *= 1.0 + 1.5 * smoothstep(0.75, 1.0, vUv.y) * smoothstep(0.4, 1.0, w);
 #elif SHAPE == 3
@@ -331,8 +334,10 @@ void main() {
   // straight contours parallel to the quad edge after the threshold.
   heat *= 1.0 - smoothstep(0.6, 0.98, length((vUv - 0.5) * 2.0));
   if (heat <= 0.0) discard;
+  // Posterized heat: painted styles show 2-4 flat heat bands with hard edges.
+  if (uPoster > 0.5) heat = (floor(clamp(heat, 0.0, 0.999) * uPoster) + 1.0) / uPoster;
   col = texture2D(uRamp, vec2(clamp(1.0 - heat, 0.0, 1.0), 0.5));
-  a = clamp(heat * 3.0, 0.0, 1.0);
+  a = uPoster > 0.5 ? 1.0 : clamp(heat * 3.0, 0.0, 1.0);
   // Hot parts glow through, cooled parts occlude like smoke.
   occl = mix(0.75, 1.0, smoothstep(0.2, 0.9, 1.0 - clamp(heat, 0.0, 1.0)));
 #elif SHAPE == 8
@@ -407,6 +412,43 @@ function scales(count, r, opt) {
   return out;
 }
 
+// Back-to-front sorting for alpha-blended instances. Three.js sorts objects,
+// not instances, so the burst evaluates each instance's closed-form position
+// on the CPU (same formula as the vertex shader, minus curl and bounce) and
+// rewrites the instance attributes in far-to-near order.
+const _v = new THREE.Vector3();
+function instanceSorter(geo, count, o) {
+  const names = ['aSeed', 'aDir', 'aScale'];
+  const src = names.map(n => geo.attributes[n].array.slice());
+  const sizes = names.map(n => geo.attributes[n].itemSize);
+  const order = new Array(count).fill(0).map((_, i) => i);
+  const depth = new Float32Array(count);
+  const og = o.origin || [0, 1, 0], gr = o.gravity || [0, 0, 0];
+  const sp = o.speed || [1, 3], dl = o.delay || [0, 0];
+  const k = Math.max(o.drag ?? 0.001, 0.001), spawnR = o.spawnR ?? 0;
+  return t => {
+    const cam = VIEW.camera;
+    if (!cam) return;
+    const seeds = src[0], dirs = src[1];
+    for (let i = 0; i < count; i++) {
+      const age = Math.max(0, t - (dl[0] + seeds[i * 4 + 3] * dl[1]));
+      const spd = sp[0] + (sp[1] - sp[0]) * seeds[i * 4 + 1];
+      const e = Math.exp(-k * age), a = (1 - e) / k, g = age / k - (1 - e) / (k * k);
+      const dx = dirs[i * 3], dy = dirs[i * 3 + 1], dz = dirs[i * 3 + 2];
+      const sr = spawnR * seeds[i * 4 + 2];
+      _v.set(og[0] + dx * (sr + spd * a) + gr[0] * g, og[1] + dy * (sr + spd * a) + gr[1] * g, og[2] + dz * (sr + spd * a) + gr[2] * g);
+      _v.applyMatrix4(cam.matrixWorldInverse);
+      depth[i] = _v.z;
+    }
+    order.sort((x, y) => depth[x] - depth[y]);
+    names.forEach((n, j) => {
+      const dst = geo.attributes[n].array, s0 = src[j], w = sizes[j];
+      for (let i = 0; i < count; i++) for (let c = 0; c < w; c++) dst[i * w + c] = s0[order[i] * w + c];
+      geo.attributes[n].needsUpdate = true;
+    });
+  };
+}
+
 export function burst(o) {
   const count = o.count ?? 40;
   const r = rng(o.seed ?? 7);
@@ -474,6 +516,7 @@ export function burst(o) {
       uFireK: { value: 0 },
       uFireH: { value: o.fireGlow?.height ?? 1.5 },
       uFireRim: { value: o.fireGlow?.rim ?? 0 },
+      uPoster: { value: o.poster ?? 0 },
     },
     vertexShader: BURST_VS,
     fragmentShader: BURST_FS,
@@ -484,6 +527,8 @@ export function burst(o) {
   const mesh = new THREE.Mesh(geo, mat);
   mesh.frustumCulled = false;
   mesh.renderOrder = o.order ?? 0;
+  const sorter = (o.blend === 'alpha' || o.blend === 'premul' || o.cel) && o.sort !== false
+    ? instanceSorter(geo, count, o) : null;
   return {
     object: mesh,
     scene: o.cel ? 'cel' : undefined,
@@ -491,6 +536,7 @@ export function burst(o) {
       mat.uniforms.uTime.value = t;
       mat.uniforms.uTimeAbs.value = tAbs;
       mat.uniforms.uFireK.value = fireK(tAbs);
+      if (sorter) sorter(t);
     },
     dispose() { geo.dispose(); base.dispose(); mat.dispose(); },
   };
@@ -547,7 +593,7 @@ varying float vN;
 varying float vSegT;
 void main() {
   vec4 col = texture2D(uRamp, vec2(clamp(vN + vSegT * 0.25, 0.0, 1.0), 0.5));
-  float across = 1.0 - abs(vUv.x - 0.5) * 2.0;
+  float across = 1.0 - abs(vUv.x - 0.5) * 2.0 / max(sqrt(clamp(vSegT / 0.06, 0.0, 1.0)), 0.001);
   float a = pow(clamp(across, 0.0, 1.0), uSoft) * pow(1.0 - vSegT, 1.3);
   col.rgb *= 1.0 + 1.2 * (1.0 - smoothstep(0.0, 0.15, vSegT));
   float fade = smoothstep(0.0, uFade.x, vN) * (1.0 - smoothstep(uFade.y, 1.0, vN));
@@ -790,6 +836,12 @@ void main() {
   float reps = max(1.0, floor(uNoiseFreq * 0.5 + 0.5));
   float nz = tn(vec2(ang01 * reps, uSeed * 0.137)).g;
   float w = uW * (1.0 - uNoiseAmt + uNoiseAmt * 2.0 * nz);
+  // Broken arc: only part of the circle exists (a closed even hoop reads as UI).
+  // The band narrows to a point at each gap instead of being cut straight.
+  if (uCoverage < 0.999) {
+    float cv = tn(vec2(ang01 * 2.0, uSeed * 0.29 + 0.5)).r;
+    w *= smoothstep(1.0 - uCoverage - 0.02, 1.0 - uCoverage + 0.14, cv);
+  }
   float d = abs(r - uR) - w;
   float a = uHard > 0.5 ? step(d, 0.0) : 1.0 - smoothstep(0.0, uSoft, d);
   float across = clamp((r - (uR - w)) / max(2.0 * w, 0.0001), 0.0, 1.0);
@@ -799,11 +851,6 @@ void main() {
   a += uFill * (1.0 - smoothstep(0.0, max(uR, 0.0001), r)) * (1.0 - a);
   float holes = tn(c * 0.45 + uSeed * 0.31).g;
   if (holes < uErode) a = 0.0;
-  // Broken arc: only part of the circle exists. A closed even hoop reads as UI.
-  if (uCoverage < 0.999) {
-    float cv = tn(vec2(ang01 * 2.0, uSeed * 0.29 + 0.5)).r;
-    a *= smoothstep(1.0 - uCoverage - 0.04, 1.0 - uCoverage + 0.04, cv);
-  }
   float alpha = a * uAlpha * step(r, 1.0);
   if (alpha < 0.002) discard;
   gl_FragColor = vec4(col, alpha);
@@ -913,7 +960,8 @@ void main() {
   if (tl < 0.0 || tl > 1.0) discard;
   // Both ends taper to points.
   float ends = pow(sin(3.1416 * clamp(vUv.x, 0.0, 1.0)), 0.7);
-  float w = uThick * pow(1.0 - tl, 0.6) * ends;
+  // Rounded head: the width closes to zero at the leading edge instead of a straight cut.
+  float w = uThick * pow(1.0 - tl, 0.6) * ends * sqrt(clamp(tl / 0.05, 0.0, 1.0));
   float nz = tn(vec2(vUv.x * 1.5 - uHead * 0.4, vUv.y * 0.35) + uSeed * 0.21).b;
   float dr = abs(vUv.y - 0.5) * 2.0 + (nz - 0.5) * uWobble;
   float torn = uTorn * tn(vUv * vec2(6.0, 1.0) + uSeed * 0.11).a;
@@ -921,13 +969,15 @@ void main() {
   if (s <= 0.0) discard;
   float rimW = uRimW * (0.5 + tn(vUv * vec2(4.0, 0.5) + uSeed * 0.07).a);
   float tear = tn(vec2(vUv.x * 2.5, vUv.y * 0.6) + uSeed * 0.37).a;
-  float thr = uDissolve * tl;
+  // Dissolve lives in the tail only: holes in the body read as dirt (additive)
+  // or as outlined pockmarks (alpha). The body stays solid.
+  float thr = uDissolve * smoothstep(0.45, 1.0, tl);
   if (tear < thr) discard;
-  float a = uHard > 0.5 ? 1.0 : smoothstep(0.0, 0.35, s);
+  float a = uHard > 0.5 ? 1.0 : smoothstep(0.0, 0.35, s) * smoothstep(thr, thr + 0.06, tear);
   float k = uHard > 0.5 ? step(0.55, s) * step(tl, 0.75) : smoothstep(0.2, 0.9, s) * (1.0 - tl);
   vec3 col = mix(uEdge, uCore, k);
   if (s < rimW) col = uRim;
-  if (uBurnW > 0.0 && tear < thr + uBurnW) col = uBurn;
+  if (uBurnW > 0.0 && thr > 0.001 && tear < thr + uBurnW) col = uBurn;
   float alpha = a * uAlpha;
   if (alpha < 0.002) discard;
   gl_FragColor = vec4(col, alpha);
@@ -990,7 +1040,23 @@ export function slash(o) {
   mesh.frustumCulled = false;
   mesh.renderOrder = o.order ?? 6;
   mesh.position.set(...(o.pos || [0, 1.1, 0]));
-  mesh.rotation.set(...(o.rot || [0, 0, 0]));
+  if (o.swing) {
+    // Orient by intent: `swing` is the direction the blade travels at the
+    // arc's midpoint (world), `normal` the swing plane's normal. Hand-picked
+    // Euler angles drift into vertical or edge-on arcs; this cannot.
+    const a0 = (o.from ?? 140) * Math.PI / 180, a1 = (o.to ?? -40) * Math.PI / 180;
+    const am = (a0 + a1) / 2, sg = Math.sign(a1 - a0) || 1;
+    const u = new THREE.Vector3(-Math.sin(am) * sg, Math.cos(am) * sg, 0);
+    const ez = new THREE.Vector3(0, 0, 1);
+    const n = new THREE.Vector3(...(o.normal || [0.25, 0.35, 1])).normalize();
+    const t = new THREE.Vector3(...o.swing);
+    t.addScaledVector(n, -t.dot(n)).normalize();
+    const L = new THREE.Matrix4().makeBasis(u, new THREE.Vector3().crossVectors(ez, u), ez);
+    const W = new THREE.Matrix4().makeBasis(t, new THREE.Vector3().crossVectors(n, t), n);
+    mesh.quaternion.setFromRotationMatrix(W.multiply(L.transpose()));
+  } else {
+    mesh.rotation.set(...(o.rot || [0, 0, 0]));
+  }
   mesh.scale.setScalar(o.scale ?? 1);
   const H = curve(o.head || [[0, 0], [0.12, 1.4, 'outQuart']]);
   const A = curve(o.alpha || [[0, 1], [0.18, 1], [0.3, 0]]);

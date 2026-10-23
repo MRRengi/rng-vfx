@@ -10,22 +10,21 @@ export default {
   look: { fps: 0, tone: 'neutral', bloom: { strength: 0.12, threshold: 1.6, radius: 0.15 } },
   effects: {
     impact: {
-      duration: 0.6,
+      duration: 0.5,
       contact: 0,
       build(fx) {
-        fx.hitstop(0, 3);
         fx.celOutline('#2b2b55', 3);
         fx.flash({
-          pos: HIT, size: 1.2, hard: true, spikes: 5, spikeLen: 0.8, core: 0.45, sharp: 1.6, jitter: 0.6,
+          pos: HIT, size: 1.2, hard: true, spikes: 6, spikeLen: 0.7, core: 0.45, sharp: 0.7, jitter: 0.6,
           dir: HIT_DIR, aspect: 1.6, core_color: '#fffbd0', coreK: 1.0, edge_color: '#ffc62e', edgeK: 1.0, rot: 0.3, order: 0,
-          scaleCurve: [[0, 0], [0.06, 1.12, 'outBack'], [0.1, 1], [0.16, 1.05], [0.24, 0, 'inQuad']],
-          alphaCurve: [[0, 1], [0.24, 1], [0.241, 0]],
+          scaleCurve: [[0, 0], [0.06, 1.12, 'outBack'], [0.09, 0.95], [0.12, 1.06], [0.16, 0, 'inQuad']],
+          alphaCurve: [[0, 1], [0.16, 1], [0.161, 0]],
         }, 0);
         fx.ring({
-          billboard: true, pos: HIT, size: 1.7, hard: true, noise: 0, blend: 'alpha', coverage: 0.6, seed: 3,
+          normal: [0.75, 0.3, 0.9], pos: at(HIT, HIT_DIR[0] * 0.2, HIT_DIR[1] * 0.2, HIT_DIR[2] * 0.2), size: 1.5, aspect: 1.5, hard: true, noise: 0, blend: 'alpha', coverage: 0.6, seed: 3,
           color: '#ffffff', colorK: 1, color2: '#ffffff', color2K: 1,
-          radius: [[0, 0.5], [0.22, 0.8, 'outBack']], width: [[0, 0.05], [0.22, 0.0, 'inQuad']],
-          alpha: [[0, 1], [0.21, 1], [0.22, 0]],
+          radius: [[0, 0.5], [0.1, 0.8, 'outBack']], width: [[0, 0.05], [0.1, 0.0, 'inQuad']],
+          alpha: [[0, 1], [0.099, 1], [0.1, 0]],
         }, 0.05);
         for (const [axis, seed] of [[[1, 0.7, 0.1], 11], [[1, -0.25, 0.5], 12], [[0.6, 0.35, -0.7], 13]]) {
           fx.burst({
@@ -52,14 +51,14 @@ export default {
       },
     },
     explosion: {
-      duration: 1.4,
+      duration: 1.25,
       contact: 0,
       build(fx) {
         const C = at(BLAST, 0, 0.5, 0);
         fx.celOutline('#3a1e3a', 3);
         // Short pop disc under the puffs, smaller than the fireball.
         fx.flash({
-          pos: C, size: 1.6, hard: true, spikes: 0, spikeLen: 0, core: 0.9, depthTest: true, order: 0,
+          pos: C, size: 1.1, hard: true, spikes: 0, spikeLen: 0, core: 0.9, depthTest: true, order: 0,
           core_color: '#ffffff', coreK: 1.0, edge_color: '#fff2a8', edgeK: 1.0,
           scaleCurve: [[0, 0], [0.05, 1, 'outBack'], [0.085, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.085, 1], [0.086, 0]],
@@ -71,11 +70,11 @@ export default {
           ramp: fx.ramp([[0, '#fff3b0', 1.05], [0.3, '#ffb627', 1.0], [1, '#ff5e3a', 1]]),
         }, 0.02);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 10, sizeDist: [3, 4, 3], origin: at(C, 0, 0.8, -0.6), spawnR: 0.5,
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 10, sizeDist: [3, 4, 3], origin: C, spawnR: 0.5,
           speed: [1.5, 2.5], gravity: [0, 1.5, 0], drag: 3, delay: [0, 0.08], life: [0.7, 1.0], size: [1.0, 0.06],
           sizePow: 2.5, sizeIn: 0.12, bands: 1, outline: 0, shadow: '#4c4870', erode: 0, noiseScale: 1.4,
           blend: 'alpha', fadeDist: 0.05, ramp: fx.ramp([[0, '#8a86a8', 1], [1, '#6a6690', 1]]),
-        }, 0.42);
+        }, 0.06);
         // Stem: three puffs that tie the fireball to the ground.
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 10, count: 3, seed: 23, origin: at(BLAST, 0, 0.15, 0), spawnR: 0.1,

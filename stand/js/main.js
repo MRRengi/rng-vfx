@@ -8,7 +8,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import GUI from 'lil-gui';
 import { buildEffect } from './fx/builder.js';
 import { preloadSheets } from './fx/primitives.js';
-import { G, distortScene, celScene, overScene } from './fx/globals.js';
+import { G, VIEW, distortScene, celScene, overScene } from './fx/globals.js';
 import { STAGE, ARCHETYPES } from './styles/layout.js';
 import anime from './styles/anime.js';
 import toon from './styles/toon.js';
@@ -30,6 +30,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 200);
+VIEW.camera = camera;
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 

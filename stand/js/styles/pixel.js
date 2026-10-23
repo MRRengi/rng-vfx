@@ -21,13 +21,13 @@ export default {
   look: { fps: 10, tone: 'neutral', pixel: 5, palette: PALETTE, bloom: { strength: 0.0, threshold: 2, radius: 0 } },
   effects: {
     impact: {
-      duration: 1.0,
+      duration: 0.7,
       contact: 0,
       build(fx) {
         fx.celOutline('#0e0e17', 1);
         fx.flash({
-          pos: HIT, size: 1.6, hard: true, spikes: 4, spikeLen: 0.8, core: 0.32, sharp: 2, jitter: 0.8,
-          dir: HIT_DIR, aspect: 1.3, redraw: 10, bias: 0.5, core_color: '#ffffff', coreK: 1, edge_color: '#ffe14d', edgeK: 1,
+          pos: HIT, size: 1.6, hard: true, spikes: 4, spikeLen: 0.5, core: 0.32, sharp: 2, jitter: 0.8,
+          dir: HIT_DIR, aspect: 1.0, redraw: 10, bias: 0.3, core_color: '#ffffff', coreK: 1, edge_color: '#ffe14d', edgeK: 1,
           scaleCurve: [[0, 0.7], [D, 1], [2 * D, 0.5]], alphaCurve: [[0, 1], [3 * D - 0.001, 1], [3 * D, 0]],
         }, 0);
         fx.ring({
@@ -48,7 +48,7 @@ export default {
         }, 2 * D);
         fx.target({
           dir: HIT_DIR, color: '#ffffff',
-          flash: [[0, 1], [2 * D - 0.001, 1], [2 * D, 0]],
+          flash: [[0, 1], [D - 0.001, 1], [D, 0]],
           jolt: [[0, 0.06], [4 * D, 0]],
         });
         fx.shake([[0, 0.05], [2 * D, 0]]);
@@ -73,9 +73,9 @@ export default {
         }, D);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 8, origin: at(C, 0, 0.6, 0), spawnR: 0.5, speed: [1.2, 2],
-          gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [8 * D, 11 * D], size: [1.1, 0.2], sizePow: 2, bands: 1, outline: 0,
-          shadow: '#3a3a44', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0, dither: true,
-          ramp: fx.ramp([[0, '#b4b2bc', 1], [1, '#5c5a66', 1]]),
+          gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [8 * D, 11 * D], size: [1.1, 0.2], sizePow: 2, bands: 2, outline: 0,
+          shadow: '#5c5a66', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0, dither: true,
+          ramp: fx.ramp([[0, '#b4b2bc', 1], [1, '#8a8894', 1]]),
         }, 3 * D);
         fx.burst({
           shape: 'square', cel: true, dir: 'hemi', count: 18, sizeDist: [4, 8, 6], origin: C, speed: [5, 9], gravity: [0, -14, 0], drag: 1,
@@ -90,7 +90,7 @@ export default {
         }, D);
         fx.target({
           dir: AWAY, color: '#ffffff',
-          flash: [[0, 1], [2 * D - 0.001, 1], [2 * D, 0]],
+          flash: [[0, 1], [D - 0.001, 1], [D, 0]],
           knock: [[0, 0], [D, 0.15], [5 * D, 0]],
         });
         fx.shake([[0, 0.12], [5 * D, 0]]);

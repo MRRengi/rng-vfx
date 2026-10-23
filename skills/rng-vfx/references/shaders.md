@@ -147,13 +147,13 @@ Directed swirls (lava, portals, magic that flows around a shape) without simulat
 `color.rgb *= alpha` in the shader with blend `One, OneMinusSrcAlpha`. One material can then be additive in some areas (alpha 0 with color) and occluding in others: a fire with a dark smoky edge and a glowing core in one particle. Cuts the number of materials and draw calls. **Fire uses premultiplied by default:**
 
 ```
-float occl = mix(0.35, 1.0, smoothstep(0.2, 0.9, 1.0 - heat)); // hot glows through, cool occludes
+float occl = mix(0.75, 1.0, smoothstep(0.2, 0.9, 1.0 - heat)); // hot glows a little, cool occludes (0.75+ keeps overlapping bodies from summing to white)
 gl_FragColor = vec4(rampColor(1.0 - heat) * alpha, alpha * occl);
 ```
 
 ## 17. Erosion with height bias and burn edge
 
-Flames burn off at the tips: add height to the erosion threshold, `thr += (uv.y - 0.5) * bias` (bias 0.25 - 0.5). **Preserve the core:** keep the threshold at 0.1 or less for the first 25 - 30% of life, for example `thr = mix(0.05, 0.95, pow(age01, 1.6))`, add a radial bias `heat += (1 - r) * 0.4`, and keep noise features at least a third of the particle size. Fire that erodes into islands at its peak reads as embers, not flame. For slashes and dissolving shapes, draw a bright band just above the threshold: `if (n < thr + burnWidth) color = burnColor;` (HDR). Use ridged noise for tearing dissolves.
+Flames burn off at the tips: add height to the erosion threshold, `thr += (uv.y - 0.5) * bias` (bias 0.25 - 0.5). **Preserve the core:** keep the threshold at 0.1 or less for the first 25 - 30% of life, for example `thr = mix(0.05, 0.95, pow(age01, 1.6))`, mask by radius instead of adding it (`heat = (noise * 1.8 - 0.35) * smoothstep(1.0, 0.35, r) - thr`; an additive radial term makes concentric rings), and keep noise features at least a third of the particle size. Fire that erodes into islands at its peak reads as embers, not flame. For slashes and dissolving shapes, draw a bright band just above the threshold: `if (n < thr + burnWidth) color = burnColor;` (HDR). Use ridged noise for tearing dissolves.
 
 ## 18. Billboard puffs that read as one volume
 

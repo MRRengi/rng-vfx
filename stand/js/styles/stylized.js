@@ -11,7 +11,7 @@ export default {
   look: { fps: 0, tone: 'neutral', bloom: { strength: 0.3, threshold: 1.4, radius: 0.2 } },
   effects: {
     impact: {
-      duration: 0.9,
+      duration: 0.7,
       contact: 0.08,
       build(fx) {
         fx.hitstop(0.08, 4);
@@ -85,16 +85,17 @@ export default {
         }, 0);
         fx.exposure([[0, 1], [0.03, 0.75], [0.4, 1, 'outQuad']]);
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 60, count: 9, sizeDist: [3, 5, 1], origin: C, spawnR: 0.5,
-          speed: [5, 8], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.2], size: [2.2, 3.4], sizePow: 0.5, aspectY: 1.35, upright: true,
-          soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 3, fadeDist: 0.4,
-          ramp: fx.ramp([[0, '#fffbe0', 1.7], [0.25, '#ffd34d', 1.4], [0.55, '#ff6a1f', 1.0], [0.85, '#b3261e', 0.8], [1, '#3b0f0f', 1]]),
+          // Painted fire: big noise features, three flat heat bands with hard edges.
+          shape: 'fire', dir: 'cone', axis: UP, angle: 40, count: 7, sizeDist: [2, 4, 1], origin: C, spawnR: 0.35,
+          speed: [3, 6], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.1], size: [2.0, 3.0], sizePow: 0.5, aspectY: 1.25, upright: true,
+          soft: 0.8, erode: 1, noiseScale: 1.6, vBias: 0.25, poster: 3, blend: 'premul', order: 3, fadeDist: 0.4,
+          ramp: fx.ramp([[0, '#fff6c8', 1.3], [0.33, '#ffc23a', 1.1], [0.66, '#ff6a1f', 1.0], [0.9, '#a8261e', 0.9], [1, '#3b0f0f', 1]]),
         }, 0.02);
         // Stem: the fireball connects to the ground.
         fx.burst({
           shape: 'fire', dir: 'cone', axis: UP, angle: 15, count: 4, seed: 61, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
           speed: [4, 6], drag: 3.5, gravity: [0, 0.8, 0], life: [0.6, 0.9], size: [1.0, 1.5], aspectY: 1.4, upright: true,
-          soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 4, fadeDist: 0.3,
+          soft: 0.8, erode: 1, noiseScale: 1.6, vBias: 0.3, poster: 3, blend: 'premul', order: 4, fadeDist: 0.3,
           ramp: fx.ramp([[0, '#fffbe0', 1.5], [0.3, '#ffd34d', 1.3], [0.6, '#ff6a1f', 1.0], [1, '#3b0f0f', 1]]),
         }, 0.02);
         fx.burst({
@@ -122,7 +123,7 @@ export default {
         }, 0.02);
         fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 9, radius: [[0, 0.05], [0.6, 0.95, 'outExpo']], width: [[0, 0.1], [0.6, 0.04]], strength: [[0, 0.0135], [0.6, 0]] }, 0.02);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.2, 0), size: 4, strength: [[0, 0.012], [1.5, 0.006], [2.6, 0]] }, 0.05);
-        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 3.6, hot: '#ff6a1f', hotK: 1.4, dark: '#100a08', glow: [[0, 1], [1.6, 0, 'outQuad']] }, 0.02);
+        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 3.6, multiply: true, strength: 0.45, hot: '#ff6a1f', hotK: 1.4, dark: '#100a08', glow: [[0, 1], [1.6, 0, 'outQuad']] }, 0.02);
         fx.target({
           dir: AWAY, color: '#ffd8a8', rimColor: '#ff9a4a',
           rim: [[0, 0], [0.05, 1], [0.7, 0]],
