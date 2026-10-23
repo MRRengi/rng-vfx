@@ -16,19 +16,19 @@ export default {
       build(fx) {
         fx.hitstop(0.08, 4);
         fx.slash({
-          pos: at(HIT, -0.15, 0.1, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 150, to: -35, rIn: 1.15, rOut: 1.42, torn: 0.15,
+          pos: at(HIT, -0.15, 0.1, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 150, to: 0, rIn: 1.15, rOut: 1.42, torn: 0.15,
           coreColor: '#e6dcff', coreK: 1.2, edgeColor: '#6a3cff', edgeK: 1.0, noise: 0.25, dissolve: 0.7,
           burnColor: '#d9ccff', burnK: 1.6, burnW: 0.06,
           head: [[0, 0], [0.08, 1, 'outQuart'], [0.22, 1.7]], alpha: [[0, 1], [0.12, 1], [0.22, 0]], tail: 0.7,
         }, 0);
         // Secondary arcs: thinner, offset, a frame behind; they give the swing volume.
         fx.slash({
-          pos: at(HIT, -0.15, 0.1, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 140, to: -20, rIn: 1.58, rOut: 1.68, torn: 0.3,
+          pos: at(HIT, -0.15, 0.1, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 140, to: 10, rIn: 1.58, rOut: 1.68, torn: 0.3,
           coreColor: '#d9ccff', coreK: 1.1, edgeColor: '#6a4cff', edgeK: 1.0, noise: 0.35, dissolve: 0.8,
           head: [[0, 0], [0.08, 1, 'outQuart'], [0.2, 1.6]], alpha: [[0, 0.8], [0.14, 0.8], [0.2, 0]], tail: 0.5,
         }, 0.017);
         fx.slash({
-          pos: at(HIT, -0.15, 0.1, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 160, to: -10, rIn: 0.55, rOut: 0.63, torn: 0.3,
+          pos: at(HIT, -0.15, 0.1, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 160, to: 10, rIn: 0.55, rOut: 0.63, torn: 0.3,
           coreColor: '#bfaeff', coreK: 1.0, edgeColor: '#4b2bd1', edgeK: 0.9, noise: 0.4, dissolve: 0.8,
           head: [[0, 0], [0.09, 1, 'outQuart'], [0.2, 1.5]], alpha: [[0, 0.7], [0.13, 0.7], [0.19, 0]], tail: 0.45,
         }, 0.033);
@@ -73,7 +73,7 @@ export default {
       },
     },
     explosion: {
-      duration: 2.4,
+      duration: 2.0,
       contact: 0,
       build(fx) {
         const C = at(BLAST, 0, 0.5, 0);

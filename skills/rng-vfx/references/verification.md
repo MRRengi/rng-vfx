@@ -82,7 +82,7 @@ Sample at 60 fps around contact (or at the drawing rate for held-drawing styles)
 - **Size.** Primary shape height at peak in 1080p pixels at the gameplay camera, from a strict mask without the bloom halo (`--min-px` 40 / 80 / 200 by tier).
 - **Frame border.** The effect never touches the frame border.
 - **White clip and haze** on the effect's brightest frame: at most 10% of the effect clipped to white; brightness outside the effect rises at most 25%.
-- **Hue.** On the frame with the most visible effect pixels (impacts: within 0.25 s of contact), 15% or more of those pixels are saturated and their hue is within 25 degrees of `--hue`. Required; `--hue none` only for neutral effects. This catches AgX turning red into salmon and orange into white.
+- **Hue.** On the frame with the most visible effect pixels (impacts: within 0.25 s of contact), 15% or more of those pixels are saturated, and 30% or more of the saturated ones sit within 25 degrees of `--hue` (so two-colour designs pass, drifted colours do not). Required; `--hue none` only for neutral effects. This catches AgX turning red into salmon and orange into white.
 - **Static hold** in seconds: at most 4 frames at full rate, 2 drawings in held styles.
 - **Empty tail.** At 90% of the duration the mask holds at least 2% of its peak area.
 - **Growth** (`--kind explosion`). The first frame with content after contact is at most 50% of the peak area.

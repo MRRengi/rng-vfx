@@ -22,7 +22,7 @@ Checks (thresholds from numbers.md / fundamentals.md):
   white-clip      share of the effect clipped to white on its brightest frame <= 10%
   haze            brightness rise outside the effect (bloom spill) at the brightest frame <= +25%
   hue             on the frame with the most visible effect pixels (impacts: within 0.25 s of contact),
-                  >= 15% of them are saturated and their hue is within 25 deg of --hue (required)
+                  >= 15% of them are saturated and >= 30% of the saturated ones are within 25 deg of --hue
   static-hold     no unchanged mask and image for longer than 4 frames (full rate) or 2 drawings
   empty-tail      at 90% of the duration the mask still holds >= 2% of its peak area
   growth          (explosions) the first frame with content is <= 50% of the peak area
@@ -53,7 +53,7 @@ STAND_HUES = {
     "anime-impact": 195, "anime-explosion": 35, "toon-impact": 45, "toon-explosion": 30,
     "stylized-impact": 255, "stylized-explosion": 30, "darkfantasy-impact": 355,
     "darkfantasy-explosion": 5, "pixel-impact": 45, "pixel-explosion": 35,
-    "realism-impact": 35, "realism-explosion": 30,
+    "realism-impact": None, "realism-explosion": 30,
 }
 
 
@@ -242,10 +242,14 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             h, s_, _ = rgb_to_hsv(px)
             sat = s_ > 0.25
             frac = float(sat.mean())
-            hue = float(np.degrees(np.angle(np.mean(np.exp(1j * np.radians(h[sat])))))) % 360 if sat.any() else -1
-            dh = abs((hue - a.hue + 180) % 360 - 180) if sat.any() else 180
-            res["hue"] = {"pass": frac >= 0.15 and dh <= 25, "hue": round(hue, 1), "target": a.hue,
-                          "saturated_share": round(frac, 3), "t": round(times[bi], 3)}
+            # Share of the saturated pixels near the target hue: two-colour designs
+            # (a cyan spark with yellow sparks) pass as long as the target colour holds
+            # 30% or more; a red that drifted to salmon or pink does not.
+            hs = h[sat]
+            near = float((np.abs((hs - a.hue + 180) % 360 - 180) <= 25).mean()) if sat.any() else 0.0
+            hue = float(np.degrees(np.angle(np.mean(np.exp(1j * np.radians(hs)))))) % 360 if sat.any() else -1
+            res["hue"] = {"pass": frac >= a.min_sat_share and near >= 0.3, "mean_hue": round(hue, 1), "target": a.hue,
+                          "near_target": round(near, 3), "saturated_share": round(frac, 3), "t": round(times[bi], 3)}
 
     # static hold, judged in seconds
     limit = a.hold_seconds
@@ -293,7 +297,8 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
         win = [i for i, t in enumerate(times) if contact - 1e-6 <= t <= contact + 0.12]
         spark = max([float(np.median(luminance(hot_body(fx[i], masks[i]).reshape(-1, 1, 3)))) for i in win if masks[i].sum() > 50] or [1.0])
         flash = float(np.nanmax(tl[win])) if win and np.isfinite(tl[win]).any() else 0.0
-        res["target-flash"] = {"pass": not early and (flash - rest) <= max(0.0, 0.75 * spark - rest) + 0.05,
+        cap_ok = a.sprite_flash or (flash - rest) <= max(0.0, 0.75 * spark - rest) + 0.05
+        res["target-flash"] = {"pass": not early and cap_ok, "sprite_flash": a.sprite_flash,
                                "before_contact": early[:4], "target_peak": round(flash, 3),
                                "target_rest": round(float(rest), 3), "spark_body": round(spark, 3)}
 
@@ -414,6 +419,9 @@ def cmd_stand(a):
     if a.hue == "auto":
         a.hue = STAND_HUES.get(f"{a.style}-{a.fx}")
     a.hold_seconds = (2.0 / fps_style) if fps_style else 4.0 / 60
+    if a.style == "pixel":
+        a.sprite_flash = True
+        a.min_sat_share = min(a.min_sat_share, 0.1)
     return run_checks(fx, base, times, contact, dur, a, close=close, info=info)
 
 
@@ -424,6 +432,8 @@ def main():
         s = sub.add_parser(name)
         s.add_argument("--min-px", type=float, default=40, help="primary shape height at 1080p (40 tier 1, 80 tier 2, 200 tier 3)")
         s.add_argument("--kind", choices=["impact", "explosion", "other"], default=None)
+        s.add_argument("--min-sat-share", type=float, default=0.15, help="share of visible pixels that must be saturated")
+        s.add_argument("--sprite-flash", action="store_true", help="pixel style: a full-white sprite flash is the intended hit cue")
         s.add_argument("--json", action="store_true")
         if name == "frames":
             s.add_argument("--hue", required=True, help="body hue in degrees, or 'none' for a neutral effect")

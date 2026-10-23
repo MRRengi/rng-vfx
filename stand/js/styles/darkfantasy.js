@@ -11,7 +11,7 @@ export default {
   look: { fps: 0, tone: 'agx', bloom: { strength: 0.4, threshold: 1.2, radius: 0.25 } },
   effects: {
     impact: {
-      duration: 0.95,
+      duration: 0.85,
       contact: 0.05,
       build(fx) {
         fx.hitstop(0.05, 4);

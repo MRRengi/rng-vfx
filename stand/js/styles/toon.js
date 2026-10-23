@@ -40,7 +40,7 @@ export default {
         }, 0.04);
         fx.target({
           dir: HIT_DIR, color: '#fff3c0', rimColor: '#ffd84a',
-          flash: [[0, 0.4], [0.033, 0.4], [0.034, 0]],
+          flash: [[0, 0.25], [0.033, 0.25], [0.034, 0]],
           rim: [[0, 0], [0.034, 1], [0.15, 0]],
           knock: [[0, 0], [0.06, 0.2, 'outQuad'], [0.4, -0.05, 'inOutSine'], [0.6, 0, 'inOutSine']],
           squash: [[0, 0], [0.04, 1, 'outQuad'], [0.14, -0.5, 'inOutSine'], [0.26, 0.2, 'inOutSine'], [0.38, 0, 'inOutSine']],
