@@ -228,6 +228,7 @@ uniform float uRampShade;
 uniform sampler2D uSheet;
 uniform vec2 uGrid;
 uniform float uFrames;
+uniform float uSheetEase;
 uniform float uStepped;
 varying vec2 vUv;
 varying float vN;
@@ -355,7 +356,8 @@ void main() {
 #elif SHAPE == 8
   // Flipbook: a drawn or simulated sprite sheet. Stepped (anime, pixel) or
   // blended between frames (realism). Grey sheets take colour from the ramp.
-  float fr = clamp(vN, 0.0, 0.9999) * uFrames;
+  // uSheetEase < 1 plays the growth keys fast and the decay slow (fast in, slow out).
+  float fr = pow(clamp(vN, 0.0, 0.9999), uSheetEase) * uFrames;
   vec4 s0 = sheetFrame(floor(fr));
   vec4 s1 = sheetFrame(min(floor(fr) + 1.0, uFrames - 1.0));
   vec4 sh = uStepped > 0.5 ? s0 : mix(s0, s1, fract(fr));
@@ -511,6 +513,7 @@ export function burst(o) {
       uSheet: { value: o.sheet ? sheet(o.sheet.url) : null },
       uGrid: { value: new THREE.Vector2(...(o.sheet?.grid || [1, 1])) },
       uFrames: { value: o.sheet?.frames ?? 1 },
+      uSheetEase: { value: o.sheet?.ease ?? 1 },
       uStepped: { value: o.sheet?.stepped ? 1 : 0 },
       uRamp: { value: o.ramp },
       uOpacity: { value: o.opacity ?? 1 },
@@ -720,6 +723,7 @@ uniform float uHard;
 uniform float uSoft;
 uniform float uJitter;
 uniform float uRound;
+uniform float uPoly;
 uniform float uAngJit;
 uniform float uBias;
 uniform float uExt;
@@ -745,6 +749,20 @@ void main() {
   float idx = floor((ang + 3.1416) / 6.2832 * uSpikes + 0.5);
   float jit = 1.0 + (hash12(vec2(idx, uSeed)) - 0.5) * uJitter;
   float rad = uCore + uSpikeLen * sp * max(jit, 0.2);
+  if (uPoly != 0.0) {
+    // True star polygon (toon): straight edges from each tip to the valley, bulged
+    // outward by uPoly (0.08 slightly convex toon; negative pinches the edges inward into
+    // blades, still pointed and straight-cut, unlike a polar curve). A polar triangle wave
+    // curves the edges inward and reads as a flower.
+    float half_ = 3.1416 / uSpikes;
+    float phi = abs(half_ - mod(ang + half_, 2.0 * half_)); // 0 at a tip, half_ at a valley
+    vec2 p1 = vec2(uCore + uSpikeLen * max(jit, 0.2), 0.0);
+    vec2 p2 = uCore * vec2(cos(half_), sin(half_));
+    vec2 e = p2 - p1;
+    vec2 d = vec2(cos(phi), sin(phi));
+    float rr = (p1.x * e.y - p1.y * e.x) / max(d.x * e.y - d.y * e.x, 1e-4);
+    rad = rr * (1.0 + uPoly * sin(3.1416 * phi / half_));
+  }
   // Longest spikes point along the hit (local +x is the hit direction).
   rad *= 1.0 + uBias * pow(max(0.0, cos(ang0)), 4.0);
   float s = 1.0 - r / max(rad, 0.0001);
@@ -786,6 +804,7 @@ export function flash(o) {
       uSoft: { value: o.soft ?? 4 },
       uJitter: { value: o.jitter ?? 0 },
       uRound: { value: o.round ? 1 : 0 },
+      uPoly: { value: o.poly ?? 0 },
       uAngJit: { value: o.angJitter ?? 0 },
       uBias: { value: o.bias ?? 0 },
       uSeed: { value: o.seed ?? 3 },
@@ -1084,13 +1103,21 @@ export function slash(o) {
     mesh.rotation.set(...(o.rot || [0, 0, 0]));
   }
   mesh.scale.setScalar(o.scale ?? 1);
+  // The mesh origin is the arc's midpoint (arcGeometry is built around it). `through`
+  // puts that midpoint on a point (the hit); `throughR` is the main arc's mid radius, so a
+  // claw strand with another radius stays concentric with the main arc instead of crossing it.
+  const amid = (((o.from ?? 140) + (o.to ?? -40)) / 2) * Math.PI / 180;
+  const radialAt = r => new THREE.Vector3(Math.cos(amid), Math.sin(amid), 0).applyQuaternion(mesh.quaternion).multiplyScalar(r * (o.scale ?? 1));
+  const rMid = ((o.rIn ?? 0.9) + (o.rOut ?? 1.5)) / 2;
+  if (o.through) mesh.position.copy(new THREE.Vector3(...o.through).add(radialAt(rMid - (o.throughR ?? rMid))));
+  const midWorld = mesh.position.clone();
   const H = curve(o.head || [[0, 0], [0.12, 1.4, 'outQuart']]);
   const A = curve(o.alpha || [[0, 1], [0.18, 1], [0.3, 0]]);
   return {
     object: mesh,
     update(t) { mat.uniforms.uHead.value = H(t); mat.uniforms.uAlpha.value = A(t); },
     // For checks: the arc's midpoint (the mesh origin) and the swing direction.
-    probe: () => ({ mid: mesh.position.toArray(), swing: o.swing || null }),
+    probe: () => ({ mid: midWorld.toArray(), swing: o.swing || null }),
     dispose() { geo.dispose(); mat.dispose(); },
   };
 }
@@ -1175,8 +1202,12 @@ void main() {
 #ifdef MULTIPLY
   // Scorch as darkening, with radial ejecta rays: never an alpha-black hole.
   float ang = atan(c.y, c.x) / 6.2832 + 0.5;
-  float rays = tn(vec2(ang * 8.0, r * 0.5 + uSeed)).r;
-  float dark = clamp((scorch * 0.8 + rays * scorch * 0.5) * uAlpha * reveal, 0.0, 1.0) * uStrength;
+  // A small dark core and streaky ejecta rays reaching past it: the edge is the rays,
+  // never the rim of a disc.
+  float rays = tn(vec2(ang * 9.0, r * 0.35 + uSeed)).r;
+  float core = (1.0 - smoothstep(0.08, 0.5, r + (f - 0.5) * 0.45)) * uScorch;
+  float ej = (1.0 - smoothstep(0.25, 1.0, r + (f - 0.5) * 0.3)) * smoothstep(0.42, 0.75, rays) * uScorch;
+  float dark = clamp((core * 0.75 + ej * 0.7) * uAlpha * reveal, 0.0, 1.0) * uStrength;
   gl_FragColor = vec4(mix(vec3(1.0), uDark, dark) + uHot * scorch * uGlow * (1.0 - r) * 0.6, 1.0);
   return;
 #endif

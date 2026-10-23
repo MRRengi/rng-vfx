@@ -16,16 +16,16 @@ export default {
       build(fx) {
         fx.hitstop(0.05, 4);
         fx.slash({
-          pos: at(HIT, -0.1, 0.15, 0.2), swing: [0.8, -0.5, -0.2], normal: [0.2, 0.45, 1], scale: 1.05, from: 160, to: -30, rIn: 1.1, rOut: 1.38,
+          through: at(HIT, 0, 0.05, 0.15), swing: [0.95, -0.3, -0.2], normal: [0.2, 0.45, 1], scale: 1.05, from: 118, to: 22, rIn: 1.95, rOut: 2.28,
           blend: 'alpha', hard: false, coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1,
           rimColor: '#ff2a10', rimK: 1.2, rimW: 0.28, noise: 0.3, dissolve: 0.3, thick: 0.85,
           burnColor: '#ff3a10', burnK: 1.1, burnW: 0.05,
           head: [[0, 0], [0.05, 1.0, 'outQuart'], [0.083, 1.1], [0.25, 1.75, 'outQuad']], alpha: [[0, 1], [0.18, 1], [0.26, 0]], tail: 0.75,
         }, 0);
         // Claw strands: thin torn arcs riding the main slash, each a frame late.
-        for (const [k, rIn, rOut] of [[0, 1.56, 1.64], [1, 0.64, 0.72]]) {
+        for (const [k, rIn, rOut] of [[0, 2.4, 2.46], [1, 1.78, 1.84]]) {
           fx.slash({
-            pos: at(HIT, 0, 0, 0.2), swing: [0.8, -0.5, -0.2], normal: [0.2, 0.45, 1], scale: 1.05, from: 150, to: -20,
+            through: at(HIT, 0, 0.05, 0.15), throughR: 2.115, swing: [0.95, -0.3, -0.2], normal: [0.2, 0.45, 1], scale: 1.05, from: 114, to: 26,
             rIn, rOut, torn: 0.4, blend: 'alpha', hard: false,
             coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1, rimColor: '#ff2a10', rimK: 1.1, rimW: 0.6,
             noise: 0.4, dissolve: 0.8, thick: 1,
@@ -33,8 +33,10 @@ export default {
           }, 0.017 * (k + 1));
         }
         fx.flash({
-          pos: HIT, size: 0.9, spikes: 2, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 0.4, soft: 0.6, blend: 'alpha', bias: 1.0,
-          dir: HIT_DIR, aspect: 3.0, core_color: '#0a0204', coreK: 1, edge_color: '#b80c04', edgeK: 1.0,
+          // Torn splash: two hard-cut blades along the hit (a star polygon pinched into blades),
+          // dark core, red edge. Soft-edged it read as a blurred lens ellipse.
+          pos: HIT, size: 0.75, hard: true, spikes: 3, spikeLen: 1.0, core: 0.16, sharp: 1, poly: -0.35, jitter: 0.6, angJitter: 0.7, blend: 'alpha', bias: 1.2,
+          dir: HIT_DIR, aspect: 2.2, core_color: '#0a0204', coreK: 1, edge_color: '#a80a06', edgeK: 1.0,
           scaleCurve: [[0, 0.5], [0.03, 1, 'outExpo'], [0.08, 1.15]], alphaCurve: [[0, 1], [0.05, 1], [0.08, 0]],
         }, 0.05);
         fx.flash({
@@ -48,30 +50,33 @@ export default {
           ramp: fx.ramp([[0, '#7a0a10', 1], [1, '#3a0206', 1]]),
         }, 0.05);
         fx.decal({
-          pos: at(HIT, 1.1, -1.14, -0.1), size: 1.5, splat: true, dark: '#8a0010', seed: 9,
+          pos: at(HIT, 1.1, -1.14, -0.1), size: 1.5, splat: true, dark: '#4e050c', seed: 9,
           alpha: [[0, 0], [0.28, 0], [0.3, 0.95], [10, 0.95]], reveal: [[0, 0], [0.28, 0], [0.45, 1.1, 'outQuad']],
         }, 0.05);
         fx.burst({
-          shape: 'glow', dir: 'cone', axis: HIT_DIR, angle: 80, count: 24, sizeDist: [2, 6, 12], origin: HIT, spawnR: 0.3,
-          speed: [1, 3], gravity: [0, 1.5, 0], drag: 2, curl: 0.8, life: [0.8, 1.4], size: [0.1, 0.02], soft: 2.2,
-          ramp: fx.ramp([[0, '#ff9a5a', 1.3], [0.5, '#e8200a', 1.05], [1, '#400000', 1]]),
+          // Embers: orange-hot sparks cooling to dark, never the blood's red, so they do not read as glowing blood.
+          shape: 'glow', dir: 'cone', axis: HIT_DIR, angle: 55, count: 14, sizeDist: [1, 4, 9], origin: HIT, spawnR: 0.3,
+          speed: [1, 3], gravity: [0, 1.5, 0], drag: 2, curl: 0.8, life: [0.6, 1.1], size: [0.08, 0.02], soft: 2.2,
+          ramp: fx.ramp([[0, '#ffc080', 1.3], [0.5, '#ff6a1a', 1.0], [1, '#2a0800', 1]]),
         }, 0.05);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: HIT_DIR, angle: 70, count: 7, origin: HIT, spawnR: 0.2, speed: [0.4, 1], drag: 2,
+          shape: 'smoke', dir: 'cone', axis: HIT_DIR, angle: 50, count: 7, origin: HIT, spawnR: 0.2, speed: [0.4, 1], drag: 2,
           gravity: [0, 0.9, 0], delay: [0.04, 0.08], life: [0.7, 1.0], size: [0.6, 1.2], sizePow: 0.5,
           shadow: '#5a2020', noiseScale: 3, erode: 0.3, blend: 'alpha', order: -1, fade: [0.06, 0.75],
           fireGlow: { color: '#ff2a12', intensity: 1.2, height: 0.4, rim: 0.6, k: [[0, 0.8], [0.5, 0]] },
           ramp: fx.ramp([[0, '#2a1418', 1, 0.9], [0.7, '#1a0c0e', 1, 0.88], [1, '#0a0506', 1, 0]]),
         }, 0.05);
         fx.target({
-          dir: HIT_DIR, color: '#962e2e', rimColor: '#ff3a22',
-          flash: [[0, 0], [0.049, 0], [0.05, 1], [0.083, 1], [0.084, 0]],
+          // A pale value flash for one frame, tinted only slightly: the hit reads by value and
+          // the hot rim, the target is never repainted red (dark-fantasy.md > Common mistakes).
+          dir: HIT_DIR, color: '#e6d6cf', rimColor: '#ff3a22',
+          flash: [[0, 0], [0.049, 0], [0.05, 0.35], [0.067, 0.35], [0.068, 0]],
           rim: [[0, 0], [0.05, 1], [0.15, 0]],
           squash: [[0, 0], [0.05, 0], [0.08, 0.6], [0.3, 0, 'outQuad']],
           jolt: [[0, 0], [0.05, 0.05], [0.3, 0]],
           knock: [[0, 0], [0.05, 0], [0.1, 0.12, 'outQuad'], [0.7, 0, 'inOutSine']],
         });
-        fx.light({ pos: HIT_LIGHT, color: '#ff2a1a', distance: 2.5, intensity: [[0, 0], [0.05, 0], [0.06, 3], [0.15, 0, 'outQuad']] });
+        fx.light({ pos: HIT_LIGHT, color: '#ff4a2a', distance: 2.2, intensity: [[0, 0], [0.05, 0], [0.06, 1.4], [0.13, 0, 'outQuad']] });
         fx.shake([[0, 0], [0.05, 0], [0.06, 0.12], [0.4, 0, 'outQuad']]);
       },
     },
@@ -101,23 +106,24 @@ export default {
         fx.burst({
           // Hero tongues: drawn dark-fire keyframes (image model), red that stays red under AgX,
           // turning to black smoke in the last keys.
-          shape: 'sheet', sheet: { url: './textures/dark_fire_3x2.png', grid: [3, 2], frames: 5 },
+          shape: 'sheet', sheet: { url: './textures/dark_fire_3x2.png', grid: [3, 2], frames: 5, ease: 0.55 },
           dir: 'cone', axis: UP, angle: 18, count: 3, sizeDist: [1, 2, 0], origin: at(BLAST, 0, 1.75, 0), spawnR: 0.5,
           speed: [0.1, 0.4], drag: 3, gravity: [0, 0.15, 0], life: [1.2, 1.5], size: [3.6, 4.4], sizeIn: 0.15, spin: 0, upright: true,
           blend: 'alpha', order: 3, fadeDist: 0.4, fade: [0, 0.92], ramp: fx.ramp([[0, '#ffffff', 1.1], [1, '#ffffff', 0.9]]),
         }, T);
         fx.burst({
           // Procedural tongues break the drawn silhouette so the three heroes never read as stamps.
-          shape: 'fire', dir: 'cone', axis: UP, angle: 35, count: 4, sizeDist: [0, 2, 2], origin: C, spawnR: 0.8,
-          speed: [3, 5.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.1], size: [1.6, 2.6], sizePow: 0.45, aspectY: 1.2, spin: 0.3, sizeIn: 0.15,
+          shape: 'fire', dir: 'cone', axis: UP, angle: 40, count: 4, sizeDist: [0, 2, 2], origin: at(BLAST, 0, 0.3, 0), spawnR: 1.0,
+          speed: [2, 3.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.7, 1.0], size: [1.2, 1.9], sizePow: 0.45, aspectY: 1.9, upright: true, sizeIn: 0.15,
           soft: 0.8, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 4, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#ff7a30', 1.0], [0.2, '#d8280c', 0.9], [0.5, '#6a0808', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
         }, T);
         fx.burst({
           // Stem: tongues licking up from the cracks, tied to the ground.
           shape: 'fire', dir: 'cone', axis: UP, angle: 14, count: 4, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.25, speed: [4, 6], drag: 3,
-          life: [0.6, 0.9], size: [1.0, 1.5], aspectY: 1.8, upright: true, soft: 0.7, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 4,
-          ramp: fx.ramp([[0, '#ffd0a0', 1.0], [0.3, '#d8280c', 0.9], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
+          life: [0.6, 0.9], size: [0.8, 1.2], aspectY: 2.2, upright: true, soft: 0.7, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 2,
+          // Stem core stays under 1.3 B and red-orange: a white-hot column reads as a light tube.
+          ramp: fx.ramp([[0, '#ff9a60', 0.95], [0.3, '#c8200a', 0.9], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
         }, T + 0.02);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 12, sizeDist: [5, 8, 7], origin: C, spawnR: 0.5,
@@ -129,7 +135,7 @@ export default {
         fx.burst({
           // Drawn black smoke keyframes, fire light baked into the bottom third; born inside the
           // fire's footprint and taking over as the tongues burn off.
-          shape: 'sheet', sheet: { url: './textures/dark_smoke_2x2.png', grid: [2, 2], frames: 4 },
+          shape: 'sheet', sheet: { url: './textures/dark_smoke_4x4.png', grid: [4, 4], frames: 15 },
           dir: 'cone', axis: UP, angle: 30, count: 5, sizeDist: [1, 3, 1], origin: at(BLAST, 0, 1.15, 0), spawnR: 0.6,
           speed: [0.05, 0.25], gravity: [0, 0.15, 0], drag: 2, delay: [0.35, 0.8], life: [1.8, 2.4], size: [3.2, 4.0], sizeIn: 0.2, spin: 0.1,
           blend: 'alpha', order: 2, fade: [0.1, 0.85], fadeDist: 0.4,
@@ -172,7 +178,7 @@ export default {
           jolt: [[0, 0.01], [T, 0.02], [T + 0.01, 0.06], [T + 0.5, 0]],
           knock: [[0, 0], [T, 0], [T + 0.1, 0.2, 'outQuad'], [T + 1.0, 0, 'inOutSine']],
         });
-        fx.light({ pos: C, color: '#ff2a12', distance: 9, shadow: true, flicker: 0.25, intensity: [[0, 1], [T, 4], [T + 0.02, 22], [2.0, 0, 'outQuad']] });
+        fx.light({ pos: C, color: '#ff2a12', distance: 5.5, shadow: true, flicker: 0.25, intensity: [[0, 1], [T, 3], [T + 0.02, 14], [T + 0.3, 6, 'outQuad'], [1.7, 0, 'outQuad']] });
         fx.shake([[0, 0.015], [T, 0.03], [T + 0.01, 0.26], [T + 1.2, 0, 'outQuad']]);
       },
     },

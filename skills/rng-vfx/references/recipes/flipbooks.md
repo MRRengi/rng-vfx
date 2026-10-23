@@ -26,7 +26,7 @@ Procedural noise stays useful for masks, erosion, distortion and small accents. 
    - Keep the passes grayscale. Colour comes from a ramp in the shader, so one sim serves several palettes.
 4. **Pack.**
    - 8 x 8 frames of 256 px (64 frames) for heroes; 4 x 4 frames of 256 px for small elements.
-   - 4 px of empty padding inside each cell, so mipmaps never bleed between frames.
+   - Empty padding inside each cell sized for the smallest mip (`numbers.md` > Textures), so mipmaps never bleed between frames.
    - `montage` (ImageMagick) or an atlas tool packs the frames.
 5. **Motion vectors (optional).** Export a flow pass, or compute optical flow between frames, so the shader can blend frames without ghosting. This makes 16 frames look like 64.
 
@@ -69,9 +69,11 @@ Always preview the packed sheet on the stand's sky and on black before wiring it
 Using a sheet in an effect:
 - **Pivot:** the shared crop centres the union box, so a fire drawn growing from its base has its base near the cell bottom. Place the quad's centre about 0.4x its size above the ground, and keep it `upright` with no spin; a rotated flame reads as wind.
 - **Value:** drawn and rendered greys arrive at mid value. Tint the ramp down to the style's smoke floor (dark fantasy 0.08 - 0.12) instead of regenerating.
+- **Frame timing:** the growth keys are a small part of the effect's life. Play the sheet on an eased clock, `frame = age01^0.55..0.7 * frames`, so birth to peak takes 3 - 6 frames and the decay keys get the rest (the stand's `sheet.ease`). A linear clock puts the peak at a third of the life, which for a 1.5 s fireball is 0.5 s late.
+- **Frame count:** image models give 5 - 8 keys; add optical-flow in-betweens (`packframes.py --inbetween 1`) so blended frames travel instead of cross-fading (`numbers.md` > Textures).
 - **Variation:** 2 - 3 copies at different sizes and start delays, plus a few procedural sprites breaking the outline, so the drawn shape never reads as one stamp.
 
-Sheets shipped with the stand (`stand/textures/`), usable as starting points under MIT: `anime_fire_3x2`, `anime_smoke_2x2`, `toon_puff_2x2`, `toon_fire_2x2`, `toon_smoke_2x2`, `stylized_fire_3x2`, `stylized_smoke_2x2`, `dark_fire_3x2`, `dark_smoke_2x2`, `realism_smoke_2x2`, plus the procedural `fire_4x4` and `puff_4x4` from `tools/texgen.py`.
+Sheets shipped with the stand (`stand/textures/`), usable as starting points under MIT: drawn (stepped) `anime_fire_3x2`, `anime_smoke_3x2`, `toon_puff_2x2`, `toon_fire_2x2`, `toon_smoke_3x2`; painted `stylized_fire_3x2`, `stylized_smoke_4x4`, `dark_fire_3x2`, `dark_smoke_4x4`; rendered-sim look with flat light `realism_fire_4x4`, `realism_smoke_4x4` (8 keys + flow in-betweens, 15 frames). The procedural `fire_4x4` and `puff_4x4` from `tools/texgen.py` are tier 0 - 1 fallbacks, not hero bodies.
 
 ## Life-map erosion (the cheapest designed shape)
 

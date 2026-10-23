@@ -343,7 +343,7 @@ function effectFps() {
 function load() {
   state.effect?.dispose();
   const def = state.style.effects[state.fxId];
-  state.effect = buildEffect(def, scene, distortScene, celScene, overScene);
+  state.effect = buildEffect(def, scene, distortScene, celScene, overScene, state.style.look.fps || 0);
   const co = state.effect.celOutline();
   celPass.uniforms.uOutline.value.copy(co.color);
   dummy.position.set(...STAGE[state.fxId].dummy);
@@ -693,7 +693,7 @@ const [noise, gAlb, gNrm, gRgh] = await Promise.all([
   loadTex('./textures/ground_normal.png', false),
   loadTex('./textures/ground_rough.png', false),
 ]);
-await preloadSheets(['./textures/fire_4x4.png', './textures/puff_4x4.png', './textures/anime_fire_3x2.png', './textures/toon_puff_2x2.png', './textures/toon_fire_2x2.png', './textures/toon_smoke_2x2.png', './textures/anime_smoke_2x2.png', './textures/stylized_fire_3x2.png', './textures/stylized_smoke_2x2.png', './textures/dark_fire_3x2.png', './textures/dark_smoke_2x2.png', './textures/realism_smoke_2x2.png']);
+await preloadSheets(['./textures/anime_fire_3x2.png', './textures/anime_smoke_3x2.png', './textures/dark_fire_3x2.png', './textures/dark_smoke_4x4.png', './textures/realism_fire_4x4.png', './textures/realism_smoke_4x4.png', './textures/stylized_fire_3x2.png', './textures/stylized_smoke_4x4.png', './textures/toon_fire_2x2.png', './textures/toon_puff_2x2.png', './textures/toon_smoke_3x2.png']);
 G.uNoise.value = noise;
 for (const t of [gAlb, gNrm, gRgh]) t.repeat.set(12, 12);
 groundMaps = [gAlb, gNrm, gRgh];

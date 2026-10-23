@@ -46,6 +46,39 @@ def to_rgba(path, bg, tol, soft, flood=True):
     return im, a
 
 
+def inbetween(cells, k):
+    """Optical-flow in-betweens: each key is warped toward the next along the flow both
+    ways and the two warps are blended, so shapes travel instead of cross-fading."""
+    import cv2
+    out = []
+    pm = []
+    for c in cells:
+        x = np.asarray(c).astype(np.float32) / 255.0
+        x[..., :3] *= x[..., 3:4]  # premultiplied, so empty pixels carry no colour
+        pm.append(x)
+    gray = [cv2.cvtColor((np.clip(x[..., :3] + x[..., 3:4] * 0.5, 0, 1) * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY) for x in pm]
+    h, w = gray[0].shape
+    gx, gy = np.meshgrid(np.arange(w, dtype=np.float32), np.arange(h, dtype=np.float32))
+
+    def warp(img, flow, t):
+        return cv2.remap(img, gx - t * flow[..., 0], gy - t * flow[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+
+    for i in range(len(pm) - 1):
+        out.append(pm[i])
+        f_ab = cv2.calcOpticalFlowFarneback(gray[i], gray[i + 1], None, 0.5, 4, 25, 4, 7, 1.5, 0)
+        f_ba = cv2.calcOpticalFlowFarneback(gray[i + 1], gray[i], None, 0.5, 4, 25, 4, 7, 1.5, 0)
+        for j in range(1, k + 1):
+            t = j / (k + 1)
+            out.append((1 - t) * warp(pm[i], f_ab, t) + t * warp(pm[i + 1], f_ba, 1 - t))
+    out.append(pm[-1])
+    res = []
+    for x in out:
+        a_ = np.clip(x[..., 3:4], 0, 1)
+        rgb = np.where(a_ > 1e-3, x[..., :3] / np.maximum(a_, 1e-3), 0)
+        res.append(Image.fromarray((np.clip(np.dstack([rgb, a_]), 0, 1) * 255).astype(np.uint8), "RGBA"))
+    return res
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("frames", nargs="+")
@@ -58,6 +91,7 @@ def main():
     ap.add_argument("--cols", type=int, default=0)
     ap.add_argument("--no-flood", action="store_true", help="key every background-coloured pixel, not only those connected to the border")
     ap.add_argument("--auto-bg", action="store_true", help="estimate the backdrop colour and noise from each frame's border (for painted, mottled backdrops)")
+    ap.add_argument("--inbetween", type=int, default=0, help="optical-flow in-betweens generated between consecutive keys (8 keys + 1 = 15 frames)")
     ap.add_argument("--holes", action="store_true", help="also key enclosed backdrop-coloured regions (drawn dissolve holes); leave off for grey smoke whose highlights match the backdrop")
     a = ap.parse_args()
     global HOLES, AUTO
@@ -77,11 +111,8 @@ def main():
     half = max(max(ys) - min(ys), max(xs) - min(xs)) / 2 / (1 - 2 * a.pad)
     box = (int(cx - half), int(cy - half), int(cx + half), int(cy + half))
 
-    n = len(frames)
-    cols = a.cols or int(math.ceil(math.sqrt(n)))
-    rows = int(math.ceil(n / cols))
-    sheet = Image.new("RGBA", (cols * a.cell, rows * a.cell), (0, 0, 0, 0))
-    for i, (rgb, al) in enumerate(frames):
+    cells = []
+    for rgb, al in frames:
         # Un-mix the background from the soft edge so it does not leave a grey halo.
         alc = np.clip(al, 1e-3, 1.0)[..., None]
         fg = np.clip((rgb - bg * (1 - alc)) / alc, 0, 1)
@@ -89,7 +120,15 @@ def main():
         im = Image.fromarray((arr * 255).astype(np.uint8), "RGBA")
         canvas = Image.new("RGBA", (box[2] - box[0], box[3] - box[1]), (0, 0, 0, 0))
         canvas.paste(im, (-box[0], -box[1]))
-        cell = canvas.resize((a.cell, a.cell), Image.LANCZOS)
+        cells.append(canvas.resize((a.cell, a.cell), Image.LANCZOS))
+    if a.inbetween > 0:
+        cells = inbetween(cells, a.inbetween)
+
+    n = len(cells)
+    cols = a.cols or int(math.ceil(math.sqrt(n)))
+    rows = int(math.ceil(n / cols))
+    sheet = Image.new("RGBA", (cols * a.cell, rows * a.cell), (0, 0, 0, 0))
+    for i, cell in enumerate(cells):
         sheet.paste(cell, ((i % cols) * a.cell, (i // cols) * a.cell))
     sheet.save(a.out)
     print(f"wrote {a.out}: {n} frames, grid {cols}x{rows}, {a.cell}px cells")

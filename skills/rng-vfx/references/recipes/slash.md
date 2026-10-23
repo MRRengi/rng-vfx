@@ -7,7 +7,7 @@ A slash shows the path the blade took. Placed by hand with rotation angles, it d
 When the attack has an animation, the slash is the surface swept by the blade.
 
 1. **Sample.** Read the blade's base and tip positions every 1/60 s across the active frames of the attack clip, in the character's local space.
-   - Unity: in an editor script, call `clip.SampleAnimation(character, t)` for each t, then read `bladeBase.position` and `bladeTip.position` (two empty transforms parented to the weapon).
+   - Unity: in an editor script, sample the clip at each t with `AnimationMode.StartAnimationMode()` + `AnimationMode.SampleAnimationClip(character, clip, t)` (works for Humanoid and Generic clips; `clip.SampleAnimation` does not drive Humanoid retargeting correctly), then read `bladeBase.position` and `bladeTip.position` (two empty transforms parented to the weapon) and call `AnimationMode.StopAnimationMode()` at the end. A `PlayableGraph` with an `AnimationClipPlayable` evaluated per t also works.
    - Unreal: give the weapon two sockets. In Niagara, a ribbon emitter can follow the tip socket at runtime. To bake the shape, sample `GetSocketLocation` per frame from an editor utility.
    - Blender: put two empties on the blade and export their per-frame positions.
 2. **Smooth.** Resample the two paths with Catmull-Rom splines to 24 - 32 evenly spaced samples over the swing. Raw samples at 60 Hz give a faceted arc on fast swings.
@@ -36,6 +36,8 @@ Build the arc from intent, never from Euler angles.
   - Horizontal is for sweeps, vertical for overheads only.
   - The plane is seen at least 30 degrees off edge-on from the gameplay camera.
 - **Size:** the chord is at least 1.3x the target's width, so the slash reads as passing through the body, not touching it.
+- **Curvature reads as direction.** The visible band is what the eye reads, not the swing vector at its midpoint. A small radius with a long span curls the band's far half steeply down and the slash reads vertical, even with a diagonal `swing`. Without an animation path, keep `R` at 1.1 - 1.3x the character's height and the visible span at 80 - 110 degrees for a diagonal cut; widen the span only for full spins. Judge the angle on the strip from the gameplay camera: the line from the band's start to its end should sit 20 - 50 degrees from horizontal.
+- **Secondary arcs** share the main arc's centre (concentric) at 0.85x and 1.1x its radius; placing each one through the hit point on its own makes them cross in an X.
 
 ```js
 // three.js: orient an arc mesh (built in its local XY plane, angles a0 -> a1) by intent.

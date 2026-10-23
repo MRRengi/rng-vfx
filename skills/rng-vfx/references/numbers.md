@@ -20,22 +20,25 @@ Conversions:
 - **three.js:** with `EffectComposer`, B is `UnrealBloomPass.threshold`, compared against linear luminance (`LuminosityHighPassShader`). `toneMappingExposure` is applied later in `OutputPass`, so it does not change what blooms; an exposure dip there darkens the frame but not the bloom input (scale the effect's emissive too, or apply exposure before the bloom pass).
 
 **What the threshold measures depends on the engine.**
-- **three.js** (`UnrealBloomPass`) and **Unreal** compare luminance (`0.2126 R + 0.7152 G + 0.0722 B`). Every level in the table above is then a luminance; for a saturated colour, scale its channels by `level / lum(colour)` (table below).
-- **Unity URP and HDRP** prefilter on the brightest channel (`max(r, g, b)` with a soft knee). There the levels apply to the max channel directly, and the table below does not apply: a pure red at 1.2 B in its red channel blooms like white at 1.2 B.
+- **three.js** (`UnrealBloomPass`) compares Rec.709 luminance of the linear colour (`0.2126 R + 0.7152 G + 0.0722 B`).
+- **Unreal** compares its own `Luminance()` (`0.3 R + 0.59 G + 0.11 B`, linear). Reds and blues bloom earlier there than in three.js.
+- For both, every level in the table above is a luminance; for a saturated colour, scale its channels by `level / lum(colour)` (table below).
+- **Unity URP** prefilters on the brightest channel (`max(r, g, b)` with a soft knee). The levels apply to the max channel directly and the table below does not apply: a pure red at 1.2 B in its red channel blooms like white at 1.2 B.
+- **Unity HDRP** bloom is energy-conserving and its default Threshold is 0: everything scatters a little and there is no B until you set one. Either set an explicit Threshold (then B is that value after exposure) or, like UE's -1, define B as the value where the halo becomes clearly visible, measured with the method in `audit.md`.
 
 three.js also has a hard knee: `UnrealBloomPass` passes the whole pixel once it crosses the threshold (`smoothWidth` 0.01), so anything sitting right at B flickers in and out of bloom with a hard contour. Raise `bloom.highPassUniforms.smoothWidth` to about 0.15x the threshold, and keep body levels below 0.85 B or above 1.15 B.
 
-Luminance engines (three.js, Unreal), channel scale per colour:
+Luminance engines, channel scale per colour (sRGB hex converted to linear first):
 
-| Colour | lum per unit | channel scale for 1 B of luminance |
-|---|---|---|
-| white | 1.0 | x1 |
-| yellow #ffd23f | 0.81 | x1.2 |
-| cyan #3fd8ff | 0.68 | x1.5 |
-| orange #ff6a1f | 0.36 | x2.8 |
-| pure red #ff0000 | 0.21 | x4.7 |
-| violet #7b5cff | 0.18 | x5.6 |
-| pure blue #0000ff | 0.07 | x13.9 |
+| Colour | three.js lum per unit | three.js scale for 1 B | Unreal lum per unit | Unreal scale for 1 B |
+|---|---|---|---|---|
+| white | 1.00 | x1 | 1.00 | x1 |
+| yellow #ffd23f | 0.68 | x1.5 | 0.69 | x1.5 |
+| cyan #3fd8ff | 0.57 | x1.7 | 0.53 | x1.9 |
+| orange #ff6a1f | 0.32 | x3.2 | 0.39 | x2.6 |
+| pure red #ff0000 | 0.21 | x4.7 | 0.30 | x3.3 |
+| violet #7b5cff | 0.19 | x5.2 | 0.23 | x4.3 |
+| pure blue #0000ff | 0.07 | x13.9 | 0.11 | x9.1 |
 
 A red rim "at 1.2 B" written as channel values never blooms; a white core at the same channel value blows out. Reds and blues need much larger channel values to glow and turn toward white or pink under AgX when pushed. In dark styles, carry the heat with value contrast (dark body, bright edge) rather than raw channel intensity.
 
@@ -112,7 +115,16 @@ The rules elsewhere cap brightness; these floors stop effects from going timid. 
 | Hit target against the background, at any moment | 0.1, and the target's own luminance stays at 0.08 or more |
 | Primary shape against its own residue (smoke, dust) | 0.3 |
 
-Outlines on cel shapes: at least max(2 px, 7% of the shape's radius) at the gameplay camera. A 5% outline on a 30 px puff is under a pixel.
+Outlines on cel shapes: max(2 px, 6 - 8% of the shape's radius) at the gameplay camera; anime at 6%, toon at 8%, pixel 1 sprite pixel. A 5% outline on a 30 px puff is under a pixel.
+
+## Textures
+
+| | Value | Why |
+|---|---|---|
+| Flipbook cell padding | about 2^m px of empty border per cell, m = the smallest mip the sheet is drawn at (4 px for a 256 px cell drawn down to about 64 px) | one texel at mip m covers 2^m base texels |
+| Frames per second of life | blended bodies (smoke, fire): 16+ frames for each 1 - 2 s of life, or fewer keys with motion vectors; stepped drawn sheets: one drawing per 2 - 3 frames of the style's rate | 4 frames crossfaded over 2 s read as one blurry shape morphing |
+| Baked light | none on sprites that rotate; bake density only and light in the shader (six-way or normal), or keep the sprite upright and unrotated | a key light baked from the upper left points the wrong way as soon as the sprite spins |
+| Star spike sharpness (triangle-wave power) | 2 - 3 | 8+ gives hairlines, a cosine gives petals |
 
 ## Sparks
 

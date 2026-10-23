@@ -19,7 +19,7 @@ Checks (thresholds from numbers.md / fundamentals.md):
   straight-edges  dead-straight runs ending in a corner on the mask outline (quad, strip or ground cuts)
   size            primary shape height at peak, in 1080p pixels, >= --min-px (gameplay camera)
   frame-border    the effect never touches the frame border (framing)
-  white-clip      share of the effect clipped to white on its brightest frame <= 10%
+  white-clip      share of the effect burned to white next to its coloured body <= 15% (OKLab)
   haze            brightness rise outside the effect (bloom spill) at the brightest frame <= +25%
   hue             on the frame with the most visible effect pixels (impacts: within 0.25 s of contact),
                   >= 15% of them are saturated and >= 30% of the saturated ones are within 25 deg of --hue
@@ -30,10 +30,17 @@ Checks (thresholds from numbers.md / fundamentals.md):
                   below 0.75x the luminance of the spark's hot body
   slash-crosses   (stand) each slash's arc midpoint projects inside the target's screen box
   hit-vector      (stand) the slash swing and the spray agree: the effect's centroid after contact
-                  lies on the hit side, within 60 deg of the projected hit direction
-  target-visible  (stand) the hit target keeps >= half its rest luminance and >= 0.08 during the hit
-  grounded        (explosions, stand) the core mask's bottom stays within 4% of the frame of the
-                  blast's ground point for the 0.4 s after the peak
+                  lies on the hit side, within 45 deg of the projected hit direction
+  target-visible  (stand) the hit target keeps >= 70% of its rest luminance and >= 0.08 during the hit
+  target-colour   (stand) OKLab chroma of the target (85th percentile of its box) rises <= 0.05
+  time-to-peak    hot body reaches 60% of its max within --max-rise of contact
+  blobs           no smooth convex main body, no 3+ smooth balls at peak and handoff
+  closed-ring     (impacts, stand) no closed ring around the hit point for more than one sample
+  effect-light    (stand) lit pool < 3x the peak core area and dimmer than the effect's brightest part
+  drawing-grid    (held styles, stand) contact falls on a drawing
+  dark-blood      (darkfantasy impact) saturated reds: median OKLab L <= 0.5, chroma <= 0.2
+  grounded        (explosions, stand) the effect touches the blast's ground point for >= 60% of
+                  the time from contact until it falls under 20% of its peak area
   dark-background (dark styles, stand) the effect keeps >= half its visible area on Night arena
   static-hold is per region (8x8 tiles), so a frozen spark fails even while smoke moves
 Exit code 1 when any check fails.
@@ -68,6 +75,38 @@ def load(path):
 
 def luminance(img):
     return img[..., 0] * 0.2126 + img[..., 1] * 0.7152 + img[..., 2] * 0.0722
+
+
+def oklab(rgb):
+    """sRGB (0..1, gamma) to OKLab. Returns L, a, b arrays."""
+    c = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
+    r, g, b = c[..., 0], c[..., 1], c[..., 2]
+    l = np.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+    m = np.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+    s_ = np.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+    L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s_
+    A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s_
+    B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s_
+    return L, A, B
+
+
+def blob_stats(mask):
+    """Per connected component: area, solidity (area / hull area) and circularity
+    (4 pi area / perimeter^2). Smooth convex balls score high on both."""
+    if cv2 is None or mask.sum() < 50:
+        return []
+    cnts, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    out = []
+    for c in cnts:
+        a_ = cv2.contourArea(c)
+        if a_ < 60:
+            continue
+        hull = cv2.contourArea(cv2.convexHull(c))
+        per = cv2.arcLength(c, True)
+        x, y, w, h = cv2.boundingRect(c)
+        out.append({"area": a_, "solidity": a_ / max(hull, 1), "circ": 4 * np.pi * a_ / max(per * per, 1),
+                    "box": (x, y, w, h)})
+    return out
 
 
 def effect_mask(fx, base, thr=0.06):
@@ -218,8 +257,24 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
     sums = [float(luminance(f)[m].sum()) if m.any() else 0.0 for f, m in zip(fx, masks)]
     bright = int(np.argmax(sums))
     f, m = fx[bright], masks[bright]
-    clip = (f.min(-1) > 0.96) & m
-    res["white-clip"] = {"pass": clip.sum() <= 0.10 * max(1, m.sum()), "share": round(float(clip.sum() / max(1, m.sum())), 3), "t": round(times[bright], 3)}
+    # Burned to white: near-white and colourless. Tone mappers (AgX, Neutral) roll off
+    # instead of clipping, so a hard min(rgb) > 0.96 test never fires; this one does.
+    Lw, Aw, Bw = oklab(f)
+    white = (Lw > 0.9) & (np.hypot(Aw, Bw) < 0.035) & m
+    # Only white enclosed by the effect's colour counts (a burned hot core). White puffs,
+    # dust and designed white shapes are bordered by outline, ground or sky instead.
+    col_ = (np.hypot(Aw, Bw) > 0.1) & m
+    clip = np.zeros_like(white)
+    if cv2 is not None and white.any():
+        nlab, lab = cv2.connectedComponents(white.astype(np.uint8))
+        for k in range(1, nlab):
+            comp = lab == k
+            if comp.sum() < 6:
+                continue
+            ring = cv2.dilate(comp.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~comp
+            if ring.any() and col_[ring].mean() > 0.6:
+                clip |= comp
+    res["white-clip"] = {"pass": clip.sum() <= 0.15 * max(1, m.sum()), "share": round(float(clip.sum() / max(1, m.sum())), 3), "t": round(times[bright], 3)}
     pre = max([i for i, t in enumerate(times) if t < contact - 1e-6] or [0])
     outside = ~m
     if cv2 is not None:
@@ -227,7 +282,12 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
     l0 = float(luminance(fx[pre])[outside].mean()) if outside.sum() > 100 else 1.0
     l1 = float(luminance(f)[outside].mean()) if outside.sum() > 100 else 1.0
     rise = (l1 - l0) / max(l0, 1e-4)
-    res["haze"] = {"pass": rise <= 0.25, "rise_outside_effect": round(rise, 3), "t": round(times[bright], 3)}
+    # Bloom spill: the soft mask (bloom included) against the hard core. A halo much
+    # wider than the shape is haze even when it sits "inside" the soft mask.
+    cb = cores[bright].sum()
+    halo = float(m.sum() / max(cb, 1)) if cb > 30 else 1.0
+    res["haze"] = {"pass": rise <= 0.25 and halo <= 4.0, "rise_outside_effect": round(rise, 3),
+                   "halo_over_core": round(halo, 2), "t": round(times[bright], 3)}
 
     # hue on the frame with the most hot pixels
     if a.hue is None:
@@ -306,6 +366,50 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             first = after[0]
             ratio = carea[first] / max(1.0, carea.max())
             res["growth"] = {"pass": ratio <= 0.5, "first_over_peak": round(float(ratio), 3), "t": round(times[first], 3)}
+    # Time to peak of the hot body (bright or saturated effect pixels): the primary
+    # shape has to arrive fast. Smoke grows for seconds and is excluded by brightness.
+    hot = []
+    for f_, m_ in zip(fx, masks):
+        if not m_.any():
+            hot.append(0)
+            continue
+        L_, A_, B_ = oklab(f_)
+        hot.append(int(((L_ > 0.62) | (np.hypot(A_, B_) > 0.12) & (L_ > 0.4))[m_].sum()))
+    hot = np.array(hot, np.float64)
+    if hot.max() > 50:
+        reach = [t for t, v in zip(times, hot) if t >= contact - 1e-6 and v >= 0.6 * hot.max()]
+        ttp = (reach[0] - contact) if reach else 9.0
+        res["time-to-peak"] = {"pass": ttp <= a.max_rise, "seconds": round(ttp, 3), "max": a.max_rise}
+
+    # Blobs: smooth convex balls read as cotton or soap bubbles, and three or more of
+    # them at once read as a stacked column. Judged at the peak and at the handoff.
+    bad_blob = []
+    for i in sorted(set([peak, min(len(times) - 1, peak + max(1, len(times) // 6))])):
+        st = blob_stats(cores[i])
+        tot = sum(b_["area"] for b_ in st) or 1
+        balls = [b_ for b_ in st if b_["solidity"] > 0.94 and b_["circ"] > 0.78 and b_["area"] > 0.04 * tot]
+        big = max(st, key=lambda b_: b_["area"]) if st else None
+        smooth_main = big is not None and big["area"] > 0.5 * tot and big["solidity"] > 0.96 and big["circ"] > 0.82
+        if len(balls) >= 3 or smooth_main:
+            bad_blob.append({"t": round(times[i], 3), "balls": len(balls), "smooth_main": bool(smooth_main)})
+    res["blobs"] = {"pass": not bad_blob, "found": [], "frames": bad_blob}
+
+    if a.max_red_L is not None:
+        # Dark blood: saturated reds after contact stay dark (dark-fantasy palette #7a0a10 - #3a0206).
+        Ls = []
+        for f_, m_, t in zip(fx, masks, times):
+            if not (contact + 0.1 <= t <= contact + 0.8) or not m_.any():
+                continue
+            px = f_[m_]
+            h_, s_, _ = rgb_to_hsv(px)
+            red = ((h_ >= 330) | (h_ <= 20)) & (s_ > 0.45)
+            if red.sum() > 30:
+                L_, A_, B_ = oklab(px[red])
+                Ls.append((float(np.median(L_)), float(np.median(np.hypot(A_, B_)))))
+        med = float(np.median([x[0] for x in Ls])) if Ls else 0.0
+        chr_ = float(np.median([x[1] for x in Ls])) if Ls else 0.0
+        res["dark-blood"] = {"pass": med <= a.max_red_L and chr_ <= 0.2, "median_L": round(med, 3), "max_L": a.max_red_L,
+                             "median_chroma": round(chr_, 3), "max_chroma": 0.2}
 
     if info:
         tx0, ty0, tx1, ty1 = info["target"]
@@ -331,21 +435,42 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
 
         # Target never vanishes: during the reaction it keeps at least half its rest luminance.
         low = float(np.nanmin(tl[win])) if win and np.isfinite(tl[win]).any() else rest
-        res["target-visible"] = {"pass": low >= 0.5 * rest and low >= 0.08, "min_during_hit": round(low, 3), "rest": round(float(rest), 3)}
+        res["target-visible"] = {"pass": low >= 0.7 * rest and low >= 0.08, "min_during_hit": round(low, 3), "rest": round(float(rest), 3)}
+
+        # Target colour (OKLab): a hit flash tints the target toward the effect colour,
+        # it does not repaint it. Chroma rise of the target's body is capped.
+        def tchroma(img):
+            reg = img[by0:by1, bx0:bx1]
+            if not reg.size:
+                return np.nan
+            _, A_, B_ = oklab(reg)
+            return float(np.quantile(np.hypot(A_, B_), 0.85))  # the body, not the sky around it
+        tc = np.array([tchroma(b_) if not ((luminance(b_) > 0.85).mean() > 0.5) else np.nan for b_ in base])
+        c_rest = float(np.nanmin(tc[:npre])) if np.isfinite(tc[:npre]).any() else 0.0
+        c_hit = float(np.nanmax(tc[win])) if win and np.isfinite(tc[win]).any() else c_rest
+        res["target-colour"] = {"pass": a.sprite_flash or (c_hit - c_rest) <= 0.05, "chroma_rest": round(c_rest, 3),
+                                "chroma_hit": round(c_hit, 3), "max_rise": 0.05}
 
         if a.kind == "explosion" and info.get("blastGround"):
             gy = info["blastGround"][1] * H
-            pk = int(np.argmax(carea))
-            span = [i for i, t in enumerate(times) if times[pk] <= t <= times[pk] + 0.4]
+            # From contact until the effect falls under 20% of its peak area, the soft mask
+            # (smoke included) touches the ground for >= 60% of that time.
+            end = max([i for i, v in enumerate(area) if v >= 0.2 * area.max()] or [len(times) - 1])
+            span = [i for i, t in enumerate(times) if t >= contact - 1e-6 and i <= end]
             gaps = []
             for i in span:
-                ys, xs = np.nonzero(cores[i])
+                ys, xs = np.nonzero(masks[i])
                 if len(ys) < 50:
                     continue
-                bottom = np.quantile(ys, 0.98)
-                if gy - bottom > 0.04 * H:
+                if gy - np.quantile(ys, 0.995) > 0.04 * H:
                     gaps.append(round(times[i], 3))
-            res["grounded"] = {"pass": len(gaps) <= len(span) // 4, "floating_at": gaps[:6]}
+            tot_t = (times[span[-1]] - times[span[0]]) if len(span) > 1 else 1
+            gap_t = 0.0
+            for i in span[1:]:
+                if round(times[i], 3) in gaps:
+                    gap_t += times[i] - times[i - 1]
+            res["grounded"] = {"pass": gap_t <= 0.4 * tot_t, "floating_share": round(gap_t / max(tot_t, 1e-6), 3),
+                               "floating_from": gaps[:1], "life_s": round(tot_t, 2)}
 
         if info.get("slashes"):
             bad = []
@@ -355,6 +480,24 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
                 if not (tx0 - pad <= mx_ <= tx1 + pad and ty0 <= my_ <= ty1):
                     bad.append({"at": s_["at"], "mid": [round(mx_, 3), round(my_, 3)]})
             res["slash-crosses"] = {"pass": not bad, "missed": bad[:4], "target_box": [round(v, 3) for v in info["target"]]}
+
+        if a.kind == "impact" and cv2 is not None:
+            # A closed ring around the hit point reads as a targeting reticle.
+            hx_, hy_ = info["hit"][0] * W, info["hit"][1] * H
+            rings = []
+            for i in [j for j, t in enumerate(times) if contact - 1e-6 <= t <= contact + 0.3]:
+                cnts, hier = cv2.findContours(masks[i].astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+                if hier is None:
+                    continue
+                for k, c in enumerate(cnts):
+                    par = hier[0][k][3]
+                    if par < 0:
+                        continue
+                    hole, outer = cv2.contourArea(c), cv2.contourArea(cnts[par])
+                    if hole > 0.25 * outer and hole > 200 and cv2.pointPolygonTest(c, (hx_, hy_), False) >= 0:
+                        rings.append(round(times[i], 3))
+                        break
+            res["closed-ring"] = {"pass": len(rings) <= 1, "times": rings[:6]}
 
         if info.get("hitDir") and a.kind == "impact":
             hx, hy = info["hit"]
@@ -374,7 +517,7 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             if tot:
                 v = acc / tot
                 ang = float(np.degrees(np.arccos(np.clip(np.dot(v, [dx, dy]) / (np.linalg.norm(v) * np.hypot(dx, dy) + 1e-9), -1, 1))))
-                ok = ang <= 60
+                ok = ang <= 45
             swing_bad = []
             for s_ in info.get("slashes", []):
                 if s_.get("swingEnd"):
@@ -397,6 +540,111 @@ def dark_check(ts, dfx, dbase, lfx, lbase):
         if a_lit > 200 and a_dark < 0.5 * a_lit:
             bad.append({"t": round(t, 3), "dark_area": int(a_dark), "lit_area": int(a_lit)})
     return {"dark-background": {"pass": not bad, "vanishing": bad}}
+
+
+def key_mask(shapes, W, H, origin, hpx, sx):
+    """Rasterize shape-key primitives (units of target height, +y up, +x along the hit)."""
+    m = np.zeros((H, W), np.uint8)
+    ox, oy = origin
+
+    def P(x, y):
+        return int(round(ox + sx * x * hpx)), int(round(oy - y * hpx))
+    for sh in shapes:
+        (kind, v), = sh.items()
+        if kind == "circle":
+            cv2.circle(m, P(v[0], v[1]), max(1, int(v[2] * hpx)), 1, -1)
+        elif kind == "ellipse":
+            cv2.ellipse(m, P(v[0], v[1]), (max(1, int(v[2] * hpx)), max(1, int(v[3] * hpx))), 0, 0, 360, 1, -1)
+        elif kind == "poly":
+            cv2.fillPoly(m, [np.array([P(x, y) for x, y in v], np.int32)], 1)
+        elif kind == "star":
+            x, y, ro, ri, n, rot = v
+            pts = []
+            for k in range(int(n) * 2):
+                ang = np.radians(rot) + np.pi * k / n
+                r = ro if k % 2 == 0 else ri
+                pts.append(P(x + r * np.cos(ang), y + r * np.sin(ang)))
+            cv2.fillPoly(m, [np.array(pts, np.int32)], 1)
+    return m.astype(bool)
+
+
+def key_check(keys, fx, base, times, contact, info, kind, out):
+    """Overlap (IoU) of the rendered effect with its shape keys at contact, peak and break-up."""
+    H, W = fx[0].shape[:2]
+    tx0, ty0, tx1, ty1 = info["target"]
+    hpx = (ty1 - ty0) * H
+    if kind == "explosion":
+        origin = (info["blastGround"][0] * W, info["blastGround"][1] * H)
+        sx = 1
+    else:
+        origin = (info["hit"][0] * W, info["hit"][1] * H)
+        sx = -1 if info.get("hitDir") and info["hitDir"][0] < info["hit"][0] else 1
+    rows, tiles = {}, []
+    for name in ("contact", "peak", "breakup"):
+        if name not in keys:
+            continue
+        # Shape is judged here, timing by time-to-peak: each key is matched at its best frame
+        # within +-50% of its time (at least +-2 frames) after contact.
+        kt = max(keys[name]["t"], 1 / 60)
+        win = max(kt * 0.5, 2 / 60, (1.01 / info['fps']) if info.get('fps') else 0)
+        near = min(range(len(times)), key=lambda j: abs(times[j] - contact - kt))
+        if name == "contact" and (luminance(base[near]) > 0.85).mean() > 0.5:
+            rows[name] = "impact frame"  # an inked two-tone contact drawing is the designed contact shape
+            continue
+        cand = [j for j, tt in enumerate(times) if kt - win - 1e-6 <= tt - contact <= kt + win + 1e-6
+                and (luminance(base[j]) > 0.85).mean() <= 0.5]  # skip inked two-tone impact frames
+        if not cand:
+            cand = [min(range(len(times)), key=lambda j: abs(times[j] - contact - kt))]
+        km = key_mask(keys[name]["shapes"], W, H, origin, hpx, sx)
+        k_ = max(3, int(0.04 * hpx) | 1)  # tolerance: about 4% of the target's height
+        ker = np.ones((k_, k_), np.uint8)
+        kmd = cv2.dilate(km.astype(np.uint8), ker).astype(bool)
+        best = (-1.0, cand[0])
+        kc = max(3, int(0.12 * hpx) | 1)
+        close_k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kc, kc))
+        for j in cand:
+            # Silhouette, not pixels: close gaps between sparks and streaks (about 12% of the
+            # target's height) and fill holes, as a designer reads the shape.
+            em = cv2.morphologyEx(effect_mask(fx[j], base[j], 0.12).astype(np.uint8), cv2.MORPH_CLOSE, close_k)
+            cnts_, _ = cv2.findContours(em, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            em = np.zeros_like(em)
+            cv2.drawContours(em, cnts_, -1, 1, -1)
+            emd = cv2.dilate(em, ker).astype(bool)
+            iou_j = float((emd & kmd).sum() / max(1, (emd | kmd).sum()))
+            if iou_j > best[0]:
+                best = (iou_j, j)
+        iou, i = best
+        rows[name] = round(iou, 3)
+        img = (fx[i] * 255).astype(np.uint8).copy()
+        cnts, _ = cv2.findContours(km.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(img, cnts, -1, (0, 255, 255), 1)
+        tiles.append(img)
+    if tiles and out:
+        Image.fromarray(np.concatenate(tiles, 1)).save(os.path.join(out, "keys.png"))
+    nums = [v_ for v_ in rows.values() if isinstance(v_, float)]
+    worst = min(nums) if nums else 1.0
+    return {"shape-keys": {"pass": worst >= 0.3, "iou": rows, "min": 0.3, "aim": 0.6}}
+
+
+def light_check(ts, lonly, bare, full, base):
+    """Effect lights: the lit pool (ground and target) stays smaller than 3x the effect's
+    core and dimmer than its hot body (numbers.md: explosion light <= 1 B)."""
+    bad = []
+    rows = []
+    cores_ = [core_mask(fu, ba) for fu, ba in zip(full, base)]
+    core_peak = max([c.sum() for c in cores_] + [1])
+    for t, lo, br, fu, core in zip(ts, lonly, bare, full, cores_):
+        lit = effect_mask(lo, br, 0.04)
+        if lit.sum() < 50:
+            continue
+        rise = luminance(lo)[lit] - luminance(br)[lit]
+        pool = float(np.quantile(luminance(lo)[lit], 0.95))
+        body = float(np.quantile(luminance(fu)[core], 0.95)) if core.sum() > 20 else 1.0
+        ar = lit.sum() / core_peak
+        rows.append({"t": round(t, 3), "area_x": round(float(ar), 2), "pool_L": round(pool, 3), "body_L": round(body, 3), "rise": round(float(rise.mean()), 3)})
+        if (ar > 3.0 and rise.mean() > 0.04) or pool > 0.9 * body:
+            bad.append(rows[-1])
+    return {"effect-light": {"pass": not bad, "over": bad[:4], "frames": len(rows)}}
 
 
 def sample_times(dur, contact, fps_style):
@@ -456,6 +704,20 @@ def cmd_stand(a):
                 return fx_, base_
 
             fx, base = shoot(a.camera, times)
+            # Lights alone against nothing at all, to cap effect lights against the effect.
+            lt = [t for t in (contact + 0.03, contact + 0.1, contact + 0.25, contact + 0.5) if t < dur]
+            only_lights = "window.rngStand.layers().filter(l => l.kind.startsWith('light')).map(l => l.i)"
+            pg.evaluate(f"window.rngStand.set('camera', '{a.camera}')")
+            pg.evaluate(f"window.rngStand.solo({only_lights})")
+            lfx_ = [grab(t) for t in lt]
+            pg.evaluate("window.rngStand.solo([])")
+            lbare = [grab(t) for t in lt]
+            pg.evaluate("window.rngStand.solo(null)")
+            lfull = [grab(t) for t in lt]
+            pg.evaluate(f"window.rngStand.solo({lights})")
+            lbase = [grab(t) for t in lt]
+            pg.evaluate("window.rngStand.solo(null)")
+            light_pass = (lt, lfx_, lbare, lfull, lbase)
             pg.evaluate(f"window.rngStand.seek({contact + 2 / 60})")
             info = pg.evaluate("window.rngStand.info()")
             dark = None
@@ -485,10 +747,25 @@ def cmd_stand(a):
     if a.hue == "auto":
         a.hue = STAND_HUES.get(f"{a.style}-{a.fx}")
     a.hold_seconds = (2.0 / fps_style) if fps_style else 4.0 / 60
+    if a.min_px is None:
+        a.min_px = 200 if a.kind == "explosion" else 80  # tier 3 explosion, tier 2 impact
+    if a.max_rise is None:
+        a.max_rise = 0.2 if a.kind == "explosion" else 0.12
+        if fps_style:
+            a.max_rise = max(a.max_rise, 2.0 / fps_style)
+    if a.max_red_L is None and a.style == "darkfantasy" and a.kind == "impact":
+        a.max_red_L = 0.5
     if a.style == "pixel":
         a.sprite_flash = True
         a.min_sat_share = min(a.min_sat_share, 0.1)
     res = run_checks(fx, base, times, contact, dur, a, close=close, info=info)
+    res.update(light_check(*light_pass))
+    kp = a.keys or os.path.join(root, "keys", f"{a.style}-{a.fx}.json")
+    if cv2 is not None and os.path.exists(kp):
+        res.update(key_check(json.load(open(kp)), fx, base, times, contact, info, a.kind, out))
+    if fps_style:
+        k = contact * fps_style
+        res["drawing-grid"] = {"pass": abs(k - round(k)) < 0.02, "contact": contact, "drawings_per_s": fps_style}
     if dark:
         res.update(dark_check(*dark))
     return res
@@ -499,7 +776,9 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("frames", "stand"):
         s = sub.add_parser(name)
-        s.add_argument("--min-px", type=float, default=40, help="primary shape height at 1080p (40 tier 1, 80 tier 2, 200 tier 3)")
+        s.add_argument("--min-px", type=float, default=None, help="primary shape height at 1080p (40 tier 1, 80 tier 2, 200 tier 3); stand default: 80 impacts, 200 explosions")
+        s.add_argument("--max-rise", type=float, default=None, help="seconds from contact until the hot body reaches 60%% of its peak (default 0.12 impacts, 0.2 explosions, at least 2 drawings)")
+        s.add_argument("--max-red-L", type=float, default=None, help="dark blood: median OKLab lightness of saturated reds after contact (darkfantasy impact: 0.5)")
         s.add_argument("--kind", choices=["impact", "explosion", "other"], default=None)
         s.add_argument("--min-sat-share", type=float, default=0.15, help="share of visible pixels that must be saturated")
         s.add_argument("--sprite-flash", action="store_true", help="pixel style: a full-white sprite flash is the intended hit cue")
@@ -525,11 +804,14 @@ def main():
             s.add_argument("--height", type=int, default=360)
             s.add_argument("--port", type=int, default=8790)
             s.add_argument("--out", default="")
+            s.add_argument("--keys", default="", help="shape-key JSON (default stand/keys/<style>-<fx>.json)")
     a = ap.parse_args()
     if a.hue not in ("auto",):
         a.hue = None if str(a.hue).lower() == "none" else float(a.hue)
     if a.cmd == "frames":
         a.kind = a.kind or "other"
+        a.min_px = a.min_px if a.min_px is not None else 40
+        a.max_rise = a.max_rise if a.max_rise is not None else (0.2 if a.kind == "explosion" else 0.12)
         res = cmd_frames(a)
     else:
         res = cmd_stand(a)

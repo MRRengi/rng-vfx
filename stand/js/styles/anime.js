@@ -95,7 +95,7 @@ export default {
         // Hero fireball: five drawn keyframes (image model, see recipes/flipbooks.md),
         // played stepped on the drawing grid, two drawings each.
         fx.burst({
-          shape: 'sheet', cel: true, sheet: { url: './textures/anime_fire_3x2.png', grid: [3, 2], frames: 5, stepped: true },
+          shape: 'sheet', cel: true, sheet: { url: './textures/anime_fire_3x2.png', grid: [3, 2], frames: 5, stepped: true, ease: 0.65 },
           dir: 'cone', axis: UP, angle: 1, count: 1, origin: at(C, 0, 0.35, 0), speed: [0.6, 0.6], drag: 2,
           life: [10 * D, 10 * D], size: [3.4, 3.4], sizeRand: 0, blend: 'alpha', order: 5, fadeDist: 0.05, fade: [0, 0.999],
           ramp: fx.ramp([[0, '#ffffff', 1.05], [1, '#ffffff', 1.0]]),
@@ -114,7 +114,7 @@ export default {
         }, T);
         fx.burst({
           // Drawn smoke (image-model keyframes): 2 bands, outline, breaking into chunks.
-          shape: 'sheet', cel: true, sheet: { url: './textures/anime_smoke_2x2.png', grid: [2, 2], frames: 4, stepped: true },
+          shape: 'sheet', cel: true, sheet: { url: './textures/anime_smoke_3x2.png', grid: [3, 2], frames: 6, stepped: true },
           dir: 'cone', axis: UP, angle: 35, count: 4, sizeDist: [2, 2, 0], origin: at(BLAST, 0, 1.0, 0), spawnR: 0.5,
           speed: [1.0, 1.8], gravity: [0, 1.5, 0], drag: 2, delay: [0, 2 * D], life: [12 * D, 14 * D],
           size: [2.6, 3.4], sizeIn: 0.1, blend: 'alpha', order: 0, fadeDist: 0.05, fade: [0, 0.999],
@@ -143,7 +143,7 @@ export default {
           jolt: [[0, 0], [T, 0.05], [T + 6 * D, 0]],
           knock: [[0, 0], [T, 0], [T + 2 * D, 0.18, 'outQuad'], [T + 14 * D, 0, 'inOutSine']],
         });
-        fx.light({ pos: C, color: '#ffb35c', distance: 10, shadow: true, intensity: [[0, 0], [T, 3], [T + 0.001, 45], [T + 12 * D, 0, 'outQuad']] });
+        fx.light({ pos: C, color: '#ffb35c', distance: 4.5, shadow: true, intensity: [[0, 0], [T, 2], [T + 0.001, 28], [T + 3 * D, 11], [T + 12 * D, 0, 'outQuad']] });
         fx.shake([[0, 0], [T, 0], [T + 0.001, 0.22], [T + 10 * D, 0, 'outQuad']]);
       },
     },

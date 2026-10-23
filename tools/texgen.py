@@ -10,7 +10,7 @@ Examples:
   python texgen.py noise --kind voronoi --cells 8 --size 512 --seamless -o cells.png
   python texgen.py noise --kind cracks --cells 6 -o cracks.png
   python texgen.py shape --kind ring --width 0.08 -o ring.png
-  python texgen.py shape --kind star --spikes 6 --sharp 12 -o star.png
+  python texgen.py shape --kind star --spikes 6 --sharp 2.5 -o star.png
   python texgen.py shape --kind glow --falloff 2.5 -o glow.png
   python texgen.py shape --kind streak -o streak.png
   python texgen.py ramp --stops "0:#ffffff,0.3:#ffd34d,0.7:#ff6a1f,1:#3b0f0f" -o fire_ramp.png
@@ -244,7 +244,9 @@ def cmd_shape(a):
         d = np.abs(r - a.radius) - a.width
         img = np.clip(1 - d / a.soft, 0, 1) * (r <= 1)
     elif a.kind == "star":
-        sp = np.abs(np.cos(ang * a.spikes / 2)) ** a.sharp
+        # Triangle wave, not a cosine: a cosine power gives rounded petals (a flower).
+        tri = 1 - np.abs((ang / (2 * np.pi) * a.spikes + 0.5) % 1.0 - 0.5) * 2
+        sp = tri ** a.sharp
         rad = a.core + a.spike_len * sp
         img = np.clip((1 - r / rad) * 2.5, 0, 1) ** 1.5
     elif a.kind == "streak":
@@ -403,7 +405,7 @@ def main():
     s.add_argument("--width", type=float, default=0.06)
     s.add_argument("--soft", type=float, default=0.05)
     s.add_argument("--spikes", type=int, default=6)
-    s.add_argument("--sharp", type=float, default=10)
+    s.add_argument("--sharp", type=float, default=2.5, help="spike pointedness: 2 - 3 concave wedges, 8+ hairlines")
     s.add_argument("--core", type=float, default=0.25)
     s.add_argument("--spike-len", type=float, default=0.7)
     s.add_argument("--seed", type=int, default=1)

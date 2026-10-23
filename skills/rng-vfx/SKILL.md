@@ -9,7 +9,7 @@ A VFX artist's production process, written for an agent. Two things make an effe
 - **The decision chain:** what the effect communicates, which style rules apply, how it is timed, how it reads at gameplay distance in this particular project.
 - **Authored shapes and surfaces:** designed silhouettes, flipbooks and painted masks, slashes swept from the weapon, lit smoke, depth-aware blending, distortion, a reacting target.
 
-A correct chain rendered as procedural blobs on round quads still looks cheap. Follow the chain in order. Numbers come from `references/numbers.md`; the tests come from `references/fundamentals.md` > Quality floors.
+A correct chain rendered as procedural blobs on round quads still looks cheap. Follow the chain in order. Numbers come from `references/numbers.md` (when a style file disagrees, numbers.md wins); the tests come from `references/fundamentals.md` > Quality floors.
 
 ## The chain
 

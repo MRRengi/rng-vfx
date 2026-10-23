@@ -11,7 +11,7 @@ Covers URP (most common), HDRP and the Built-in pipeline where they differ.
 | Meshes with animated shaders (slashes, domes, beams, shields) | MeshRenderer + Shader Graph material, animated by Animator, Timeline or script |
 | Screen effects (impact frame, chromatic pulse, flash) | URP Renderer Feature or Volume overrides; HDRP Custom Pass |
 
-WebGL builds: VFX Graph does not run on WebGL; use Shuriken there.
+WebGL builds: VFX Graph does not run on WebGL; use Shuriken there. Unity 6's WebGPU backend (experimental) supports compute and can run VFX Graph; use it only when the project already targets WebGPU and keeps a WebGL fallback.
 
 ## Shader Graph for VFX
 
@@ -85,12 +85,12 @@ TAA (HDRP, and URP in recent versions) smears thin fast sparks and blends flipbo
 
 ## Headless frame strips (no Play mode)
 
-Effects can be sampled at exact times in the editor without entering Play mode, which makes them checkable in batch mode by an agent. Shuriken: `ParticleSystem.Simulate(time, withChildren: true, restart: true, fixedTimeStep: true)`. VFX Graph: `VisualEffect.Reinit()` then `VisualEffect.Simulate(stepDeltaTime, stepCount)`. Timeline: set `PlayableDirector.time` and call `Evaluate()`. Then render a camera into a RenderTexture.
+Effects can be sampled at exact times in the editor without entering Play mode, which makes them checkable in batch mode by an agent. Shuriken: `ParticleSystem.Simulate(time, withChildren: true, restart: true, fixedTimeStep: true)`. VFX Graph: `VisualEffect.Reinit()` then `VisualEffect.Simulate(stepDeltaTime, stepCount)`. Those steps are queued and applied by the VFX manager on its next update, so rendering right after `Simulate` captures stale particles; the script below renders one editor update later. Timeline: set `PlayableDirector.time` and call `Evaluate()`. Then render a camera into a RenderTexture.
 
 ```csharp
-// Editor/FxStrip.cs - run with:
+// Editor/FxStrip.cs - run with (no -quit: the script exits itself when done):
 // Unity -batchmode -projectPath <project> -executeMethod FxStrip.Run
-//   -fxPrefab Assets/FX/Hit.prefab -fxOut Temp/hit_strip.png -fxDuration 1.0 -fxFrames 8 -quit -logFile -
+//   -fxPrefab Assets/FX/Hit.prefab -fxOut Temp/hit_strip.png -fxDuration 1.0 -fxFrames 8 -logFile -
 // Do not pass -nographics: rendering needs a graphics device.
 using System.Globalization;
 using System.IO;
@@ -100,35 +100,52 @@ using UnityEngine.VFX;
 
 public static class FxStrip
 {
+    static GameObject root;
+    static Camera cam;
+    static RenderTexture rt;
+    static Texture2D strip, frame;
+    static ParticleSystem[] shuriken;
+    static VisualEffect[] graphs;
+    static UnityEngine.Playables.PlayableDirector director;
+    static string outPath;
+    static float duration;
+    static int frames, index, phase;
+    const int W = 480, H = 320;
+
     public static void Run()
     {
         var args = System.Environment.GetCommandLineArgs();
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Arg(args, "-fxPrefab"));
-        var outPath = Arg(args, "-fxOut") ?? "Temp/fx_strip.png";
-        var duration = float.Parse(Arg(args, "-fxDuration") ?? "1", CultureInfo.InvariantCulture);
-        var frames = int.Parse(Arg(args, "-fxFrames") ?? "8", CultureInfo.InvariantCulture);
+        outPath = Arg(args, "-fxOut") ?? "Temp/fx_strip.png";
+        duration = float.Parse(Arg(args, "-fxDuration") ?? "1", CultureInfo.InvariantCulture);
+        frames = int.Parse(Arg(args, "-fxFrames") ?? "8", CultureInfo.InvariantCulture);
 
-        var root = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-        var cam = new GameObject("FxStripCamera").AddComponent<Camera>();
+        root = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        cam = new GameObject("FxStripCamera").AddComponent<Camera>();
         cam.transform.position = new Vector3(0f, 1.7f, -4.8f);
         cam.transform.LookAt(new Vector3(0f, 1.1f, 0f));
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = new Color(0.05f, 0.05f, 0.07f);
         cam.allowHDR = true;
-
-        const int w = 480, h = 320;
-        var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32);
+        rt = new RenderTexture(W, H, 24, RenderTextureFormat.ARGB32);
         cam.targetTexture = rt;
-        var strip = new Texture2D(w * frames, h, TextureFormat.RGB24, false);
-        var frame = new Texture2D(w, h, TextureFormat.RGB24, false);
+        strip = new Texture2D(W * frames, H, TextureFormat.RGB24, false);
+        frame = new Texture2D(W, H, TextureFormat.RGB24, false);
+        shuriken = root.GetComponentsInChildren<ParticleSystem>();
+        graphs = root.GetComponentsInChildren<VisualEffect>();
+        director = root.GetComponentInChildren<UnityEngine.Playables.PlayableDirector>();
+        index = 0;
+        phase = 0;
+        EditorApplication.update += Step;
+    }
 
-        var shuriken = root.GetComponentsInChildren<ParticleSystem>();
-        var graphs = root.GetComponentsInChildren<VisualEffect>();
-        var director = root.GetComponentInChildren<UnityEngine.Playables.PlayableDirector>();
-
-        for (int i = 0; i < frames; i++)
+    // Phase 0 sets the time; phase 1 (one editor update later, after the VFX manager has
+    // applied the queued Simulate steps) renders and reads back.
+    static void Step()
+    {
+        if (phase == 0)
         {
-            float t = duration * i / Mathf.Max(1, frames - 1);
+            float t = duration * index / Mathf.Max(1, frames - 1);
             if (director != null) { director.time = t; director.Evaluate(); }
             foreach (var ps in shuriken)
                 if (ps.transform.parent == null || ps.transform.parent.GetComponentInParent<ParticleSystem>() == null)
@@ -138,19 +155,27 @@ public static class FxStrip
                 vfx.Reinit();
                 vfx.Simulate(1f / 60f, (uint)Mathf.RoundToInt(t * 60f));
             }
-            cam.Render();
-            RenderTexture.active = rt;
-            frame.ReadPixels(new Rect(0, 0, w, h), 0, 0);
-            frame.Apply();
-            strip.SetPixels(i * w, 0, w, h, frame.GetPixels());
+            EditorApplication.QueuePlayerLoopUpdate();
+            phase = 1;
+            return;
         }
+        cam.Render();
+        RenderTexture.active = rt;
+        frame.ReadPixels(new Rect(0, 0, W, H), 0, 0);
+        frame.Apply();
+        strip.SetPixels(index * W, 0, W, H, frame.GetPixels());
         RenderTexture.active = null;
+        phase = 0;
+        if (++index < frames) return;
+
+        EditorApplication.update -= Step;
         strip.Apply();
         Directory.CreateDirectory(Path.GetDirectoryName(outPath));
         File.WriteAllBytes(outPath, strip.EncodeToPNG());
         Object.DestroyImmediate(cam.gameObject);
         Object.DestroyImmediate(root);
         Debug.Log($"FxStrip wrote {outPath}");
+        EditorApplication.Exit(0);
     }
 
     static string Arg(string[] args, string name)
@@ -160,6 +185,8 @@ public static class FxStrip
     }
 }
 ```
+
+Check the first strip yourself: if VFX Graph frames are empty or all show the same particles while Shuriken frames move, the manager did not tick between steps in your Unity version; add a second wait phase, or record those frames in Play mode with the Recorder package.
 
 Notes: post-processing (bloom, tone mapping) only appears if the camera has a URP / HDRP camera data component with post-processing enabled and a Volume in the scene; set them up in a small stand scene and load that scene first (`EditorSceneManager.OpenScene`) for renders that match the game. Effects driven by gameplay scripts (not particles or Timeline) need their update method made callable with an explicit time to be sampled this way, which is good practice anyway.
 

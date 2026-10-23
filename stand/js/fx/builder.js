@@ -5,7 +5,7 @@ import { curve } from './math.js';
 // Builds one effect from its definition. Every layer gets a start time `at`
 // (seconds) and is evaluated at local time t - at, so the whole effect is a
 // pure function of the timeline.
-export function buildEffect(def, scene, distortScene, celScene, overScene) {
+export function buildEffect(def, scene, distortScene, celScene, overScene, fps = 0) {
   const group = new THREE.Group();
   const overGroup = new THREE.Group();
   const distortGroup = new THREE.Group();
@@ -71,8 +71,9 @@ export function buildEffect(def, scene, distortScene, celScene, overScene) {
   const remap = t => (!hold || t <= hold.at ? t : t < hold.at + hold.dur ? hold.at : t - hold.dur);
 
   // Lead-in: effects whose contact is at 0 get a few empty frames in front, so
-  // strips and checks see what comes before contact.
-  const lead = def.lead ?? ((def.contact ?? 0) < 0.01 ? 0.05 : 0);
+  // strips and checks see what comes before contact. Held-drawing styles lead by one
+  // whole drawing, so contact stays on the drawing grid.
+  const lead = def.lead ?? ((def.contact ?? 0) < 0.01 ? (fps ? 1 / fps : 0.05) : 0);
   return {
     group,
     duration: def.duration + lead,

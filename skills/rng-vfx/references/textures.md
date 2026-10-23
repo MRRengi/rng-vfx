@@ -22,7 +22,7 @@ Effects need few textures, but the right ones. Most good effects are 2 to 5 smal
 - **Seamless when panning.** Any texture that scrolls must tile. Periodic noise (generated on a wrapping lattice) tiles by construction.
 - **Big readable features.** Effects are seen small and fast. Noise with very fine detail turns to gray at distance. Prefer few large features plus a little fine detail.
 - **Black borders on sprites.** Shape masks must fade to zero before the edge, or the quad outline shows.
-- **Flipbook padding.** Leave 2 - 4 px empty around each frame so mips do not bleed between cells.
+- **Flipbook padding.** See `numbers.md` > Textures (about 2^m px per cell for the smallest mip m the sheet is drawn at).
 - **Compression.** Single-channel masks: BC4 (desktop) or EAC R11 / ASTC (mobile). Two-channel: BC5. Color: BC7 or ASTC. Check that soft gradients survive compression; banding shows first in glows.
 - **Mipmaps on, with alpha coverage** where alpha clip is used, so distant cutout shapes do not vanish.
 
@@ -62,7 +62,7 @@ python tools/texgen.py noise --kind cracks --cells 6 --edge 0.04 -o T_FX_Cracks.
 python tools/texgen.py noise --kind ridged --seamless -o T_FX_Ridged.png
 python tools/texgen.py shape --kind glow --falloff 2.5 -o T_FX_Glow.png
 python tools/texgen.py shape --kind ring --radius 0.7 --width 0.06 -o T_FX_Ring.png
-python tools/texgen.py shape --kind star --spikes 6 --sharp 3 -o T_FX_Star.png
+python tools/texgen.py shape --kind star --spikes 6 --sharp 2.5 -o T_FX_Star.png
 python tools/texgen.py shape --kind streak -o T_FX_Streak.png
 python tools/texgen.py shape --kind slash -o T_FX_Slash.png
 python tools/texgen.py ramp --stops "0:#ffffff,0.3:#ffd34d,0.7:#ff6a1f,1:#3b0f0f" -o T_FX_Ramp_Fire.png

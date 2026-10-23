@@ -21,11 +21,11 @@ Check each against the breakdown written before building (SKILL.md step 2):
 3. **Grayscale:** desaturate the strip. Does the shape still read? Is the core the lightest value?
 4. **Gameplay camera:** render at the real gameplay distance and angle. Is it still readable? Is it too big, hiding characters?
 5. **Backgrounds:** dark, mid-gray and bright backgrounds. Additive effects vanish on bright ones; dark smoke vanishes on dark ones. The stand has four presets.
-6. **Style rules:** compare against the style file's "What defines it" and "Common mistakes".
+6. **Style rules:** answer every bullet of the style file's "Common mistakes" and `fundamentals.md` > Quality floors with yes or no and the timestamp you checked it at, in your notes. A review with an unanswered bullet is not finished; "looks fine" is not an answer.
 7. **Dissipation:** does every layer leave in its designed way? No pops, no hard cut at the end of life, no leftover particles.
 8. **Hierarchy:** next to other effects of its tier, is it weighted correctly?
 9. **Budget:** particle counts, overdraw and lights inside `references/performance.md` limits.
-10. **Reference (mandatory):** take 2 - 3 frames from the reference games named in the style file (or the user's reference), place them under the strip at matching times, compare shape, timing and value.
+10. **Reference (mandatory):** take 2 - 3 frames from the reference games named in the style file (or the user's reference), place them under the strip at matching times, compare shape, timing and value. With no reference frames available, draw the shape keys from `shape-keys.md` as masks and put them under the strip instead. Never skip this: an effect judged without a reference drifts toward the agent's own house look.
 
 ## Layer census
 
@@ -81,17 +81,22 @@ Sample at 60 fps around contact (or at the drawing rate for held-drawing styles)
 - **Straight edges.** Dead-straight runs on the mask outline that end in a corner with a solid body behind them (a quad, strip or ground cut). Exempt by design: full-screen and two-tone impact frames, thin features (streaks, spike tips), edges that coincide with scene geometry. Run on close-up frames.
 - **Size.** Primary shape height at peak in 1080p pixels at the gameplay camera, from a strict mask without the bloom halo (`--min-px` 40 / 80 / 200 by tier).
 - **Frame border.** The effect never touches the frame border.
-- **White clip and haze** on the effect's brightest frame: at most 10% of the effect clipped to white; brightness outside the effect rises at most 25%.
+- **White clip and haze** on the effect's brightest frame: at most 15% of the effect burned to white (OKLab L above 0.9 and chroma under 0.035) next to its coloured body (designed white puffs do not count); brightness outside the effect rises at most 25%, and the bloom halo covers at most 4x the core's area.
 - **Hue.** On the frame with the most visible effect pixels (impacts: within 0.25 s of contact), 15% or more of those pixels are saturated, and 30% or more of the saturated ones sit within 25 degrees of `--hue` (so two-colour designs pass, drifted colours do not). Required; `--hue none` only for neutral effects. This catches AgX turning red into salmon and orange into white.
-- **Static hold** in seconds: at most 4 frames at full rate, 2 drawings in held styles.
+- **Static hold** in seconds: at most 4 frames at full rate, 2 drawings in held styles, per 8 x 8 region, so a frozen spark is caught even while smoke moves elsewhere.
 - **Empty tail.** At 90% of the duration the mask holds at least 2% of its peak area.
-- **Growth** (`--kind explosion`). The first frame with content after contact is at most 50% of the peak area.
-- **Target flash, slash crossing, hit vector** (stand, which exports the target's screen box, slash midpoints and swing directions, and the projected hit direction). The target never brightens before contact and stays below 0.75x the spark body. Every slash midpoint lies inside the target box. The spray leaves the target within 60 degrees of the hit direction, and no slash swings against it. In another engine, export the same points and add them to the run.
-
-- **Static hold per region.** The frame is split into 8 x 8 tiles; a tile with effect content that does not change for longer than the limit fails, so a frozen spark is caught even while smoke moves elsewhere.
-- **Target visible.** During the hit the target keeps at least half its rest luminance and 0.08 or more (dark tints must not erase it).
-- **Grounded** (explosions). For 0.4 s after the peak, the bottom of the effect stays within 4% of the frame of the blast's ground point.
+- **Growth** (explosions). The first frame with content after contact is at most 50% of the peak area.
+- **Time to peak.** The hot body (bright or saturated effect pixels) reaches 60% of its maximum within `--max-rise` of contact: 0.12 s for impacts, 0.2 s for explosions, at least 2 drawings in held styles. Slow swells read as weak.
+- **Blobs.** At the peak and at the handoff: no smooth convex main body (solidity above 0.96 and circularity above 0.82) and no three or more smooth balls at once (a stacked column or a pile of cotton).
+- **Size** by tier: 80 px for impacts, 200 px for explosions at 1080p by default on the stand.
+- **Target flash, target visible, target colour** (stand, or any engine that exports the target's screen box). The target never brightens before contact and stays below 0.75x the spark body; it keeps 70% of its rest luminance; its chroma (OKLab, 85th percentile over its box) rises by at most 0.05, so a hit tints the target instead of repainting it.
+- **Slash crossing, hit vector, closed ring.** Every slash midpoint lies inside the target box. The spray leaves the target within 45 degrees of the hit direction, and no slash swings against it. No closed ring encloses the hit point for more than one sample (a reticle).
+- **Grounded** (explosions). From contact until the effect falls under 20% of its peak area, the bottom of the effect (smoke included) touches the blast's ground point for at least 60% of that time.
+- **Effect light** (stand: a lights-only pass against an empty pass). The lit pool on the ground and the target stays under 3x the effect's peak core area and dimmer than the effect's brightest part.
+- **Drawing grid** (held styles). Contact falls on a drawing; off the grid, the contact drawing is never shown.
+- **Dark blood** (dark fantasy impacts). Saturated reds after contact have median OKLab L of 0.5 or less and chroma of 0.2 or less (`#7a0a10 - #3a0206`, never neon).
 - **Dark background** (dark fantasy and realism by default, `--dark` for others). At five moments the effect keeps at least half of its visible area on the darkest background.
+- In another engine, export the same points (target box, hit point and direction, blast ground point, slash midpoints) and add them to the run.
 
 Passing is necessary, not sufficient. The script finds known cheap tells; the shape keys and the references judge the rest.
 
@@ -102,7 +107,8 @@ Judge these on the strips, against the shape keys (SKILL.md step 7) and the refe
 - **Silhouette proportions:** the effect mask at contact, +3 and +8 frames matches the shape keys (overlap about 60% or more); the explosion is taller than wide; the impact spark is longer along the hit than across it.
 - **Post-palette colour (pixel):** sample the main colours after the palette pass. If smoke maps to a hue it was not meant to have, the palette lacks neutrals.
 - **Grayscale separation:** the main shape and its shadow side differ by 0.25 or more in grayscale; smoke and background differ by 0.25 or more on the mid background.
-- **Reticle and cotton balls:** no concentric star-ring-disc, no pile of round blobs.
+- **Reticle and cotton balls:** the script catches closed rings and smooth balls; still look for concentric star-ring-disc layouts built from broken pieces.
+- **Style "Common mistakes":** every bullet answered with a timestamp (checklist item 6).
 
 Review on a mid or dusk background by default: black backgrounds flatter additive effects and hide the problems above. Dark styles (dark fantasy, horror) are reviewed on a dark background as well, because that is where their smoke and blood vanish.
 

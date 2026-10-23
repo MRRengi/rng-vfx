@@ -5,7 +5,8 @@ import { HIT, HIT_DIR, BLAST, UP, AWAY, at } from './layout.js';
 // Fire is one premultiplied particle that glows hot and occludes as it cools,
 // smoke is dense, lit from below and keeps billowing for seconds. Short flash,
 // exposure dip instead of a white-out, distortion, flickering light, no rims.
-const BLACKBODY = [[0, '#ffffff', 2.5], [0.15, '#fff1b8', 2.0], [0.4, '#ffb347', 1.6], [0.75, '#ff5a1a', 1.2], [1, '#661100', 1]];
+// Cores at about 1.8 B: 50 overlapping sparks sum to a white ball of bloom at 2.5 B.
+const BLACKBODY = [[0, '#ffffff', 2.0], [0.15, '#fff1b8', 1.7], [0.4, '#ffb347', 1.4], [0.75, '#ff5a1a', 1.15], [1, '#661100', 1]];
 
 export default {
   id: 'realism',
@@ -21,19 +22,19 @@ export default {
         const SPRAY = [1, 0.55, -0.2];
         // Contact streak: a 2-frame anisotropic flare along the hit, the readable contact shape.
         fx.flash({
-          pos: HIT, size: 0.5, spikes: 0, spikeLen: 0, core: 0.5, soft: 3, dir: HIT_DIR, aspect: 3,
-          core_color: '#fff6e0', coreK: 2, edge_color: '#ffb050', edgeK: 1.2,
+          pos: HIT, size: 0.35, spikes: 0, spikeLen: 0, core: 0.45, soft: 4, dir: HIT_DIR, aspect: 3.5,
+          core_color: '#fff6e0', coreK: 1.35, edge_color: '#ffb050', edgeK: 1.0,
           scaleCurve: [[0, 1]], alphaCurve: [[0, 1], [0.033, 1], [0.034, 0]], order: 8,
         }, 0);
         fx.flash({
-          pos: HIT, size: 0.6, spikes: 0, spikeLen: 0, core: 0.7, soft: 4, dir: SPRAY, aspect: 3.2,
-          core_color: '#fff6e0', coreK: 3, edge_color: '#ffb050', edgeK: 1.4,
+          pos: HIT, size: 0.4, spikes: 0, spikeLen: 0, core: 0.6, soft: 5, dir: SPRAY, aspect: 3.6,
+          core_color: '#fff6e0', coreK: 1.6, edge_color: '#ffb050', edgeK: 1.05,
           scaleCurve: [[0, 1], [0.05, 0.6]], alphaCurve: [[0, 1], [0.033, 1], [0.05, 0]],
         }, 0);
         fx.burst({
-          shape: 'streak', dir: 'cone', axis: SPRAY, angle: 50, count: 70, origin: HIT,
+          shape: 'streak', dir: 'cone', axis: SPRAY, angle: 50, count: 48, origin: HIT,
           speed: [5, 18], gravity: [0, -9.81, 0], dragQ: 1.2, life: [0.25, 0.7], stretch: 0.05, minPx: 3,
-          size: [0.035, 0.015], soft: 1, ground: 0, bounce: 0.3, fade: [0, 0.85], ramp: bb,
+          size: [0.03, 0.012], soft: 1, ground: 0, bounce: 0.3, fade: [0, 0.85], ramp: bb,
         }, 0);
         // Hero sparks: a few ribbons whose tails bend under gravity.
         fx.trail({
@@ -83,26 +84,29 @@ export default {
           scaleCurve: [[0, 0.6], [0.03, 1, 'outExpo']], alphaCurve: [[0, 1], [0.03, 1], [0.05, 0]],
         }, 0);
         fx.exposure([[0, 1], [0.03, 0.6], [0.35, 1, 'outQuad']]);
+        // Hero fireball: rendered keyframes (fluid-sim look, flat light, density shading) with
+        // optical-flow in-betweens, so the lobes roll instead of cross-fading. It burns down to
+        // soot inside the sheet; the smoke layers take over from there.
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 45, count: 5, sizeDist: [3, 2, 0], origin: C, spawnR: 0.6, spin: 0.35, sizeIn: 0.12,
-          speed: [2.5, 5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.5], size: [1.8, 3.4], sizePow: 0.4, aspectY: 1.15,
-          soft: 0.9, erode: 1, noiseScale: 3, vBias: 0.25, blend: 'premul', order: 3, fadeDist: 0.4,
-          ramp: fx.ramp([[0, '#ffe2a0', 1.3], [0.2, '#ffb040', 1.15], [0.45, '#ff6a10', 1.05], [0.7, '#a3260f', 0.9], [0.88, '#2a1410', 1], [1, '#161210', 1]]),
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.7 },
+          dir: 'cone', axis: UP, angle: 15, count: 2, sizeDist: [1, 1, 0], seed: 31, origin: at(BLAST, 0, 1.55, 0), spawnR: 0.35,
+          speed: [0.2, 0.5], drag: 3, gravity: [0, 0.35, 0], life: [1.7, 2.0], size: [3.6, 4.2], sizeIn: 0.1, spin: 0.1,
+          blend: 'alpha', order: 4, fadeDist: 0.4, fade: [0, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.7], [0.35, '#ffffff', 1.25], [1, '#ffffff', 1.0]]),
         }, 0);
-        // Mid and small tiers from a flipbook: each quad plays a burning, breaking puff.
+        // Mid tier: smaller copies of the same sim, breaking the hero's outline.
         fx.burst({
-          shape: 'sheet', sheet: { url: './textures/fire_4x4.png', grid: [4, 4], frames: 16 },
-          dir: 'sphere', count: 8, sizeDist: [0, 5, 3], seed: 52, origin: C, spawnR: 0.7, speed: [1.5, 4], drag: 3.5,
-          gravity: [0, 0.8, 0], life: [0.7, 1.2], size: [1.2, 2.2], sizePow: 0.4, spin: 0.6, soft: 0.9, blend: 'premul', order: 3, fadeDist: 0.4,
-          fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffd9a0', 1.2], [0.5, '#ffc890', 1.05], [1, '#ffb080', 0.95]]),
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.7 },
+          dir: 'sphere', count: 6, sizeDist: [0, 4, 2], seed: 52, origin: C, spawnR: 0.7, speed: [1.5, 3.5], drag: 3.5,
+          gravity: [0, 0.6, 0], life: [1.1, 1.5], size: [1.2, 2.0], sizePow: 0.4, sizeIn: 0.12, spin: 0.4, blend: 'alpha', order: 3, fadeDist: 0.4,
+          fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.5], [0.4, '#ffffff', 1.15], [1, '#ffffff', 1.0]]),
         }, 0);
-        // Stem and base: the fireball sits on the ground.
+        // Stem and base: small copies of the sim low on the ground tie the fireball down.
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 15, count: 5, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
-          speed: [4, 6], drag: 3.5, gravity: [0, 0.8, 0], life: [0.7, 1.0], size: [1.2, 1.8], aspectY: 1.4, upright: true, soft: 0.9, erode: 1, noiseScale: 3,
-          vBias: 0.3, blend: 'premul', order: 4, fadeDist: 0.3,
-          ramp: fx.ramp([[0, '#fff8e6', 1.6], [0.3, '#ffb347', 1.3], [0.7, '#7a200c', 0.9], [1, '#161210', 1]]),
-        }, 0);
+          shape: 'sheet', sheet: { url: './textures/realism_fire_4x4.png', grid: [4, 4], frames: 15, ease: 0.7 },
+          dir: 'ring', lift: 0.1, count: 5, seed: 77, origin: at(BLAST, 0, 0.45, 0), spawnR: 0.5, speed: [0.6, 1.4], drag: 3,
+          gravity: [0, 0.3, 0], life: [1.6, 1.9], size: [1.1, 1.6], sizeIn: 0.12, spin: 0.3, blend: 'alpha', order: 4, fadeDist: 0.3,
+          fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.5], [0.4, '#ffffff', 1.15], [1, '#ffffff', 1.0]]),
+        }, 0.02);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 16, sizeDist: [6, 10, 10], origin: C, spawnR: 0.6,
           speed: [1, 2.2], gravity: [0, 0.9, 0], drag: 1.6, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
@@ -113,7 +117,7 @@ export default {
         fx.burst({
           // Rendered smoke keyframes (image model, self-shadowed volume) as the hero mass; the
           // procedural puffs underneath carry the fire light and fill the gaps.
-          shape: 'sheet', sheet: { url: './textures/realism_smoke_2x2.png', grid: [2, 2], frames: 4 },
+          shape: 'sheet', sheet: { url: './textures/realism_smoke_4x4.png', grid: [4, 4], frames: 15 },
           dir: 'cone', axis: UP, angle: 30, count: 5, sizeDist: [1, 3, 1], origin: at(BLAST, 0, 1.4, 0), spawnR: 0.7,
           speed: [0.1, 0.3], gravity: [0, 0.25, 0], drag: 1.8, delay: [0.35, 0.9], life: [3.0, 3.8], size: [3.2, 4.2], sizeIn: 0.2, spin: 0.08,
           blend: 'alpha', order: 2, fade: [0.08, 0.8], fadeDist: 0.5,
@@ -147,13 +151,13 @@ export default {
         fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 12, radius: [[0, 0.05], [0.3, 0.95, 'outExpo']], width: [[0, 0.06], [0.3, 0.03]], strength: [[0, 0.018], [0.3, 0]] }, 0);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.4, 0), size: 5, strength: [[0, 0.016], [2.5, 0.006], [3.8, 0]] }, 0.05);
         // Scorch darkens the ground (multiply) with ejecta streaks; never an alpha-black disc.
-        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 5, multiply: true, strength: 0.8, hot: '#ff6a1f', hotK: 1.2, dark: '#0e0b09', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
+        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 5.5, multiply: true, strength: 0.75, hot: '#ff6a1f', hotK: 1.2, dark: '#2a221c', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
         fx.target({
           dir: AWAY,
           jolt: [[0, 0.05], [0.5, 0]],
           knock: [[0, 0], [0.1, 0.16, 'outQuad'], [1.0, 0, 'inOutSine']],
         });
-        fx.light({ pos: C, color: '#ffa860', distance: 12, shadow: true, flicker: 0.15, intensity: [[0, 0], [0.02, 70], [0.3, 25, 'outQuad'], [1.8, 0, 'outQuad']] });
+        fx.light({ pos: C, color: '#ffa860', distance: 7, shadow: true, flicker: 0.15, intensity: [[0, 0], [0.02, 42], [0.3, 17, 'outQuad'], [1.8, 0, 'outQuad']] });
         fx.shake([[0, 0.28], [1.0, 0, 'outQuad']]);
       },
     },
