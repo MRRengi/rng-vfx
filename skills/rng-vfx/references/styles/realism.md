@@ -7,7 +7,7 @@ Reference points: Battlefield, Call of Duty, The Last of Us Part II, Red Dead Re
 - **Physics is the art direction.** Sparks fall under gravity and slow down with air drag, smoke rises by buoyancy and spreads, debris arcs and bounces, dust hugs the ground. Viewers know real motion and notice when it is wrong.
 - **Temperature drives color.** Hot things glow along the blackbody curve: white, then yellow, orange, red, dark red, black. Fire cools into smoke as it rises; sparks and debris cool as they fly.
 - **Scale cues.** Real explosions are huge and slow; a large explosion that dissipates in one second looks like a firecracker. Small things are fast, big things are slow.
-- **HDR and exposure.** Flashes are very bright and very short; the scene exposure reacts. Use filmic tone mapping (AgX, ACES).
+- **HDR and exposure.** Flashes are very bright and very short; the scene exposure reacts (an exposure dip). Filmic tone mapping (AgX, ACES).
 - **Volume.** Smoke has self-shadowing, density variation and soft edges; it is lit by the environment and by the fire inside it.
 - **Lighting integration.** Explosions light the environment strongly; muzzle flashes cast light; sparks are too small to cast light but their reflections on wet surfaces sell them.
 
@@ -34,10 +34,9 @@ Reference points: Battlefield, Call of Duty, The Last of Us Part II, Red Dead Re
 
 ## Default numbers
 
-- Spark impact: flash 2 - 4 frames, sparks 0.4 - 1.1 s, dust puff 1 - 1.6 s, chips 0.6 - 1 s.
-- Medium explosion: flash 2 - 3 frames, fireball 0.8 - 1.5 s, smoke 3.5 - 4.5 s rising, dust ring 1.2 - 1.8 s, debris 1.2 - 2 s, scorch persistent.
-- Gravity 9.81 m/s^2 at real scale; check the project's unit scale first.
-- Smoke lifetime scales with blast size: a ~3 m fireball's smoke keeps billowing for 3.5 - 4.5 s, rising slowly (buoyancy about 1 - 1.5 m/s^2 against drag 2), not shooting out of frame in a second.
+- Timings, sizes and brightness: `numbers.md` > Realism.
+- Gravity 9.81 m/s^2 at real scale; check the project's unit scale first (`audit.md`).
+- Smoke lifetime scales with blast size: a ~3 m fireball's smoke keeps billowing for 3.5 - 4.5 s, rising slowly, not shooting out of frame in a second.
 
 ## Common mistakes
 

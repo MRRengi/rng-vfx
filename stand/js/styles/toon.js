@@ -15,7 +15,7 @@ export default {
       build(fx) {
         fx.celOutline('#2b2b55', 3);
         fx.flash({
-          pos: HIT, size: 1.2, hard: true, spikes: 6, spikeLen: 0.7, core: 0.45, sharp: 0.7, jitter: 0.6,
+          pos: HIT, size: 1.2, hard: true, spikes: 5, spikeLen: 0.8, core: 0.3, sharp: 1.0, jitter: 0.5, bias: 0.4,
           dir: HIT_DIR, aspect: 1.6, core_color: '#fffbd0', coreK: 1.0, edge_color: '#ffc62e', edgeK: 1.0, rot: 0.3, order: 0,
           scaleCurve: [[0, 0], [0.06, 1.12, 'outBack'], [0.09, 0.95], [0.12, 1.06], [0.16, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.16, 1], [0.161, 0]],
@@ -84,7 +84,7 @@ export default {
         }, 0.02);
         for (const [delay, seed, speed] of [[0.03, 21, [6, 8]], [0.1, 22, [4, 5]]]) {
           fx.burst({
-            shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, seed, origin: at(BLAST, 0, 0.2, 0), speed, drag: 6,
+            shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, seed, origin: at(BLAST, 0, 0.38, 0), speed, drag: 6,
             life: [0.45, 0.6], size: [0.6, 0.0], sizePow: 2, sizeIn: 0.15, bands: 1, outline: 0,
             shadow: '#b6c2ff', erode: 0, noiseScale: 1.4, blend: 'alpha', ground: 0, fadeDist: 0.05,
             ramp: fx.ramp([[0, '#ffffff', 1], [1, '#eef0ff', 1]]),

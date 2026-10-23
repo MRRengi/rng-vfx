@@ -39,6 +39,29 @@ WebGL builds: VFX Graph does not run on WebGL; use Shuriken there.
 - Stretched Billboard render mode for sparks; set Speed Scale and Length Scale.
 - Use **Stop Action: Disable / Callback** and pool effects; instantiating effect prefabs per hit causes spikes.
 
+## Brightness, materials and sorting
+
+- **HDR colour picker:** intensity is in stops; +1 doubles the value. With URP's default bloom threshold of 0.9, a core at 2 B is about intensity +1, a body at 0.7 B about -0.4. Write values from `numbers.md` in these terms. HDR must be on in the URP asset and on the camera.
+- **Lock exposure while designing in HDRP** (Exposure override: Fixed), or values drift between scenes.
+- **URP Particles shaders** (Particles/Unlit, Particles/Lit):
+  - Blending Mode: Alpha, Premultiply, Additive or Multiply.
+  - Advanced options: Flip-Book Blending, Soft Particles (needs Depth Texture on in the URP asset), Camera Fading (stops quads popping into the near plane), Distortion (needs Opaque Texture).
+  - These cover most billboard needs before writing a Shader Graph.
+- **Custom Vertex Streams** (Shuriken Renderer module):
+  - Add the streams the shader needs: AgePercent, StableRandom.x, Custom1/Custom2 (Custom Data curves), Velocity, AnimBlend for flipbook blending.
+  - Unity packs them into TEXCOORD channels in order and prints the mapping next to each stream (for example `UV2 + AnimBlend (TEXCOORD0.zw|x)`). Read that label and sample the same channels with UV nodes in Shader Graph.
+  - A mismatch silently gives garbage values.
+- **Max Particle Size** (Renderer module) defaults to 0.5 of the viewport: big particles near the camera stop growing. Raise it for large effects.
+- **Sorting:**
+  - Between systems: *Sorting Fudge* (Renderer module; lower values draw later) and the material's render queue or Sorting Priority.
+  - Within a system: *Sort Mode* (By Distance for alpha smoke, Youngest in Front for bursts).
+  - VFX Graph outputs have their own Sort option (sort particles by distance) and a Sorting Priority.
+- **VFX Graph outputs:**
+  - Output Particle Unlit Quad / Lit Quad (lit smoke in HDRP, or URP with Lit outputs);
+  - Output Particle Mesh;
+  - Output ParticleStrip Quad (trails, slashes following a socket);
+  - Output Particle Six-way Smoke (recent versions) for six-way lightmapped flipbooks (`../recipes/smoke-lighting.md`).
+
 ## Lights, decals, camera
 
 - Short light flash: a Light with an animation curve, or the Shuriken Lights module. VFX Graph does not spawn lights; add a Light component driven by the same timeline.

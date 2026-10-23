@@ -30,7 +30,8 @@ Terminal velocity under linear drag is `g / k`. Pick `k` from the terminal veloc
 
 ### Drag profiles
 
-- Sparks, debris: low drag (0.3 - 1). They travel and arc.
+- Debris: low linear drag (0.3 - 1). It travels and arcs.
+- Sparks: quadratic drag, see Sparks below. Linear drag either lets them fly off screen (low k) or stops them dead in mid-air (high k).
 - Smoke puffs, dust: high drag (2 - 6). Fast initial burst that stops abruptly: this "punch then hang" is the look of real explosions and impacts.
 - Stylized energy: very high drag (5 - 10) gives snappy outward bursts that freeze in place.
 
@@ -90,6 +91,28 @@ Terminal velocity under linear drag is `g / k`. Pick `k` from the terminal veloc
 - Grinding or welding sparks: continuous stream, tight cone, very bright.
 - Impact sparks: short burst, wide cone biased away from the surface normal and along the reflection of the hitting direction.
 - Sparks from burning materials can branch: spawn 2 - 4 smaller sparks mid-flight.
+
+### Spark motion: quadratic drag
+
+Small fast particles feel air drag that grows with the square of speed (`dv/dt = g - c |v| v`). They lose most of their speed in the first moments and then coast and fall, so they neither stop dead nor fly off screen. Without gravity this has a closed form, scrubbable like the linear one:
+
+```
+v(t) = v0 / (1 + c * v0 * t)
+x(t) = ln(1 + c * v0 * t) / c
+```
+
+Add gravity on top as `0.5 * g * t^2` (an approximation that reads right for sparks).
+
+| | c (1/m) | Travel |
+|---|---|---|
+| Impact sparks | 0.8 - 2 | a 15 m/s spark covers about 1.7 m in 0.3 s and 2.8 m in 1 s at c = 1 |
+| Explosion sparks | 0.1 - 0.4 | 3 - 6 m |
+| Grinding stream | 0.3 - 0.6 | long, flat arcs |
+
+Other spark rules:
+- **Bounce.** Restitution 0.3 with friction; on the first bounce, split into 2 - 3 smaller, dimmer children.
+- **Speed spread.** Spread speeds widely (x3 between slowest and fastest). With equal speeds, the burst reads as a flower of equal petals.
+- **Engines.** Unity Shuriken: *Limit Velocity over Lifetime* > Drag, with *Multiply by Velocity* enabled, is quadratic. VFX Graph and Niagara drag blocks are linear: write the quadratic term in a custom block or module, or bake the curve into a speed-over-life curve.
 
 ## Liquids
 

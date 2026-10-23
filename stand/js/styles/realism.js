@@ -32,13 +32,13 @@ export default {
         }, 0);
         fx.burst({
           shape: 'streak', dir: 'cone', axis: SPRAY, angle: 50, count: 70, origin: HIT,
-          speed: [3, 16], gravity: [0, -9.81, 0], drag: 3.2, life: [0.15, 0.5], stretch: 0.05, minPx: 3,
+          speed: [5, 18], gravity: [0, -9.81, 0], dragQ: 1.2, life: [0.25, 0.7], stretch: 0.05, minPx: 3,
           size: [0.035, 0.015], soft: 1, ground: 0, bounce: 0.3, fade: [0, 0.85], ramp: bb,
         }, 0);
         // Hero sparks: a few ribbons whose tails bend under gravity.
         fx.trail({
           dir: 'cone', axis: SPRAY, angle: 25, count: 12, seed: 31, origin: HIT,
-          speed: [10, 15], gravity: [0, -9.81, 0], drag: 3, life: [0.35, 0.7], trailTime: 0.08,
+          speed: [12, 18], gravity: [0, -9.81, 0], dragQ: 1.0, life: [0.4, 0.8], trailTime: 0.08,
           width: 0.022, minPx: 3, ground: 0, bounce: 0.3, fade: [0, 0.8], ramp: bb,
         }, 0);
         // Dust: a fast directional jet that stops dead, then a slow haze.
@@ -104,8 +104,8 @@ export default {
           ramp: fx.ramp([[0, '#fff8e6', 1.6], [0.3, '#ffb347', 1.3], [0.7, '#7a200c', 0.9], [1, '#161210', 1]]),
         }, 0);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 26, sizeDist: [6, 10, 10], origin: C, spawnR: 0.45,
-          speed: [1, 2.6], gravity: [0, 1.2, 0], drag: 2, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
+          shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 26, sizeDist: [6, 10, 10], origin: C, spawnR: 0.6,
+          speed: [1, 2.6], gravity: [0, 0.8, 0], drag: 2, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
           shadow: '#3a3430', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.05, 0.75], fadeDist: 0.5,
           fireGlow: { color: '#ff7a2a', intensity: 0.8, height: 1.2, rim: 0.6, k: fireK },
           ramp: fx.ramp([[0, '#1c1916', 1, 0.95], [0.6, '#3d3833', 1, 0.9], [1, '#6b655f', 1, 0]]),
@@ -128,11 +128,11 @@ export default {
           ramp: fx.ramp([[0, '#3e3a36', 1], [1, '#2a2725', 1]]),
         }, 0);
         fx.trail({
-          dir: 'hemi', count: 14, origin: C, speed: [9, 14], gravity: [0, -9.81, 0], drag: 1.6,
+          dir: 'hemi', count: 14, origin: C, speed: [10, 18], gravity: [0, -9.81, 0], dragQ: 0.25,
           life: [0.8, 1.4], trailTime: 0.12, width: 0.045, minPx: 3, ground: 0, bounce: 0.3, fade: [0, 0.8], ramp: bb,
         }, 0);
         fx.burst({
-          shape: 'streak', dir: 'hemi', count: 50, origin: C, speed: [5, 12], gravity: [0, -9.81, 0], drag: 1.8,
+          shape: 'streak', dir: 'hemi', count: 50, origin: C, speed: [6, 16], gravity: [0, -9.81, 0], dragQ: 0.35,
           life: [0.5, 1.2], stretch: 0.04, minPx: 3, size: [0.035, 0.015], soft: 1, ground: 0, bounce: 0.3, fade: [0, 0.85], ramp: bb,
         }, 0);
         fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 12, radius: [[0, 0.05], [0.3, 0.95, 'outExpo']], width: [[0, 0.06], [0.3, 0.03]], strength: [[0, 0.018], [0.3, 0]] }, 0);

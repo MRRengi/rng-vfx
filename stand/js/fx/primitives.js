@@ -80,6 +80,7 @@ uniform vec2 uLife;
 uniform vec2 uSpeed;
 uniform vec3 uGravity;
 uniform float uDrag;
+uniform float uDragQ;
 uniform vec2 uSize;
 uniform float uSizePow;
 uniform float uStretch;
@@ -122,11 +123,19 @@ vec3 curlAt(vec3 q) {
 void motion(float age, float life, out vec3 p, out vec3 vel) {
   float spd = mix(uSpeed.x, uSpeed.y, aSeed.y);
   vec3 v0 = aDir * spd;
-  float k = max(uDrag, 0.001);
-  float e = exp(-k * age);
-  p = uOrigin + aDir * uSpawnR * aSeed.z + v0 * (1.0 - e) / k
-    + uGravity * (age / k - (1.0 - e) / (k * k));
-  vel = v0 * e + uGravity * (1.0 - e) / k;
+  if (uDragQ > 0.0) {
+    // Quadratic drag (sparks): fast loss of speed, then coasting and falling.
+    // x(t) = ln(1 + c v0 t) / c, gravity added on top.
+    float q = 1.0 + uDragQ * spd * age;
+    p = uOrigin + aDir * uSpawnR * aSeed.z + aDir * log(q) / uDragQ + 0.5 * uGravity * age * age;
+    vel = v0 / q + uGravity * age;
+  } else {
+    float k = max(uDrag, 0.001);
+    float e = exp(-k * age);
+    p = uOrigin + aDir * uSpawnR * aSeed.z + v0 * (1.0 - e) / k
+      + uGravity * (age / k - (1.0 - e) / (k * k));
+    vel = v0 * e + uGravity * (1.0 - e) / k;
+  }
   if (uCurl > 0.0) p += curlAt(p * 0.8 + aSeed.xyz * 9.0 + vec3(0.0, age * 0.3, 0.0)) * uCurl * pow(clamp(age / life, 0.0, 1.0), 1.2);
   if (p.y < uGround) {
     // Mirror below the ground: a cheap closed-form bounce with energy loss.
@@ -480,6 +489,7 @@ export function burst(o) {
       uSpeed: { value: new THREE.Vector2(...(o.speed || [1, 3])) },
       uGravity: { value: v3(o.gravity || [0, 0, 0]) },
       uDrag: { value: o.drag ?? 0.001 },
+      uDragQ: { value: o.dragQ ?? 0 },
       uSize: { value: new THREE.Vector2(...(o.size || [0.3, 0.1])) },
       uSizePow: { value: o.sizePow ?? 1 },
       uStretch: { value: o.stretch ?? 0 },
@@ -631,6 +641,7 @@ export function trail(o) {
       uSpeed: { value: new THREE.Vector2(...(o.speed || [1, 3])) },
       uGravity: { value: v3(o.gravity || [0, 0, 0]) },
       uDrag: { value: o.drag ?? 0.001 },
+      uDragQ: { value: o.dragQ ?? 0 },
       uSize: { value: new THREE.Vector2(0, 0) },
       uSizePow: { value: 1 },
       uStretch: { value: 0 },

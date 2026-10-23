@@ -115,8 +115,8 @@ export default {
           shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 20, sizeDist: [5, 8, 7], origin: C, spawnR: 0.5,
           speed: [1, 2.2], gravity: [0, 1.4, 0], drag: 1.8, delay: [0.03, 0.6], life: [2.0, 2.8], size: [1.6, 3.2], sizePow: 0.45,
           shadow: '#4a2020', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
-          fireGlow: { color: '#ff2a12', intensity: 2.2, height: 1.4, rim: 1.2, k: fireK },
-          ramp: fx.ramp([[0, '#4a2a2a', 1, 0.95], [0.7, '#2e1a1a', 1, 0.9], [1, '#1a0e0e', 1, 0]]),
+          fireGlow: { color: '#ff2a12', intensity: 1.4, height: 0.8, rim: 1.2, k: fireK },
+          ramp: fx.ramp([[0, '#2a1214', 1, 0.95], [0.7, '#1e0c0e', 1, 0.9], [1, '#120609', 1, 0]]),
         }, T);
         fx.burst({
           shape: 'smoke', dir: 'ring', lift: 0.05, count: 18, origin: at(BLAST, 0, 0.25, 0), speed: [5, 8], drag: 5,
@@ -141,8 +141,8 @@ export default {
           spin: 4, blend: 'alpha', fade: [0.2, 0.7], ramp: fx.ramp([[0, '#6a6266', 1], [1, '#4a4446', 1]]),
         }, T);
         fx.ring({
-          pos: at(BLAST, 0, 0.04, 0), size: 4, soft: 0.02, noise: 0.6, noiseFreq: 7, edge: 1.5, coverage: 0.6, seed: 8,
-          color: '#ff5a3a', colorK: 1.2, color2: '#3a0404', color2K: 1,
+          pos: at(BLAST, 0, 0.04, 0), size: 2.2, soft: 0.02, noise: 0.6, noiseFreq: 7, edge: 1.5, coverage: 0.4, seed: 8,
+          color: '#ff5a3a', colorK: 0.6, color2: '#3a0404', color2K: 1,
           radius: [[0, 0.05], [0.45, 0.95, 'outExpo']], width: [[0, 0.02], [0.45, 0.0, 'outQuad']],
           alpha: [[0, 0.5], [0.45, 0]],
         }, T);

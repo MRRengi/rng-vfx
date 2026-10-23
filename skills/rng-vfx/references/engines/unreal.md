@@ -24,7 +24,50 @@ Add Velocity / Add Velocity in Cone, Gravity Force, Drag, Curl Noise Force, Vort
 - `DepthFade` for soft particles. `Fresnel`. `Panner`. `SubUV` / Flipbook functions with motion vectors for smooth sims.
 - Distortion: Refraction input on a translucent material, or sample `SceneTexture:SceneColor` in a post-process style material.
 - Material Instances per effect variant; keep one master material per technique (erosion master, slash master, fresnel master).
-- Lit smoke: Translucent with Volumetric Directional or Directional lighting modes, or six-way lightmaps.
+- Lit smoke: Translucent with Lighting Mode *Volumetric PerVertex Directional* (cheap) or *Surface ForwardShading* (accurate, expensive), or six-way lightmaps built in the material (`../recipes/smoke-lighting.md`).
+
+## Brightness and exposure
+
+- **Lock exposure before tuning anything:** a Post Process Volume (unbound) with Metering Mode Manual, or Min EV100 = Max EV100. Auto exposure otherwise rescales every emissive value as the effect brightens the screen, and the effect tunes itself dimmer.
+- **Bloom:**
+  - The default threshold of -1 blooms everything slightly. Measure **B** as the emissive value where the halo becomes clearly visible at the locked exposure (`../audit.md`).
+  - Write all values from `../numbers.md` as multiples of it.
+- **Tone mapping:** the filmic tonemapper desaturates bright reds toward pink and oranges toward yellow-white. Keep hot mid tones near B and check the hue at peak.
+
+## Erosion master material
+
+One master material, instanced per effect. Domain Surface, Unlit, Translucent (or Additive), two-sided for meshes.
+
+- **Inputs:**
+  - Particle Color (colour and an alpha multiplier).
+  - Dynamic Parameter: index 0 `.x` erosion, `.y` emissive multiplier, `.z` distortion, `.w` free.
+  - Particle Random for per-particle offsets.
+- **Noise:** sample the noise texture twice with two Panners at different speeds and directions, scaled differently. Add them (dual pan).
+- **Erosion:** `heat = (noise * mask - erosion) / softness`, where mask is the sprite's shape texture or a radial gradient window.
+  - Opacity = `saturate(heat * k)`.
+  - Colour = a Curve Atlas row or a gradient texture sampled at `1 - heat`.
+- **Burn edge:** a second threshold slightly above erosion, multiplied by an HDR edge colour.
+- **Soft particles:** `DepthFade` into opacity (fade distance 20 - 50 cm).
+- **Camera fade:** `PixelDepth` near-plane fade so quads do not pop into the camera.
+
+Niagara drives the Dynamic Parameter with curves over Normalized Age (Dynamic Material Parameters module).
+
+## Renderer settings that matter
+
+- **Sprite renderer:**
+  - Facing Mode: Face Camera for most, Custom Facing Vector for ground-aligned quads.
+  - Alignment: Velocity Aligned for sparks, so they stretch along motion with Scale Sprite Size by Speed.
+  - Sub Image Size and Sub UV Blending for flipbooks.
+  - Sort Mode: View Depth or View Distance for translucent smoke, None for additive.
+- **Ribbon renderer:**
+  - UV0 mode: Scaled Uniformly (fixed texture along the ribbon), Tiled Over Ribbon Length, or Tiled From Start Over Ribbon Length.
+  - Tessellation for smooth curves on fast swings.
+  - Width and colour from particle attributes, tapered at both ends.
+- **Mesh renderer:** for domes, cones, slash meshes; Facing Mode Default or Velocity.
+- **Sorting between systems:**
+  - The Niagara component's Translucency Sort Priority (higher draws later).
+  - The renderer's Sort Order Hint between emitters of one system.
+  - Separate translucency (material: Translucency Pass "After DOF") keeps effects sharp when depth of field is on.
 
 ## Lights, decals, camera
 

@@ -14,10 +14,10 @@ Reference points: Diablo II, III and IV, Path of Exile, Grim Dawn, Dark Souls, E
 ## Color and value
 
 - Base: near black with a hue tint (never neutral gray-black, it looks like a hole in the screen).
-- Rim and core: one hot hue, HDR, used sparingly so it pops against darkness.
+- Rim and core: one hot hue, above B, used sparingly so it pops against darkness.
 - Ground lighting from the effect is important: a red or green glow on the floor sells it.
 - Bloom: medium, tight radius. Haze washes out the darkness.
-- Filmic tone mapping (AgX, ACES) desaturates HDR toward white: an orange at HDR 3 comes out pale yellow-white. Keep mid-tone hot colours at HDR 1.5 or less, reserve higher values for the small core, and check that the fireball's hue at peak is still red-orange. Black bodies need opaque dark smoke and an exposure dip, not more glow.
+- Filmic tone mapping (AgX, ACES) desaturates bright values toward white: an orange at 3 B comes out pale yellow-white, and reds turn salmon pink. Keep mid-tone hot colours at 1.2 B or less, reserve higher values for the small core, and check that the fireball's hue at peak is still red-orange. Black bodies need opaque dark smoke and an exposure dip, not more glow.
 
 ## Signature techniques
 
@@ -32,8 +32,9 @@ Reference points: Diablo II, III and IV, Path of Exile, Grim Dawn, Dark Souls, E
 
 ## Default numbers
 
-- Impact: slash 10 - 25 frames with lingering dissolve, flash 2 - 4 frames (the hot afterglow of the slash carries the rest), blood 25 - 45 frames, embers 50 - 85 frames, smoke 50 - 80 frames.
-- Explosion: crack anticipation 10 - 20 frames, eruption fire 50 - 70 frames, black smoke column 80 - 120 frames, ash 90 - 130 frames, cracks cooling 2 - 4 s.
+- Timings, sizes and brightness: `numbers.md` > Dark fantasy.
+- Crack anticipation 10 - 20 frames before an eruption; cracks cool over 2 - 4 s.
+- Blood: 25 - 45 frames in flight, landing as splats that stay.
 
 ## Common mistakes
 

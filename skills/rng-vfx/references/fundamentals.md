@@ -14,7 +14,7 @@ Everything on screen competes for attention. Rank the effect before designing it
 | 3 Signature | ultimates, boss attacks, big explosions | pure white allowed | 15 - 40% | 1 - 3 s | strong |
 | 4 Cinematic | finishers, cutscene moments | anything | full screen | as needed | as needed |
 
-Reserve pure white and full saturation for tier 3 and up. If everything glows, nothing reads.
+Reserve clipping white (far above B, blooming) and full saturation for the cores of tier 2 - 3 effects. Flat white as a palette colour in toon, anime and pixel is different and allowed (`numbers.md`). If everything glows, nothing reads.
 
 Separate **gameplay-critical** elements (area of effect, hitbox, direction, timing tells) from **flavor** (sparks, motes, smoke). Critical elements get the clearest shapes and must stay readable when flavor is turned down for performance.
 
@@ -24,7 +24,7 @@ Telegraphs (where an attack will land) must show the true area. A circle that is
 
 Value (lightness) carries readability; hue carries identity.
 
-- Design in grayscale first. Toggle grayscale on the stand or desaturate the frame. The shape of the peak frame must be obvious.
+- Design in grayscale first: desaturate the frame. The shape of the peak frame must be obvious.
 - Keep a value structure: core brightest, mid tones around it, darkest elements (smoke, debris, outlines) at the edges. Three to four value steps is enough.
 - Contrast against the background, not in absolute terms. A white flash on a snow level needs a dark outline or a dark under-layer to read. A black smoke on a dark dungeon needs a rim light or an emissive edge.
 - Dark elements are powerful: a dark core, dark smoke or a dark outline makes the bright parts brighter without raising brightness.
@@ -35,7 +35,7 @@ Value (lightness) carries readability; hue carries identity.
 - Hue shift across value: bright parts drift toward white or yellow, shadows drift toward the complementary or cooler side. A ramp that only changes lightness looks flat.
 - Saturation peaks in the mid tones. Highlights desaturate toward white, shadows desaturate toward gray or a dark tint.
 - Color means something in games (team colors, damage types, healing green, poison green-purple, fire orange, ice cyan). Respect the game's existing color language before inventing.
-- HDR: values above 1 make bloom respond. Push only the core above 1; keep mid tones under 1 so bloom does not swallow the shape.
+- Brightness is relative to the project's bloom threshold B (`numbers.md`). Push only the core above B; keep mid tones under it so bloom does not swallow the shape.
 
 ## Shape language
 
@@ -53,65 +53,68 @@ Rules:
 - Give the silhouette a direction. Radial symmetry is static; bias the burst toward the hit direction or upward.
 - Avoid tangents and mush: shapes that barely touch, or overlap into an even blob, destroy readability. Clusters with gaps read better than even spreads.
 - Negative space is part of the shape. Holes in smoke and gaps between flame tongues make them read as volume.
-- **No straight cuts.** Every procedural shape fades or narrows to zero before the edge of its quad or strip: stars fit their longest spike, lobed puffs get a margin, bodies get a round window, broken rings narrow to a point at each gap, streak, trail and slash heads close to a rounded tip. A straight line on a frame that is not a designed hard edge is the quad showing through, and it is the fastest giveaway of cheap VFX.
-- **Slashes are oriented by the swing.** Define a slash by the direction the blade travels at contact and the swing plane's normal, not by Euler angles picked by eye (those drift into vertical or edge-on arcs). The arc runs diagonally, 20 - 50 degrees from horizontal for most melee swings, passes through the target's centre of mass, and is seen at least 30 degrees off edge-on from the gameplay camera.
+- **No straight cuts.** Every procedural shape fades or narrows to zero before the edge of its quad or strip (mesh, ribbon, billboard): stars fit their longest spike, lobed puffs get a margin, bodies get a round window, broken rings narrow to a point at each gap, streak, trail and slash heads close to a rounded tip. A straight line on a frame that is not a designed hard edge is the quad showing through, and it is the fastest giveaway of cheap VFX.
+- **Slashes follow the swing.** From the weapon's path when there is an animation, from swing direction and plane normal when there is not; never from rotation angles picked by eye (`recipes/slash.md`).
 - **Dissolve stays out of the body.** Erosion holes belong to the tail of a slash or the end of a body's life. Holes in the body read as dirt on additive shapes and as outlined pockmarks on alpha shapes.
 
 ## Timing
 
-The universal envelope: **anticipation -> contact -> follow-through -> dissipation**.
+The universal envelope: **anticipation -> contact -> follow-through -> dissipation**. Per-style lengths are in `numbers.md`.
 
-| Phase | Purpose | Typical length (60 fps) |
-|---|---|---|
-| Anticipation | tells the player something is coming; gather, charge, inward motion | 0 - 10 frames for hits, up to 1 s for big telegraphed attacks |
-| Contact / peak | the readable frame; biggest shape, highest contrast | 1 - 4 frames |
-| Follow-through | energy leaves: bursts, shockwaves, sparks travel | 6 - 20 frames |
-| Dissipation | residue: smoke, embers, decals, afterglow | 0.3 - 2 s |
+| Phase | Purpose |
+|---|---|
+| Anticipation | tells the player something is coming: gather, charge, inward motion |
+| Contact / peak | the readable frame: biggest shape, highest contrast |
+| Follow-through | energy leaves: bursts, shockwaves, sparks travel |
+| Dissipation | residue: smoke, embers, decals, afterglow |
 
-Defaults:
 - Peak within the first 2 to 4 frames after contact. A slow rise kills the hit.
-- Ease out on almost everything that expands (outExpo, outQuart). Ease in on things that fall or collapse.
-- Overshoot (outBack, elastic) only in toon and playful styles.
+- Ease out on almost everything that expands (outExpo, outQuart). Ease in on things that fall or collapse. Overshoot (outBack, elastic) only in toon and playful styles.
 - Stagger secondary layers by 1 to 3 frames after the primary. Everything starting on the same frame looks mechanical.
-- Long tails are cheap and add a lot: lingering embers or a cooling decal extend the effect without hurting readability.
-- **Hitstop sits on contact, never on frame 0** of an effect that has nothing before it: freezing the first frame freezes nothing. Explosions in realism get no hitstop; elsewhere put it on the eruption, not on the anticipation.
-- **No empty tail.** The last element stays visible until at least 90% of the effect's duration. Trim the duration to the content, not the other way round.
-- **Opacity over life is faded in one place.** Either the ramp alpha or the `fade` window carries the fade-out, not both multiplied: a ramp going 0.9 -> 0 times a fade window going 1 -> 0 makes smoke transparent by mid-life. Keep ramp alpha nearly constant (about 0.9) and fade over the last quarter (`fade: [0.05, 0.75]`), erosion 0.3 or less.
-- **Spark travel budget.** With linear drag the distance a spark covers is `d = v0 (1 - e^(-k t)) / k`, at most `v0 / k`. Pick drag from the distance you want: impacts 1 - 3 m, explosions 3 - 6 m. Speeds of 10 m/s with drag 0.5 throw sparks 20 m away and off screen.
+- **Hitstop sits on contact,** never on the first frame of an effect that has nothing before it (freezing the first frame freezes nothing). What it freezes and for how long: `numbers.md` > Per style and the hitstop rule under that table.
+- **No empty tail.** The last element stays visible until at least 90% of the effect's duration. Trim the duration to the content.
+- **Fade in one place.** One curve owns each layer's fade-out. A colour ramp that fades alpha, multiplied by a separate opacity-over-life curve, makes smoke transparent by mid-life. Keep the body's opacity nearly constant and fade over the last quarter of life; erode lightly.
 
 ### Drawings per second (frame holds)
 
-Hand-drawn effects animate on twos or threes (a new drawing every 2 or 3 frames at 24 fps, so 12 or 8 drawings per second). Holding drawings gives snap and weight. In real time, quantize the effect's time: `t_held = floor(t * fps) / fps`. Use 12 for anime, 8 to 12 for pixel, full rate for stylized and realism. Never hold the camera or gameplay, only the effect.
+Hand-drawn effects animate on twos or threes (a new drawing every 2 or 3 frames at 24 fps, so 12 or 8 drawings per second). Holding drawings gives snap and weight. In real time, quantize the effect's time: `t_held = floor(t * fps) / fps`. Never hold the camera or gameplay, only the effect.
 
-**Put every key on the drawing grid** (multiples of 1/fps). A key that falls between drawings is simply lost: the contact drawing never appears, or appears already decaying. Check that the contact drawing exists and is not hidden under an impact frame (put the colour peak on the drawing after the impact frame). The coloured spark lives 2 - 3 drawings in total, but only its first drawing may be above HDR 1; the next ones shrink, break or darken (see No white-out frames in SKILL.md).
+**Put every key on the drawing grid** (multiples of 1/fps). A key that falls between drawings is simply lost: the contact drawing never appears, or appears already decaying. Check that the contact drawing exists and is not hidden under an impact frame (put the colour peak on the drawing after the impact frame). Only the spark's first drawing may be above B; the next ones shrink, break or darken.
 
 ## Quality floors
 
-Hard minimums. An effect that misses one of these looks cheap regardless of how good the timing is.
+Hard minimums. An effect that misses one of these looks cheap regardless of how good the timing is. Numbers live in `numbers.md`; these are the tests.
 
-- **Screen size.** Nothing thinner than 2 px at the review camera. Sparks at least ~20 px long at peak. Debris and ash big enough to read as shapes (on a 1080p frame at mid distance: 0.05 m chips vanish, 0.1 - 0.3 m read).
-- **Counts per layer.** Explosion: about 3 hero shapes, 6 - 10 mid shapes, 30+ accents. Impact: 1 - 2 hero shapes, 4 - 8 mids, 10 - 30 accents. Uniform counts of identical sizes read as a pattern.
-- **Size tiers.** Use big / mid / small tiers with ratios near 1 : 0.5 : 0.15, not one random range.
-- **Cotton-ball test.** If the peak frame reads as a pile of separate circles, the shapes are wrong. Merge silhouettes (one outline around a cluster), add lobes, tongues and negative space, break the round quad silhouette with noise.
+Shape:
+- **Screen size.** The primary shape, sparks and lines meet the pixel minimums at the gameplay camera (`numbers.md` > Sizes, enforced by `recipes/screen-size.md`).
+- **Size tiers and counts.** Big, mid and small tiers per layer; hero, mid and accent counts per effect (`numbers.md` > Counts). One random size range reads as a pattern.
+- **Cotton-ball test.** If the peak frame reads as a pile of separate circles, the shapes are wrong. Merge silhouettes (one outline around a cluster), add lobes, tongues and negative space, and use authored shapes (`recipes/flipbooks.md`).
 - **Reticle test.** If the peak frame reads as a target or crosshair (concentric star, ring and disc), offset and tilt the parts and give them a direction.
-- **Ring limits.** Rings are small and broken: impact rings stay within 1.2x the primary shape (about 0.5 - 0.8 m around a 1.8 m character), cover 40 - 70% of the circle (a broken arc), are stretched 1.4 - 1.8x along the hit, start 2 - 3 frames after the flash and live 6 frames or less. Ground rings on the biggest explosions reach about 2 m radius at most, at low alpha, or are replaced by a dust skirt plus distortion. A closed even ring larger than the character reads as a selection circle.
-- **White budget.** At most ~10% of the effect's area clips to white on the peak frame, and the brightest element sits next to a dark one. The flash core (the bright disc, not the spike shape) has a radius at most 0.6x the primary shape's; when the spark itself is the primary shape (anime), its total size stays at or under about 0.8x the character's height, falloff exponent 4 or more, 3 frames or fewer above HDR 1.
-- **Bloom adds up.** Many small HDR sources sum into haze: with 30+ additive sparks keep their heads at HDR 2.5 or less and bloom strength at 0.3 or less. Measure it: mean frame luminance at the peak should rise less than ~25% over the frame before contact.
-- **Target flash cap.** The hit character's flash stays at or below HDR 1 (under the bloom threshold), tinted, for 1 - 2 frames. A full-body flash brighter than the spark is a white-out. Rims at modest strength, and none in realism.
-- **No static holds.** Nothing is held unchanged for more than 4 frames at 60 fps, and the count includes hitstop: a slash frozen 4 frames by hitstop has no hold budget left, so it freezes 2 frames at most and starts wiping right after; in held-drawing styles, no drawing repeats unchanged for more than 2 drawings (10 frames at 60 fps on twos). Held shapes drift in scale 5 - 10%, erode, or get redrawn; a frozen shape reads as a sticker.
-- **Smoke has mass.** At its peak a smoke puff covers 55% or more of its quad with alpha 0.8 or more in the core, and differs from the background by at least 0.25 in grayscale value.
-- **Visible residue.** Dark layers (smoke, blood, ash) must read on dark backgrounds: give them a value floor, a rim, or light from the fire below. Check on a dark and a mid background.
-- **Ground contact.** No hard lines where quads cut the ground or a character (soft particles), and something touches the ground on big events (light pool, dust, scorch, cracks).
-- **No visible quads.** Every procedural body (fire, puff, smoke) is windowed to zero before the quad edge (`smoothstep` on the distance to the UV border), not just faded by radius. Soft particles only hide edges against geometry; a window hides them against everything.
-- **Sort alpha-blended instances.** Alpha smoke, cel puffs and blood are drawn back to front within the layer as well as between layers, or dust draws through fire. Sort instances by view depth per frame (or use weighted blended OIT); additive layers do not need it.
-- **HDR overdraw budget.** Overlapping additive or premultiplied bodies sum: with 10+ fire quads keep the hottest ramp stop at HDR 1.5 - 1.8, fire `occlusion` near 0.75 or more, and 3 hero plus 6 mid quads rather than 15 equal ones. Bloom gets clamped input. Check the hue at the peak: if the core of an orange fireball reads white, lower the K values, not the bloom.
-- **Fire noise leads.** Heat is noise first, masked by the radius (`heat = (noise - bias) * mask - threshold`); a strong radial term (`+ (1 - r) * k`) maps the ramp into concentric rings, the fried-egg look. Test: if the fire shows rings around its centre at any frame, the radial term is too strong.
-- **Fireball rise budget.** Fire hangs; smoke rises. A fireball body travels 1.5 - 2.5 m (buoyancy around +0.8 m/s^2, drag 3 - 3.5); the smoke column carries the height. Fire that rises 4 - 5 m leaves the gameplay frame.
-- **Smoke wraps the fire.** On explosions the smoke is emitted from the fireball itself, starting within 2 - 4 frames of the peak and continuing for about half a second, with 30 - 40% of puffs inside the fire's footprint at the fire's size or bigger. Delayed smoke spawned above the fire leaves bare fire balloons with a separate cloud on top.
-- **One fire per style.** Fire bodies differ by style in shape language, value, timing and texture, not only in ramp colours. Copying one emitter template (counts, sizes, speeds) between styles makes every style read the same.
-- **Framing.** The whole effect, peak to dissipation, stays inside the gameplay camera's frame. Check the gameplay strip, not only the close-up.
-- **Explosion silhouette.** The fireball is taller than wide (aspect 1.3 - 1.4, upright), sits on a stem that touches the ground, and its smoke column keeps that silhouette. A round symmetrical ball floating in the air reads as a balloon.
-- **Target reaction numbers.** Rim at most HDR 0.5 for 2 - 6 frames; squash to about 0.85 on the hit axis and 1.1 across it on contact, recover with ease-out over 6 - 15 frames. Toon gets a squash-stretch-squash bounce, realism a small one.
+- **Rings are small, broken and short.** Size and lifetime from `numbers.md`; coverage 40 - 70% of the circle, stretched 1.4 - 1.8x along the hit. A closed even ring larger than the character reads as a selection circle.
+- **No straight cuts.** No straight edge on any frame where a shape ends on its quad or strip border (see Shape language).
+- **Slashes cross the target.** Built from the swing (`recipes/slash.md`); the projected arc midpoint lies inside the target's silhouette.
+- **No static holds.** Nothing is held unchanged for more than 4 frames at 60 fps, including frames frozen by hitstop, or for more than 2 drawings in held-drawing styles. Held shapes drift in scale 5 - 10%, erode, or get redrawn.
+- **Explosion silhouette.** Ground explosions are taller than wide (about 1.3 - 1.4) and sit on a stem that touches the ground. Air bursts are round with a dust ring below. Toon may stay round but squashes and stretches.
+- **Framing.** The whole effect, peak to dissipation, stays inside the gameplay camera's frame.
+
+Brightness:
+- **White budget.** At most ~10% of the effect's area clips to white on the peak frame, and the brightest element sits next to a dark one. Flash core size and time above B: `numbers.md`.
+- **Summed brightness.** Overlapping additive or premultiplied bodies add up. Fewer, bigger hero quads beat many equal ones; fire that glows through should mostly occlude as it cools. Test: the peak's hue survives (an orange fireball still reads orange), and mean frame luminance rises less than ~25% over the frame before contact.
+- **Target flash cap.** The hit character's flash stays under B, tinted, for the frames in `numbers.md`. A full-body flash brighter than the spark is a white-out. Dark styles darken the body (an albedo tint) instead of adding light.
+
+Bodies:
+- **Fire noise leads.** Heat is noise first, masked by the radius (`heat = (noise - bias) * mask - threshold`). An additive radial term maps the ramp into concentric rings, the fried-egg look. Test: no rings around the centre on any frame.
+- **Fire hangs, smoke rises.** Motion budgets in `numbers.md`.
+- **Smoke wraps the fire.** On explosions the smoke is emitted from the fireball itself, starting within 2 - 4 frames of the peak and continuing for about half a second, with 30 - 40% of puffs inside the fire's footprint at the fire's size or bigger.
+- **Smoke has mass and light.** At its peak a smoke puff is opaque in its core and differs from the background by at least 0.25 in grayscale value. It is lit, not flat (`recipes/smoke-lighting.md`).
+- **Visible residue.** Dark layers (smoke, blood, ash) read on dark backgrounds: a value floor, a rim, or light from the fire below. Check on a dark and a mid background.
+- **One fire per style.** Fire bodies differ by style in shape language, value, timing and texture, not only in ramp colours.
+
+Integration:
+- **Ground contact.** No hard lines where quads cut the ground or a character (soft particles), and something touches the ground on big events (light pool, dust, scorch, cracks). Hard-edged cel shapes are the exception to soft particles: the fade plus the cel threshold still cuts them along a straight ground line. Keep their bottom above the ground (centre at least one radius up) or squash them flat.
+- **Sort alpha-blended instances** back to front within each layer as well as between layers, or dust draws through fire. Additive layers do not need it.
+- **Dissolve stays out of the body.** Erosion holes belong to the tail of a slash or the end of a body's life.
+- **Target reaction.** Squash on contact, a jolt and a lean away from the hit, a short rim (`numbers.md` > Motion budgets and Per style). Toon gets a squash-stretch-squash bounce, realism a small one.
 
 ## Layer anatomy
 
@@ -120,14 +123,14 @@ A complete hit or explosion usually has most of these. Each is its own emitter o
 | Layer | Job | Typical tech |
 |---|---|---|
 | Anticipation | warn and build | inward streaks, charging glow, ground crack reveal |
-| Flash | mark the contact frame | billboard star or disc, 1 - 4 frames |
+| Flash | mark the contact frame | billboard star or disc (lengths in `numbers.md`) |
 | Primary shape | the identity of the effect | slash mesh, shockwave ring, fireball puffs |
 | Secondary | energy and direction | sparks, speed lines, debris |
 | Tertiary / residue | aftermath and grounding | smoke, embers, dust, ash |
 | Light | lights the world | point light with a fast curve |
 | Distortion | heat or shock | screen-space refraction of a ring or puff; required for tier 2+ shockwaves and big fires |
 | Decal | lasting mark | scorch, crack, splatter, frost |
-| Target reaction | sells the hit on the receiver | hit flash or fresnel rim for 2 - 6 frames, jolt, lean away from the hit, wound mark |
+| Target reaction | sells the hit on the receiver | hit flash or rim, squash, jolt, lean away from the hit, wound mark |
 | Camera | weight | shake, hitstop, impact frame, exposure dip |
 
 ## Dissipation catalog
@@ -144,7 +147,7 @@ Choose deliberately per layer:
 
 ## Game feel helpers
 
-- **Hitstop:** freeze or slow both attacker and target for 2 to 6 frames on contact, scaled with damage. Defaults per style: anime 4 - 6 frames (2 - 3 drawings), stylized 3 - 4, dark fantasy 3 - 4, realism 2 - 3, toon 2 - 3, pixel 2 drawings. Hitstop freezes what was already moving before contact: the attacker, the swing, the slash and the anticipation layers. Layers born at contact (spark, flash, ring, puffs) keep playing through the hold, so the spark blooms while the world is frozen and lands together with the target reaction. Freezing a contact layer at its first frame leaves the spark tiny during the hold and peaking after the reaction is over. Camera shake keeps running. Explosions in realism get no hitstop.
+- **Hitstop:** freeze or slow both attacker and target on contact, scaled with damage (lengths per style in `numbers.md`). Hitstop freezes what was already moving before contact: the attacker, the swing, the slash and the anticipation layers. Layers born at contact (spark, flash, ring, puffs) keep playing through the hold, so the spark blooms while the world is frozen and lands together with the target reaction. Freezing a contact layer at its first frame leaves the spark tiny during the hold and peaking after the reaction is over. A slash freezes 2 frames at most, then keeps wiping. Camera shake keeps running.
 - **Camera shake:** short, high frequency for hits; longer, lower frequency for explosions. Decay fast (outQuad or exponential). Shake along the hit direction reads better than random.
 - **Impact frame:** a single two-tone image (1 - 3 frames at full rate, 1 drawing in held-drawing styles) on the biggest hits. Anime signature; use sparingly elsewhere. It is the only allowed full-screen flat frame (see No white-out frames in SKILL.md).
 - **Screen flash:** a brief full-screen tint at very low alpha. Never on tier 0 to 1 effects.
@@ -157,7 +160,7 @@ Starting stacks. The style file adjusts the parts.
 - **Melee impact:** anticipation (optional) -> flash -> shockwave ring -> radial sparks or streaks -> small smoke -> light -> shake.
 - **Slash:** arc mesh swept by a head with a tail, white core to colored edge, eroding as the tail passes -> small flash at contact -> sparks along the arc direction.
 - **Projectile:** head (core glow + shape), trail (ribbon or stretched particles), muzzle flash at spawn, impact at end. The head must be readable at gameplay distance; the trail shows direction.
-- **Explosion:** anticipation (compression, glow, cracks) -> flash -> fireball (fast expansion, slow decay) -> smoke column (buoyant, delayed) -> shockwave on ground -> debris (ballistic) -> sparks -> scorch decal -> light -> shake.
+- **Explosion:** anticipation (compression, glow, cracks) -> flash -> fireball (fast expansion, slow decay) -> smoke emitted from the fireball (wrapping it, then rising) -> shockwave on ground -> debris (ballistic) -> sparks -> scorch decal -> light -> shake.
 - **Fire loop:** flame tongues (eroded noise scrolling up), core glow, embers, a little smoke, flickering light. Loop length 1 - 3 s with a seamless noise scroll.
 - **Aura / buff:** ground ring or glyph, rising motes, a fresnel shell or rim on the character, slow pulse. Never cover the character's silhouette.
 - **Heal:** rising soft particles, plus signs or leaves for style, upward spiral, a gentle flash. Round shapes, green or gold.

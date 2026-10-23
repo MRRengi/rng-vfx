@@ -61,6 +61,16 @@ A sheet is a grid of frames (4x4 at 256 px per cell is enough for most bodies). 
 
 When motion is a closed-form function of time, a trail needs no history buffer: build a strip of N segments per particle and place segment i at `motion(age - i / N * trailTime)`. The ribbon bends with gravity and drag for free, stays deterministic and scrubbable, and costs one instanced draw. Expand each vertex across the screen-space tangent (perpendicular to the projected segment direction), keep the width at least 2 px, taper toward the tail, and make the head 2x brighter. Use them for the hero subset of sparks, not all of them.
 
+## The stand's primitive parameters
+
+The stand's effect definitions (`stand/js/styles/*.js`) use these names; the general rules they implement live in `fundamentals.md` and `numbers.md`:
+- `fade: [in, out]` is the opacity-over-life window. Keep ramp alpha nearly constant and let `fade` own the fade-out, e.g. `[0.05, 0.75]`.
+- `sizeIn` is the fraction of life spent popping in.
+- `coreK` / `K` in ramp stops is the HDR multiplier. With the stand's bloom threshold of about 1.0-1.4, B is about 1.2.
+- `occlusion` on premultiplied fire is how much a hot pixel blocks what is behind it. Keep it at 0.75 or more so overlapping quads do not sum to white.
+- `swing` and `normal` on `slash()` orient the arc by intent (`recipes/slash.md`).
+- `dragQ` on `burst()` is quadratic drag for sparks (`physics.md` > Sparks).
+
 ## Determinism and review
 
 - Seed every random value (a small xorshift is enough) and drive everything from a single effect time. Then any frame can be rendered on demand: scrubbing, frame strips and automated checks become trivial.

@@ -28,14 +28,14 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 - **Impact frame:** 1 drawing at contact. The character is forced to one value (black) by its own mask, not by luminance: a luminance threshold turns a mid-gray character white and erases it. Background goes flat (white, or red for the strongest hits), bright effect shapes go black with a crisp edge, optional radial speed lines over it. Turn bloom off for these drawings. The coloured spark peaks on the drawing after the impact frame, so the frame never hides it. A cheap way to get the mask: push the character's emissive to full white for the impact drawings, then the two-tone pass inks it with the effect.
 - **One outline per cluster:** puffs drawn as separate outlined circles read as a bag of oranges. Render the cel puffs into their own target and draw the outline around the union (edge detect on alpha), or use a flipbook drawn as one mass. Shade from the cluster centre (normal = sphere normal + direction from the effect centre), not per puff.
 - **Smears:** a 1 - 2 drawing smeared shape (stretched along motion, single colour) between the anticipation and the contact sells speed better than motion blur.
-- **Hand-drawn flipbooks:** for flame and explosion shapes the best results come from drawn frames (8 to 16 frames) rather than simulation. Generate them with an image model in a consistent style and play them stepped.
+- **Hand-drawn flipbooks:** for flame and explosion shapes the best results come from drawn frames (8 to 16 frames) rather than simulation. Make them from 4 - 6 drawn keyframes plus a life map (`recipes/flipbooks.md`) and play them stepped.
 - **Normals for cel-shaded meshes:** if the effect includes meshes (shockwave domes, energy shells), edit or replace normals so the light band falls in a clean designed shape; noise in the normals turns into noise in the bands.
 
 ## Default numbers
 
-- Impact: anticipation 0 - 6 frames of inward lines; contact spark 2 - 3 drawings (first drawing hot, then shrinking and breaking); ring 3 - 4 drawings expanding fast; puffs 5 - 8 drawings; total under 1 s.
-- Explosion: 2 drawings of bright compressed core, impact frame 1 drawing, fireball 6 - 10 drawings, black smoke 10 - 16 drawings rising, all on twos.
+- Timings, sizes and brightness: `numbers.md` > Anime.
 - Bands: 2 for smoke, 3 for fire. Outline width about 5 - 8% of the puff radius.
+- Spark: 4 - 5 blades, one dominant blade along the hit, blades unequal, redrawn every drawing.
 
 ## Common mistakes
 

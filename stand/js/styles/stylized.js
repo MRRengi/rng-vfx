@@ -16,19 +16,19 @@ export default {
       build(fx) {
         fx.hitstop(0.08, 4);
         fx.slash({
-          pos: at(HIT, 0, 0, 0.2), rot: [-0.9, 0.3, 0.6], scale: 1.15, from: 150, to: -35, rIn: 0.7, rOut: 1.5, torn: 0.15,
+          pos: at(HIT, -0.4, 0.25, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 150, to: -35, rIn: 0.7, rOut: 1.5, torn: 0.15,
           coreColor: '#ffffff', coreK: 1.4, edgeColor: '#7b5cff', edgeK: 1.2, noise: 0.25, dissolve: 0.7,
           burnColor: '#d9ccff', burnK: 1.6, burnW: 0.06,
           head: [[0, 0], [0.08, 1, 'outQuart'], [0.1, 1.05], [0.2, 1.7, 'inQuad']], alpha: [[0, 1], [0.12, 1], [0.2, 0]], tail: 0.7,
         }, 0);
         // Secondary arcs: thinner, offset, a frame behind; they give the swing volume.
         fx.slash({
-          pos: at(HIT, 0, 0, 0.2), rot: [-0.9, 0.3, 0.6], scale: 1.15, from: 140, to: -20, rIn: 1.58, rOut: 1.68, torn: 0.3,
+          pos: at(HIT, -0.4, 0.25, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 140, to: -20, rIn: 1.58, rOut: 1.68, torn: 0.3,
           coreColor: '#d9ccff', coreK: 1.1, edgeColor: '#6a4cff', edgeK: 1.0, noise: 0.35, dissolve: 0.8,
           head: [[0, 0], [0.08, 1, 'outQuart'], [0.2, 1.6, 'inQuad']], alpha: [[0, 0.8], [0.14, 0.8], [0.2, 0]], tail: 0.5,
         }, 0.017);
         fx.slash({
-          pos: at(HIT, 0, 0, 0.2), rot: [-0.9, 0.3, 0.6], scale: 1.15, from: 160, to: -10, rIn: 0.55, rOut: 0.63, torn: 0.3,
+          pos: at(HIT, -0.4, 0.25, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 160, to: -10, rIn: 0.55, rOut: 0.63, torn: 0.3,
           coreColor: '#bfaeff', coreK: 1.0, edgeColor: '#4b2bd1', edgeK: 0.9, noise: 0.4, dissolve: 0.8,
           head: [[0, 0], [0.09, 1, 'outQuart'], [0.2, 1.5, 'inQuad']], alpha: [[0, 0.7], [0.13, 0.7], [0.19, 0]], tail: 0.45,
         }, 0.033);
@@ -46,7 +46,7 @@ export default {
         fx.distort({ kind: 'ring', billboard: true, pos: HIT, size: 3.2, radius: [[0, 0.2], [0.3, 0.9, 'outExpo']], width: [[0, 0.12], [0.3, 0.05]], strength: [[0, 0.0113], [0.3, 0]] }, 0.08);
         fx.burst({
           shape: 'streak', dir: 'cone', axis: HIT_DIR, angle: 40, count: 30, origin: HIT, speed: [5, 10], gravity: [0, -9, 0],
-          drag: 2.5, life: [0.35, 0.65], stretch: 0.08, size: [0.08, 0.02], soft: 1.2, ground: 0, bounce: 0.3,
+          dragQ: 1.0, life: [0.35, 0.65], stretch: 0.08, size: [0.08, 0.02], soft: 1.2, ground: 0, bounce: 0.3,
           ramp: fx.ramp([[0, '#ffffff', 2.0], [0.4, '#a48bff', 1.4], [1, '#4b2bd1', 1.0]]),
         }, 0.08);
         fx.burst({
@@ -62,7 +62,7 @@ export default {
         }, 0.08);
         fx.target({
           dir: HIT_DIR, color: '#c9bbff', rimColor: '#8e7bff',
-          flash: [[0, 0], [0.079, 0], [0.08, 0.8], [0.113, 0.8], [0.114, 0]],
+          flash: [[0, 0], [0.079, 0], [0.08, 0.45], [0.113, 0.45], [0.114, 0]],
           rim: [[0, 0], [0.114, 1], [0.18, 0]],
           jolt: [[0, 0], [0.08, 0.04], [0.25, 0]],
           knock: [[0, 0], [0.08, 0], [0.13, 0.1, 'outQuad'], [0.6, 0, 'inOutSine']],
@@ -106,7 +106,7 @@ export default {
           ramp: fx.ramp([[0, '#4a3a52', 1, 0.92], [0.7, '#3a3042', 1, 0.88], [1, '#2a2430', 1, 0]]),
         }, 0.02);
         fx.burst({
-          shape: 'streak', dir: 'hemi', count: 30, origin: C, speed: [6, 12], gravity: [0, -10, 0], drag: 1.2,
+          shape: 'streak', dir: 'hemi', count: 30, origin: C, speed: [6, 14], gravity: [0, -10, 0], dragQ: 0.3,
           life: [0.6, 1.2], stretch: 0.05, size: [0.07, 0.02], soft: 1.2, ground: 0, bounce: 0.3,
           ramp: fx.ramp([[0, '#ffffff', 2.0], [0.3, '#ffd36b', 1.4], [1, '#ff5a1f', 1.0]]),
         }, 0.02);

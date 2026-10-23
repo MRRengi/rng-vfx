@@ -49,14 +49,14 @@ export default {
           ramp: fx.ramp([[0, '#ffffff', 1.4], [0.5, '#fff3a0', 1.2], [1, '#ffb030', 1.0]]),
         }, T);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: HIT_DIR, angle: 75, count: 12, sizeDist: [2, 4, 6], origin: HIT, spawnR: 0.15,
-          speed: [1.5, 3.2], drag: 5, life: [6 * D, 9 * D], size: [0.55, 1.0], sizePow: 0.4, sizeIn: 0.15, bands: 2, outline: 0,
+          shape: 'puff', cel: true, dir: 'cone', axis: HIT_DIR, angle: 75, count: 8, sizeDist: [2, 3, 3], origin: at(HIT, HIT_DIR[0] * 0.35, HIT_DIR[1] * 0.35, HIT_DIR[2] * 0.35), spawnR: 0.15,
+          speed: [1.5, 3.2], drag: 5, life: [6 * D, 9 * D], size: [0.35, 0.7], sizePow: 0.4, sizeIn: 0.15, bands: 2, outline: 0,
           shadow: '#4a5c90', holeScale: 0.45, erode: 1, noiseScale: 2.5, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#ffffff', 1.0], [1, '#dce8f2', 1]]),
         }, T + D);
         fx.target({
           dir: HIT_DIR, color: '#bff3ff', rimColor: '#3fd8ff',
-          flash: [[0, 0], [T + D - 0.001, 0], [T + D, 1], [T + 2 * D - 0.001, 1], [T + 2 * D, 0]],
+          flash: [[0, 0], [T + D - 0.001, 0], [T + D, 0.35], [T + 2 * D - 0.001, 0.35], [T + 2 * D, 0]],
           rim: [[0, 0], [T + 2 * D, 1], [T + 3 * D, 0]],
           jolt: [[0, 0], [T, 0.05], [T + 4 * D, 0]],
           knock: [[0, 0], [T, 0], [T + D, 0.14, 'outQuad'], [T + 9 * D, 0, 'inOutSine']],
@@ -81,7 +81,7 @@ export default {
         }, 0);
         fx.impactFrame([[0, 0], [T - 0.001, 0], [T, 1], [T + D - 0.001, 1], [T + D, 0]]);
         fx.flash({
-          pos: C, size: 2.4, hard: true, spikes: 5, spikeLen: 1.4, core: 0.3, sharp: 2.0, jitter: 0.8,
+          pos: C, size: 1.1, hard: true, spikes: 5, spikeLen: 1.0, core: 0.3, sharp: 2.0, jitter: 0.8, blend: 'alpha',
           dir: [0.45, 1, 0.1], aspect: 1.8, redraw: 12, angJitter: 0.7, bias: 0.5, core_color: '#fffbe6', coreK: 1.15, edge_color: '#ffb12a', edgeK: 1.0,
           scaleCurve: [[0, 0.8], [3 * D, 1.1], [4 * D, 0.3]], alphaCurve: [[0, 1], [4 * D, 1], [4 * D + 0.001, 0]],
         }, T);
@@ -92,9 +92,17 @@ export default {
           shadow: '#7a2418', holeScale: 0.45, erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff2c0', 1.2], [0.4, '#ffb02a', 1.0], [1, '#7a2a1a', 0.8]]),
         }, T);
+        // Hero fireball: five drawn keyframes (image model, see recipes/flipbooks.md),
+        // played stepped on the drawing grid, two drawings each.
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 55, count: 16, sizeDist: [3, 5, 8], origin: C, spawnR: 0.4,
-          speed: [3, 6], drag: 4, life: [8 * D, 13 * D], size: [1.3, 2.3], sizePow: 0.35, sizeIn: 0.1, bands: 2, outline: 0, order: 3,
+          shape: 'sheet', cel: true, sheet: { url: './textures/anime_fire_3x2.png', grid: [3, 2], frames: 5, stepped: true },
+          dir: 'cone', axis: UP, angle: 1, count: 1, origin: at(C, 0, 0.35, 0), speed: [0.6, 0.6], drag: 2,
+          life: [10 * D, 10 * D], size: [3.4, 3.4], sizeRand: 0, blend: 'alpha', order: 5, fadeDist: 0.05, fade: [0, 0.999],
+          ramp: fx.ramp([[0, '#ffffff', 1.05], [1, '#ffffff', 1.0]]),
+        }, T);
+        fx.burst({
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 55, count: 6, sizeDist: [0, 3, 3], origin: C, spawnR: 0.6,
+          speed: [3, 6], drag: 4, life: [8 * D, 13 * D], size: [0.9, 1.6], sizePow: 0.35, sizeIn: 0.1, bands: 2, outline: 0, order: 3,
           shadow: '#7a2418', holeScale: 0.45, erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff7d6', 1.3], [0.25, '#ffd23f', 1.1], [0.55, '#ff6a1a', 1.0], [1, '#5a1e1e', 0.8]]),
         }, T);
@@ -114,7 +122,7 @@ export default {
         }, T + 4 * D);
         // Dust skirt instead of a giant ground hoop.
         fx.burst({
-          shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, origin: at(BLAST, 0, 0.2, 0), speed: [6, 8], drag: 5,
+          shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, origin: at(BLAST, 0, 0.42, 0), speed: [6, 8], drag: 5,
           life: [5 * D, 8 * D], size: [0.7, 0.2], sizePow: 1.5, sizeIn: 0.15, bands: 1, outline: 0, order: 1, shadow: '#9a7a6a',
           erode: 1, noiseScale: 2, blend: 'alpha', ground: 0, fadeDist: 0.05,
           ramp: fx.ramp([[0, '#e8d8c0', 1], [1, '#b8a890', 1]]),

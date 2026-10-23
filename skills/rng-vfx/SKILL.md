@@ -5,37 +5,51 @@ description: Real-time game VFX across styles (anime, toon, stylized, dark fanta
 
 # rng-vfx
 
-A VFX artist's process, written for an agent. Two things make an effect look expensive, and both are load-bearing: the decision chain (what the effect communicates, which style rules apply, how it is timed, how it reads at gameplay distance) and the quality of its shapes and surfaces (designed silhouettes, real texture noise or flipbooks, depth-aware blending, distortion, a reacting target). A correct chain rendered as procedural blobs on round quads still looks cheap. Follow the chain in order and meet the quality floors in `references/fundamentals.md`.
+A VFX artist's production process, written for an agent. Two things make an effect look expensive, and both are load-bearing:
+- **The decision chain:** what the effect communicates, which style rules apply, how it is timed, how it reads at gameplay distance in this particular project.
+- **Authored shapes and surfaces:** designed silhouettes, flipbooks and painted masks, slashes swept from the weapon, lit smoke, depth-aware blending, distortion, a reacting target.
+
+A correct chain rendered as procedural blobs on round quads still looks cheap. Follow the chain in order. Numbers come from `references/numbers.md`; the tests come from `references/fundamentals.md` > Quality floors.
 
 ## The chain
 
-1. **Brief.** Write down in one or two lines: what gameplay event this is, how important it is compared to everything else on screen (see `references/fundamentals.md` > Hierarchy), where the camera is, and how long the effect may last.
-2. **Style.** Pick exactly one style file and follow its rules. Mixing rules from two styles is the most common reason an effect looks "off".
-3. **Reference breakdown.** Before building, describe the effect as frames: what is on screen at contact, at +2 frames, at +6, at the end. If the user gave a reference, break it down frame by frame. If not, write the breakdown from the style file.
-4. **Timing.** Anticipation, contact, follow-through, dissipation, with numbers in seconds or frames. `references/fundamentals.md` > Timing has the defaults.
-5. **Layers.** Decide the layer stack (core, flash, shape, secondary, residue, light, camera, decal). Each layer has one job.
-6. **Textures.** Choose or generate masks, noises, flipbooks and ramps (`references/textures.md`).
-7. **Shaders and materials.** Build from the technique catalog (`references/shaders.md`, `references/materials.md`).
-8. **Motion.** Particle physics, curves, forces (`references/physics.md`).
-9. **Engine.** Implement with the engine file (`references/engines/unity.md`, `unreal.md`, `threejs.md`).
-10. **Budget.** Check against `references/performance.md` before calling it done.
-11. **Verify.** Render a frame strip and check it against the breakdown from step 3 (`references/verification.md`).
+0. **Audit the project.** Before designing, record the engine and pipeline, tone mapper, bloom threshold (**B**), exposure mode, units, gameplay camera and its pixels per metre, frame rate, colour language, and render 2 - 3 existing effects as a reference strip (`references/audit.md`). Every brightness and size in this skill is relative to these. With no project, use the neutral defaults listed there and say so.
+1. **Brief.** In one or two lines: what gameplay event this is, how important it is compared to everything else on screen (`references/fundamentals.md` > Hierarchy), where the camera is, and how long the effect may last.
+2. **Engine and system.** Decide where it is built: VFX Graph or Shuriken, Niagara, three.js instancing, meshes or sprites, which blend modes and post effects exist (`references/engines/*.md`). This limits everything after it.
+3. **Style.** Pick exactly one style file and follow its rules. Mixing rules from two styles is the most common reason an effect looks "off".
+4. **References.** Ask the user for 2 - 3 reference clips or frames of the look they want, unless they already gave some. If a shell with network access exists, `yt-dlp` plus `ffmpeg -ss <time> -frames:v 24` cuts frames around contact. Break each reference down as frames: what is on screen at contact, +2, +6, the end. With no references, write the breakdown from the style file and say that you did.
+5. **Timing.** Anticipation, contact, follow-through, dissipation, with numbers from `references/numbers.md`.
+6. **Blockout.** Before any texture or shader work: flat, unlit, grayscale shapes with the final timing, seen through the gameplay camera. Check the silhouette, the size on screen, the hit direction and the framing. Fix them here; they do not get fixed by textures later.
+7. **Layers.** Decide the layer stack (core, flash, shape, secondary, residue, light, distortion, decal, target reaction, camera). Each layer has one job.
+8. **Shape sources.** For each body, choose an authored source:
+   - a flipbook (simulated or drawn), a life map or a swept mesh (`references/recipes/`);
+   - procedural noise only for masks, erosion and accents (`references/textures.md`).
+9. **Shaders and materials.** Build from the technique catalog (`references/shaders.md`, `references/materials.md`, `references/recipes/smoke-lighting.md`).
+10. **Motion.** Particle physics, curves, forces (`references/physics.md`).
+11. **Budget.** Check against `references/performance.md`.
+12. **Verify.** Render frame strips (even, peak, gameplay camera) next to the references and the existing effects. Run the checks in `references/verification.md`.
 
 ## Which file to read
 
 | Task | Read |
 |---|---|
-| Any effect, first time in a session | `references/fundamentals.md` |
+| Any effect, first time in a session | `references/fundamentals.md`, `references/numbers.md` |
+| Working in an existing project | `references/audit.md` |
 | Anime, sakuga, cel-shaded 3D, fighting games | `references/styles/anime.md` |
 | Cartoon, toon, Wind Waker, bouncy | `references/styles/toon.md` |
 | MOBA, hero shooter, hand-painted, "Riot / Blizzard look" | `references/styles/stylized.md` |
 | ARPG, Diablo-like, grimdark, horror magic | `references/styles/dark-fantasy.md` |
 | Pixel art, retro, low-res | `references/styles/pixel.md` |
 | Realistic, cinematic, military, physically based | `references/styles/realism.md` |
-| Particle motion, gravity, drag, smoke, fire, sparks, fluids | `references/physics.md` |
+| Slashes, sword trails, swings | `references/recipes/slash.md` |
+| Fire, smoke, explosions, puffs, anything that needs a flipbook or a designed dissolve | `references/recipes/flipbooks.md` |
+| Smoke, dust, steam that must look lit | `references/recipes/smoke-lighting.md` |
+| Shockwave cones, domes, beams, tornadoes, ground shocks, scorch and crack decals | `references/recipes/meshes-decals.md` |
+| Effects too small at the gameplay camera, minimum pixel sizes | `references/recipes/screen-size.md` |
+| Particle motion, gravity, drag, sparks, smoke, fire, fluids | `references/physics.md` |
 | Erosion, distortion, flowmaps, fresnel, polar UVs, soft particles | `references/shaders.md` |
 | Blend modes, HDR, emission, lit vs unlit, sorting | `references/materials.md` |
-| Masks, noises, flipbooks, ramps, texture generation | `references/textures.md` |
+| Masks, noises, ramps, texture generation | `references/textures.md` |
 | Unity | `references/engines/unity.md` |
 | Unreal Engine | `references/engines/unreal.md` |
 | Browser, WebGL, three.js | `references/engines/threejs.md` |
@@ -59,9 +73,11 @@ A VFX artist's process, written for an agent. Two things make an effect look exp
 - **No reticles, no hoops.** A flash and a ring sharing a centre read as a crosshair, and a big closed ring reads as a UI selection circle. Rings are small, broken, stretched along the hit and short-lived; the numbers are under Ring limits in `references/fundamentals.md`. Tilt rings toward the hit.
 - **Bodies use texture noise or flipbooks.** Fire, smoke, explosion and puff bodies sample a large-feature noise texture (billow, inverted Worley, warped fbm) or a flipbook. Procedural value noise is for small masks and holes only; on bodies it gives the same cotton-ball look in every style.
 - **The target reacts.** Hit flash or fresnel rim, a jolt, a lean away from the hit, a mark. The target's response carries half of an impact.
-- **No white-out frames.** The flash core stays small (see White budget in `references/fundamentals.md`), has a tight falloff, and lives 3 frames or less above HDR 1. Overlapping bodies (fire, explosions) count too: their summed HDR is what blooms into white mush. Use an exposure dip, not a full-screen white, to sell brightness. The one exception is a designed impact frame: a two-tone frame, 1 drawing, with the effect and character inked, on the biggest hits in styles that use it (anime first).
+- **No white-out frames.** The flash core stays small, has a tight falloff, and stays above B only for the frames in `references/numbers.md`. Overlapping bodies (fire, explosions) count too: their summed HDR is what blooms into white mush. Use an exposure dip, not a full-screen white, to sell brightness. The one exception is a designed impact frame: a two-tone frame, 1 drawing, with the effect and character inked, on the biggest hits in styles that use it (anime first).
 - **Depth-aware and refractive.** Soft particles wherever quads meet geometry; shockwaves and heat are distortion, not soft additive discs.
-- **Nothing under 2 pixels.** At the review camera, no element is thinner than 2 px and sparks are at least ~20 px long at their peak.
+- **Big enough on screen.** At the gameplay camera the primary shape, sparks and lines meet the pixel minimums in `references/numbers.md`, clamped in the shader when needed.
+- **No straight cuts.** Nothing ends on the straight border of its quad or strip; shapes fade or narrow to zero first.
+- **Slashes follow the swing** and cross the target (`references/recipes/slash.md`).
 
 ## Tools this skill can use
 

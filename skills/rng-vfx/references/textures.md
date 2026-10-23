@@ -87,8 +87,8 @@ How to use it as an agent:
 ### 4. Image generation
 
 For painted and hand-drawn looks (anime fire, toon puffs, stylized flipbooks, decals) an image model gives a more designed result than noise. Prompting rules that work:
-- Ask for a **sprite sheet on a plain black background** (additive use) or **plain white/transparent background** (alpha use), with an explicit grid: "4 by 4 grid, 16 frames, each frame centered, nothing crossing cell borders".
-- Describe the **motion over the frames**: "frame 1 small bright core, frames 2-5 expanding flame tongues, frames 6-12 breaking into separate shapes, frames 13-16 small fading wisps".
+- **Do not ask for a whole grid.** Models cannot keep 16 cells consistent; frames jump in shape and position. Generate 4 - 6 keyframes as separate images (birth, growth, peak, break-up, last wisps), feeding the previous one back as a reference, and fill the in-betweens with a life map or frame blending. Full method: `recipes/flipbooks.md`.
+- Use a **plain neutral background** (#808080) and remove it afterwards, or a **plain black background** for additive elements.
 - Name the **style and constraints**: "flat cel-shaded, 3 tones, crisp edges, no gradients, no text, no glow haze" for anime; "hand-painted brush texture, soft value bands" for stylized; "pixel art, 64 px per frame, 5 color palette" for pixel.
 - Generate grayscale when the color should come from a ramp in the shader; it keeps the palette controllable.
 - Always post-process: remove background to alpha, center frames, enforce the grid, check frame-to-frame consistency. Reject sheets where frames jump in position or style.

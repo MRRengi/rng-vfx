@@ -26,12 +26,12 @@ Reference points: Dead Cells, Celeste, Hyper Light Drifter, Enter the Gungeon, B
 - **Sprite flash (mandatory):** the hit target turns full palette white for exactly 1 drawing, the shortest step the drawing grid allows; a longer white reads as a white-out. It is the single most important pixel hit cue.
 - **No smooth light falloff on the floor.** Quantized point-light falloff bands into rings. Use a flat floor and dithered light-pool sprites instead.
 - **Dithered dissolve:** Bayer matrix threshold instead of smooth alpha.
-- **Hand-drawn flipbooks:** the gold standard for pixel effects; small (32 to 128 px) frame sequences. An image model can draft them, then they are reduced to the palette.
+- **Hand-drawn flipbooks:** the gold standard for pixel effects; small (32 to 128 px) frame sequences. An image model can draft keyframes (`recipes/flipbooks.md`), which are then redrawn at sprite resolution and reduced to the palette.
 
 ## Default numbers
 
-- Impact: plus or star flash 2 frames, ring 3 drawings, squares 3 - 5 drawings, puffs 4 - 6 drawings at 10 fps.
-- Explosion: white disc 2 drawings, fire 5 - 8 drawings, smoke 8 - 11 drawings, debris pixels with gravity.
+- Timings and sizes: `numbers.md` > Pixel.
+- Effects drawn at the sprites' pixel density, never finer; palette of the game, never extra colours.
 
 ## Common mistakes
 

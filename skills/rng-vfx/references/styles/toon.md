@@ -19,19 +19,19 @@ Reference points: Western cartoon animation, cel-shaded adventure games (The Leg
 
 ## Signature techniques
 
-- **Two-tone puff:** circle silhouette with slight noise wobble, one shading band, outline. Size curve: pop up to full with outBack in 3 - 6 frames, hold, shrink with ease in. A size curve that only goes from big to small (born at full size) has no pop: add an explicit size-in phase (the stand's burst takes `sizeIn`, the fraction of life spent popping in).
+- **Two-tone puff:** circle silhouette with slight noise wobble, one shading band, outline. Size curve: pop up to full with outBack in 3 - 6 frames, hold, shrink with ease in. A size curve that only goes from big to small (born at full size) has no pop: give it an explicit size-in phase (the first 10 - 20% of life).
 - **Cluster puffs:** spawn 2 - 3 clusters of 3 - 5 puffs (tight spawn radius, low speed variance inside a cluster) so a cloud reads as a bunch of grapes, not balloons drifting apart. Draw one thick outline around each cluster's union, not one per puff.
 - **Curl tips:** the comic smoke swoosh is a spiral, a polar mask `r < f(angle + twist * r)`, at the ends of puff trails.
-- **Star burst:** 4 - 6 pointed star, low sharpness for rounded tips, overshoot scale, then vanish in one frame or shrink.
+- **Star burst:** 4 - 6 points with straight or slightly convex edges and softly rounded tips, unequal lengths (one long point along the hit), a thick dark outline, overshoot scale, then vanish in one frame or shrink. Concave, petal-like points read as a flower; needle-thin points read as anime.
 - **Rings and ground shocks:** a flat single-colour broken ring (alpha-blended, hard edge, the cel outline gives it its edge) that starts 2 - 3 frames after the star, covers about 60% of the circle and stays within 1.2x the star; on the ground use a skirt of small puffs running outward, never a flat additive white hoop.
 - **Sparkle:** four-point star particle, scale and rotation pulse, twinkle out.
 - **Rim and toon ramp on meshes:** a 1D ramp texture with 2 - 3 hard steps for lighting, a fresnel rim for magic.
 
 ## Default numbers
 
-- Impact: star 6 - 12 frames with overshoot, ring 15 - 20 frames, puffs 30 - 40 frames shrink out, sparkles 25 - 40 frames.
-- Explosion: white disc pop 5 frames, fire puffs 30 - 50 frames, lavender smoke puffs drifting up 50 - 70 frames, stars falling with gravity.
+- Timings, sizes and brightness: `numbers.md` > Toon.
 - Outline width 7 - 10% of puff radius.
+- Puffs pop in over 10 - 20% of life with overshoot, then shrink out.
 
 ## Common mistakes
 

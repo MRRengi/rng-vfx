@@ -299,11 +299,16 @@ def cmd_flipbook(a):
                 col = sample_ramp(stops, np.full((cell, cell), t)) * lit[..., None]
         elif a.kind == "fire":
             # flame tongues rising and eroding, colored by heat
+            # Grows from ~45% to full size over the first quarter, then billows and
+            # burns off. Noise leads and the radius only masks (no radial hot
+            # centre: it reads as concentric rings when tiled into a fireball).
+            grow = 0.4 + 0.48 * min(1.0, t / 0.25) ** 0.6
             shift = int(t * cell * 0.6)
             noise = np.roll(base, -shift, axis=0) * 0.6 + np.roll(detail, -shift * 2, axis=0) * 0.4
-            mask = np.clip(1 - r * 0.9, 0, 1) * np.clip(1 - (-yy) * 0.6, 0, 1)
-            thr = 0.15 + 0.75 * t ** 1.3
-            heat = (noise * mask * 1.8 - thr) / 0.6
+            rr = r / grow
+            mask = np.clip((1.0 - rr) / 0.65, 0, 1) ** 0.8 * np.clip(1 - (-yy) * 0.5, 0, 1)
+            thr = 0.05 + 0.6 * t ** 1.6
+            heat = ((noise * 1.8 - 0.35) * mask - thr) / 0.5
             alpha = np.clip(heat * 3, 0, 1)
             fire_stops = stops or parse_stops("0:#fffbe0,0.25:#ffd34d,0.55:#ff6a1f,0.85:#b3261e,1:#3b0f0f")
             col = sample_ramp(fire_stops, 1 - np.clip(heat, 0, 1))

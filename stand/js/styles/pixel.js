@@ -26,8 +26,8 @@ export default {
       build(fx) {
         fx.celOutline('#0e0e17', 1);
         fx.flash({
-          pos: HIT, size: 1.6, hard: true, spikes: 4, spikeLen: 0.5, core: 0.32, sharp: 2, jitter: 0.8,
-          dir: HIT_DIR, aspect: 1.0, redraw: 10, bias: 0.3, core_color: '#ffffff', coreK: 1, edge_color: '#ffe14d', edgeK: 1,
+          pos: HIT, size: 1.6, hard: true, spikes: 4, spikeLen: 0.55, core: 0.2, sharp: 2.5, jitter: 0,
+          dir: HIT_DIR, aspect: 1.0, redraw: 10, core_color: '#ffffff', coreK: 1, edge_color: '#ffe14d', edgeK: 1,
           scaleCurve: [[0, 0.7], [D, 1], [2 * D, 0.5]], alphaCurve: [[0, 1], [3 * D - 0.001, 1], [3 * D, 0]],
         }, 0);
         fx.ring({
@@ -44,7 +44,7 @@ export default {
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: HIT_DIR, angle: 70, count: 5, origin: HIT, speed: [1.2, 2], drag: 5,
           life: [4 * D, 6 * D], size: [0.5, 0.1], sizePow: 2, bands: 1, outline: 0, shadow: '#8a92c8',
-          erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0, ramp: fx.ramp([[0, '#ffffff', 1], [1, '#d0d6ff', 1]]),
+          erode: 0.4, noiseScale: 2, blend: 'alpha', fadeDist: 0, ramp: fx.ramp([[0, '#ffffff', 1], [1, '#d0d6ff', 1]]),
         }, 2 * D);
         fx.target({
           dir: HIT_DIR, color: '#ffffff',
@@ -74,7 +74,7 @@ export default {
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 8, origin: at(C, 0, 0.6, 0), spawnR: 0.5, speed: [1.2, 2],
           gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [8 * D, 11 * D], size: [1.1, 0.2], sizePow: 2, bands: 2, outline: 0,
-          shadow: '#5c5a66', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0, dither: true,
+          shadow: '#5c5a66', erode: 0.4, noiseScale: 2, blend: 'alpha', fadeDist: 0,
           ramp: fx.ramp([[0, '#b4b2bc', 1], [1, '#8a8894', 1]]),
         }, 3 * D);
         fx.burst({

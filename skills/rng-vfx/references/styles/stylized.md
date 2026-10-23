@@ -16,7 +16,7 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 - One theme color per ability, chosen from the character's identity. Accent sparingly.
 - Hue shift: core toward white or pale yellow, edges toward a deeper saturated hue, smoke toward a desaturated dark version.
 - Reserve pure white and maximum brightness for the strongest abilities (Riot's guide frames this as a scale of importance).
-- Bloom: medium, controlled. Use HDR only on cores and sparks.
+- Bloom: medium, controlled. Only cores and sparks go above B.
 
 ## Signature techniques
 
@@ -31,8 +31,8 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 
 ## Default numbers
 
-- Impact: slash 6 - 10 frames, flash 2 - 4 frames, ring 18 - 20 frames, sparks 20 - 35 frames with gravity, motes 40 - 70 frames, smoke 35 - 55 frames.
-- Explosion: flash 5 - 15 frames, fireball 35 - 60 frames eroding, smoke 70 - 110 frames, embers up to 2 s, scorch 2 - 5 s.
+- Timings, sizes and brightness: `numbers.md` > Stylized.
+- Fire: 2 - 4 posterized heat bands on large-feature noise; painted flipbooks for hero bodies.
 
 ## Common mistakes
 
@@ -41,4 +41,4 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 - Area of effect drawn larger or smaller than the hitbox.
 - Smoke covering the character or the important part of the effect.
 - A slash that floats beside the target: it crosses the target's body, with one or two thinner secondary arcs a frame behind for volume.
-- Body and slash cores above HDR 1.5 (spark heads may reach 2.5, see Bloom adds up in `fundamentals.md`): bloom turns them into haze and the shape is lost.
+- Body and slash cores far above B (`numbers.md` > Brightness): bloom turns them into haze and the shape is lost.

@@ -33,9 +33,19 @@ Once per effect, solo each layer (all other layers hidden) and render it across 
 
 The stand (or any reference implementation) is not proof that a rule is implemented: check the rule in the code.
 
+## Before textures: the blockout check
+
+Before any texture or shader work, render the effect as flat grayscale shapes with final timing through the gameplay camera:
+- The primary shape reaches its minimum size on screen.
+- The hit direction reads.
+- The slash midpoint falls inside the target.
+- Nothing leaves the frame.
+
+Problems found here are cheap. Found after texturing, they get papered over with glow.
+
 ## Required outputs per review
 
-An even strip, a peak strip around contact, and one strip from the gameplay camera. Close-ups alone hide readability problems.
+An even strip, a peak strip around contact, and one strip from the gameplay camera, shown next to the reference frames (SKILL.md step 4) and the project's existing effects (`audit.md`). Close-ups alone hide readability problems; an effect judged without its references drifts toward the agent's own taste.
 
 ## Cheapness checklist
 
