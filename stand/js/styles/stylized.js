@@ -85,18 +85,25 @@ export default {
         }, 0);
         fx.exposure([[0, 1], [0.03, 0.75], [0.4, 1, 'outQuad']]);
         fx.burst({
-          // Painted fire: big noise features, three flat heat bands with hard edges.
-          shape: 'fire', dir: 'cone', axis: UP, angle: 40, count: 7, sizeDist: [2, 4, 1], origin: C, spawnR: 0.35,
-          speed: [1.5, 3], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.1], size: [2.0, 3.0], sizePow: 0.5, aspectY: 1.25, upright: true,
+          // Hero fireball: painted keyframes (image model), blended between frames.
+          shape: 'sheet', sheet: { url: './textures/stylized_fire_3x2.png', grid: [3, 2], frames: 5 },
+          dir: 'cone', axis: UP, angle: 20, count: 2, sizeDist: [1, 1, 0], origin: at(C, 0, 0.5, 0), spawnR: 0.25,
+          speed: [0.6, 1.2], drag: 3, gravity: [0, 0.6, 0], life: [1.0, 1.2], size: [3.4, 3.8], sizeIn: 0.12, spin: 0.2,
+          blend: 'alpha', order: 4, fadeDist: 0.4, fade: [0, 0.95], ramp: fx.ramp([[0, '#ffffff', 1.25], [1, '#ffffff', 1.0]]),
+        }, 0.02);
+        // Mid tier: painted procedural fire, three flat heat bands, breaking the hero's outline.
+        fx.burst({
+          shape: 'fire', dir: 'cone', axis: UP, angle: 45, count: 5, sizeDist: [0, 3, 2], origin: C, spawnR: 0.7,
+          speed: [1.5, 3], drag: 3.5, gravity: [0, 0.8, 0], life: [0.7, 1.0], size: [1.4, 2.0], sizePow: 0.5, aspectY: 1.2, spin: 0.3,
           soft: 0.8, erode: 1, noiseScale: 1.6, vBias: 0.25, poster: 3, blend: 'premul', order: 3, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#fff6c8', 1.3], [0.33, '#ffc23a', 1.1], [0.66, '#ff6a1f', 1.0], [0.9, '#a8261e', 0.9], [1, '#3b0f0f', 1]]),
         }, 0.02);
         // Stem: the fireball connects to the ground.
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 15, count: 4, seed: 61, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
-          speed: [0.4, 1.0], drag: 3.5, gravity: [0, 0.2, 0], life: [1.1, 1.3], size: [1.0, 1.5], aspectY: 1.4, upright: true,
-          soft: 0.8, erode: 1, noiseScale: 1.6, vBias: 0.3, poster: 3, blend: 'premul', order: 4, fadeDist: 0.3,
-          ramp: fx.ramp([[0, '#fffbe0', 1.5], [0.3, '#ffd34d', 1.3], [0.6, '#ff6a1f', 1.0], [1, '#3b0f0f', 1]]),
+          shape: 'sheet', sheet: { url: './textures/stylized_fire_3x2.png', grid: [3, 2], frames: 5 },
+          dir: 'cone', axis: UP, angle: 10, count: 3, seed: 61, origin: at(BLAST, 0, 0.5, 0), spawnR: 0.25,
+          speed: [0.4, 1.0], drag: 3.5, gravity: [0, 0.2, 0], life: [0.9, 1.1], size: [1.5, 1.8], sizeIn: 0.12, spin: 0.3,
+          blend: 'alpha', order: 5, fadeDist: 0.3, fade: [0, 0.95], ramp: fx.ramp([[0, '#ffffff', 1.2], [1, '#ffffff', 1.0]]),
         }, 0.02);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 45, count: 18, sizeDist: [5, 8, 5], origin: C, spawnR: 0.6,
