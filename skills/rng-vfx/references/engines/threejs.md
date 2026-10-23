@@ -55,7 +55,7 @@ Six-way lightmaps store how a smoke frame is lit from +X, -X, +Y, -Y, +Z and -Z 
 
 ### Flipbooks
 
-A sheet is a grid of frames (4x4 at 256 px per cell is enough for most bodies). Pick the frame from the particle's normalized age, `frame = floor(age01 * frames)`, optionally stepped (no blend between frames, for hand-drawn sheets) or blended between two frames for smoke. Load sheets once, share the texture across materials, `colorSpace = SRGBColorSpace`, mipmaps on, clamp to edge, and leave half a texel of padding at cell borders or neighbours bleed in. Randomize the start frame and flip per particle so a burst of 20 does not play the same drawing in sync. The stand's `shape: 'sheet'` uses `sheet: { url, grid: [4, 4], frames: 16, stepped }`.
+A sheet is a grid of frames (4x4 at 256 px per cell is enough for most bodies). Pick the frame from the particle's normalized age, `frame = floor(age01 * frames)`, optionally stepped (no blend between frames, for hand-drawn sheets) or blended between two frames for smoke. Load sheets once and share the texture across materials. Colour art sheets use `colorSpace = SRGBColorSpace`; grayscale data sheets (density, temperature, life maps, masks) use `NoColorSpace`, or every threshold shifts. Mipmaps on, clamp to edge, and leave half a texel of padding at cell borders or neighbours bleed in. Randomize the start frame and flip per particle so a burst of 20 does not play the same drawing in sync. The stand's `shape: 'sheet'` uses `sheet: { url, grid: [4, 4], frames: 16, stepped }`.
 
 ### Ribbon trails from the closed form
 
@@ -66,7 +66,7 @@ When motion is a closed-form function of time, a trail needs no history buffer: 
 The stand's effect definitions (`stand/js/styles/*.js`) use these names; the general rules they implement live in `fundamentals.md` and `numbers.md`:
 - `fade: [in, out]` is the opacity-over-life window. Keep ramp alpha nearly constant and let `fade` own the fade-out, e.g. `[0.05, 0.75]`.
 - `sizeIn` is the fraction of life spent popping in.
-- `coreK` / `K` in ramp stops is the HDR multiplier. With the stand's bloom threshold of about 1.0-1.4, B is about 1.2.
+- `coreK` / `K` in ramp stops is the HDR multiplier. B is each style's `look.bloom.threshold` (1.1 - 2.0 on the stand), compared against luminance.
 - `occlusion` on premultiplied fire is how much a hot pixel blocks what is behind it. Keep it at 0.75 or more so overlapping quads do not sum to white.
 - `swing` and `normal` on `slash()` orient the arc by intent (`recipes/slash.md`).
 - `dragQ` on `burst()` is quadratic drag for sparks (`physics.md` > Sparks).

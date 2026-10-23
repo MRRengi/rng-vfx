@@ -15,9 +15,23 @@ Absolute values like "HDR 2" mean nothing across engines. UE5 has auto exposure 
 | Rim | 0.3 - 0.5 B | fresnel rim on the hit character | 2 - 6 frames |
 
 Conversions:
-- **Unity HDR picker:** intensity is in stops. +1 doubles the value, so with URP's default bloom threshold of 0.9, 2B is about +1.
+- **Unity HDR picker:** intensity is in stops; +1 doubles the value. URP's Bloom Threshold is entered in gamma space (0.9 is about 0.79 linear), so measure B (`audit.md`) instead of computing it, then write levels as stops above it.
 - **UE5:** lock exposure first (Min EV100 = Max EV100 in a post-process volume, or Manual metering). Emissive values are then relative to that fixed exposure. With the default bloom threshold of -1 (everything blooms a little), measure B as the value where the bloom halo becomes clearly visible.
-- **three.js:** with `EffectComposer`, B is simply `UnrealBloomPass.threshold` in linear values. `toneMappingExposure` is applied later in `OutputPass`, so it does not change what blooms; an exposure dip there darkens the frame but not the bloom input (scale the effect's emissive too, or apply exposure before the bloom pass).
+- **three.js:** with `EffectComposer`, B is `UnrealBloomPass.threshold`, compared against linear luminance (`LuminosityHighPassShader`). `toneMappingExposure` is applied later in `OutputPass`, so it does not change what blooms; an exposure dip there darkens the frame but not the bloom input (scale the effect's emissive too, or apply exposure before the bloom pass).
+
+**Bloom thresholds luminance, not channels.** three.js `UnrealBloomPass`, URP and HDRP bloom all compare luminance (`0.2126 R + 0.7152 G + 0.0722 B`) against the threshold. Every level in the table above is a luminance. For a saturated colour, scale its channels by `level / lum(colour)`:
+
+| Colour | lum per unit | channel scale for 1 B of luminance |
+|---|---|---|
+| white | 1.0 | x1 |
+| yellow #ffd23f | 0.81 | x1.2 |
+| cyan #3fd8ff | 0.68 | x1.5 |
+| orange #ff6a1f | 0.36 | x2.8 |
+| pure red #ff0000 | 0.21 | x4.7 |
+| violet #7b5cff | 0.18 | x5.6 |
+| pure blue #0000ff | 0.07 | x13.9 |
+
+A red rim "at 1.2 B" written as channel values never blooms; a white core at the same channel value blows out. Reds and blues need much larger channel values to glow and turn toward white or pink under AgX when pushed. In dark styles, carry the heat with value contrast (dark body, bright edge) rather than raw channel intensity.
 
 Summed brightness counts too. Ten overlapping fire quads at 1.2 B add up to a white blob. Check the hue at peak: an orange fireball that reads white is too bright, whatever its per-quad values say.
 

@@ -14,7 +14,7 @@ The core artifact: 6 to 12 frames evenly spaced over the effect's duration, side
 
 ## Checklist
 
-Check each against the breakdown written before building (SKILL.md step 4):
+Check each against the breakdown written before building (SKILL.md step 2):
 
 1. **Peak frame:** is there a clearly readable peak within the first few frames after contact? Is it the brightest, highest-contrast frame?
 2. **Timing:** fast in, slow out? Layers staggered? Total length matches the brief?
@@ -45,7 +45,7 @@ Problems found here are cheap. Found after texturing, they get papered over with
 
 ## Required outputs per review
 
-An even strip, a peak strip around contact, and one strip from the gameplay camera, shown next to the reference frames (SKILL.md step 4) and the project's existing effects (`audit.md`). Close-ups alone hide readability problems; an effect judged without its references drifts toward the agent's own taste.
+An even strip, a peak strip around contact, and one strip from the gameplay camera, shown next to the reference frames (SKILL.md step 2) and the project's existing effects (`audit.md`). Close-ups alone hide readability problems; an effect judged without its references drifts toward the agent's own taste.
 
 ## Cheapness checklist
 
