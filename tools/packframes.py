@@ -14,10 +14,18 @@ from PIL import Image
 
 
 HOLES = False
+AUTO = False
 
 
 def to_rgba(path, bg, tol, soft, flood=True):
     im = np.asarray(Image.open(path).convert("RGB")).astype(np.float32) / 255.0
+    if AUTO:
+        # Image models often paint a mottled backdrop instead of a flat one: take the
+        # backdrop colour and its noise from a border band and key relative to that.
+        band = np.concatenate([im[:16].reshape(-1, 3), im[-16:].reshape(-1, 3), im[:, :16].reshape(-1, 3), im[:, -16:].reshape(-1, 3)])
+        bg = np.median(band, 0)
+        dd = np.sqrt(((band - bg) ** 2).sum(-1))
+        tol = max(tol, float(np.quantile(dd, 0.99)) * 1.2)
     d = np.sqrt(((im - bg) ** 2).sum(-1))
     a = np.clip((d - tol) / soft, 0.0, 1.0)
     if flood:
@@ -49,10 +57,12 @@ def main():
     ap.add_argument("--pad", type=float, default=0.04, help="empty border inside each cell, fraction")
     ap.add_argument("--cols", type=int, default=0)
     ap.add_argument("--no-flood", action="store_true", help="key every background-coloured pixel, not only those connected to the border")
+    ap.add_argument("--auto-bg", action="store_true", help="estimate the backdrop colour and noise from each frame's border (for painted, mottled backdrops)")
     ap.add_argument("--holes", action="store_true", help="also key enclosed backdrop-coloured regions (drawn dissolve holes); leave off for grey smoke whose highlights match the backdrop")
     a = ap.parse_args()
-    global HOLES
+    global HOLES, AUTO
     HOLES = a.holes
+    AUTO = a.auto_bg
 
     bg = np.array([int(a.bg[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
     frames = [to_rgba(p, bg, a.tol, a.soft, not a.no_flood) for p in a.frames]

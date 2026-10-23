@@ -73,7 +73,7 @@ export default {
       },
     },
     explosion: {
-      duration: 2.0,
+      duration: 2.5,
       contact: 0,
       build(fx) {
         const C = at(BLAST, 0, 0.5, 0);
@@ -103,14 +103,15 @@ export default {
           shape: 'sheet', sheet: { url: './textures/stylized_fire_3x2.png', grid: [3, 2], frames: 5 },
           dir: 'cone', axis: UP, angle: 10, count: 3, seed: 61, origin: at(BLAST, 0, 0.5, 0), spawnR: 0.25,
           speed: [0.4, 1.0], drag: 3.5, gravity: [0, 0.2, 0], life: [0.9, 1.1], size: [1.5, 1.8], sizeIn: 0.12, spin: 0.3,
-          blend: 'alpha', order: 5, fadeDist: 0.3, fade: [0, 0.95], ramp: fx.ramp([[0, '#ffffff', 1.2], [1, '#ffffff', 1.0]]),
+          blend: 'alpha', order: 1, fadeDist: 0.3, fade: [0, 0.95], ramp: fx.ramp([[0, '#ffffff', 1.2], [1, '#ffffff', 1.0]]),
         }, 0.02);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: UP, angle: 45, count: 18, sizeDist: [5, 8, 5], origin: C, spawnR: 0.6,
-          speed: [0.8, 1.8], gravity: [0, 1.0, 0], drag: 2, delay: [0.08, 0.5], life: [1.3, 1.6], size: [1.6, 3.0], sizePow: 0.35,
-          shadow: '#7a6a80', noiseScale: 2.5, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
-          fireGlow: { color: '#ff7a2a', intensity: 1.0, height: 0.8, rim: 0.4, k: fireK },
-          ramp: fx.ramp([[0, '#4a3a52', 1, 0.92], [0.7, '#3a3042', 1, 0.88], [1, '#2a2430', 1, 0]]),
+          // Painted smoke keyframes, born inside the fire and rising past it.
+          shape: 'sheet', sheet: { url: './textures/stylized_smoke_2x2.png', grid: [2, 2], frames: 4 },
+          dir: 'cone', axis: UP, angle: 40, count: 6, sizeDist: [2, 3, 1], origin: at(C, 0, 0.6, 0), spawnR: 0.6,
+          speed: [0.6, 1.4], gravity: [0, 1.0, 0], drag: 2, delay: [0.1, 0.45], life: [1.7, 2.1], size: [3.4, 4.4], sizeIn: 0.15, spin: 0.25,
+          blend: 'alpha', order: 2, fade: [0.05, 0.9], fadeDist: 0.4,
+          ramp: fx.ramp([[0, '#ffffff', 1, 0.95], [1, '#ffffff', 1, 0.95]]),
         }, 0.02);
         fx.burst({
           shape: 'streak', dir: 'hemi', count: 30, origin: C, speed: [6, 14], gravity: [0, -10, 0], dragQ: 0.3,
