@@ -66,7 +66,7 @@ export default {
           squash: [[0, 0], [0.033, 0.6], [0.2, 0, 'outQuad']],
         });
         // Small hot spot on the surface, close and short.
-        fx.light({ pos: at(HIT, 0, 0, 0.3), color: '#ffb066', distance: 1.5, intensity: [[0, 1.5], [0.05, 0, 'outQuad']] });
+        fx.light({ pos: at(HIT, 0, 0, 0.3), color: '#ffb066', distance: 1.5, intensity: [[0, 0.8], [0.05, 0, 'outQuad']] });
         fx.shake([[0, 0.035], [0.15, 0, 'outQuad']]);
       },
     },

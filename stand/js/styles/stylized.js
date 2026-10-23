@@ -47,7 +47,7 @@ export default {
         fx.burst({
           shape: 'streak', dir: 'cone', axis: HIT_DIR, angle: 40, count: 30, origin: HIT, speed: [5, 10], gravity: [0, -9, 0],
           dragQ: 1.0, life: [0.35, 0.65], stretch: 0.08, size: [0.08, 0.02], soft: 1.2, ground: 0, bounce: 0.3,
-          ramp: fx.ramp([[0, '#ffffff', 2.0], [0.4, '#a48bff', 1.4], [1, '#4b2bd1', 1.0]]),
+          ramp: fx.ramp([[0, '#e0d6ff', 1.6], [0.3, '#a48bff', 1.3], [1, '#4b2bd1', 1.0]]),
         }, 0.08);
         fx.burst({
           shape: 'glow', dir: 'cone', axis: HIT_DIR, angle: 80, count: 16, sizeDist: [2, 5, 9], origin: HIT, spawnR: 0.3,
