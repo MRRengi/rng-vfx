@@ -23,7 +23,7 @@ Reference points: Western cartoon animation, cel-shaded adventure games (The Leg
 - **Cluster puffs:** spawn 2 - 3 clusters of 3 - 5 puffs (tight spawn radius, low speed variance inside a cluster) so a cloud reads as a bunch of grapes, not balloons drifting apart. Draw one thick outline around each cluster's union, not one per puff.
 - **Curl tips:** the comic smoke swoosh is a spiral, a polar mask `r < f(angle + twist * r)`, at the ends of puff trails.
 - **Star burst:** 4 - 6 pointed star, low sharpness for rounded tips, overshoot scale, then vanish in one frame or shrink.
-- **Rings and ground shocks:** an outlined ring (dark inner band, light outer band, alpha-blended) that starts 2 - 3 frames after the star, covers about 60% of the circle and stays within 1.2x the star; on the ground use a skirt of small puffs running outward, never a flat additive white hoop.
+- **Rings and ground shocks:** a flat single-colour broken ring (alpha-blended, hard edge, the cel outline gives it its edge) that starts 2 - 3 frames after the star, covers about 60% of the circle and stays within 1.2x the star; on the ground use a skirt of small puffs running outward, never a flat additive white hoop.
 - **Sparkle:** four-point star particle, scale and rotation pulse, twinkle out.
 - **Rim and toon ramp on meshes:** a 1D ramp texture with 2 - 3 hard steps for lighting, a fresnel rim for magic.
 

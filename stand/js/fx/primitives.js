@@ -960,7 +960,9 @@ export function slash(o) {
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide,
-    depthTest: o.depthTest ?? false,
+    depthTest: o.depthTest ?? true,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
   });
   blending(mat, o.blend || 'add');
   const mesh = new THREE.Mesh(geo, mat);

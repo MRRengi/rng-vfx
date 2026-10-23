@@ -55,7 +55,7 @@ export default {
       },
     },
     explosion: {
-      duration: 1.9,
+      duration: 1.4,
       contact: 0,
       build(fx) {
         const C = at(BLAST, 0, 0.5, 0);

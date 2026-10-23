@@ -7,7 +7,7 @@ An effect is checked by looking at frames, not by reading code. Something other 
 The core artifact: 6 to 12 frames evenly spaced over the effect's duration, side by side, labelled with times. It shows timing, shape evolution and dissipation at a glance, and it is diffable between versions.
 
 - **three.js / stand:** `window.rngStand.captureStrip(8)` returns a PNG data URL; the Tools folder in the stand's panel saves one.
-- **Peak strip:** an evenly spaced strip misses 1 - 3 frame peaks. Always also capture frames packed around contact: -1, 0, +1, +2, +3, +5, +8, +12 frames (`window.rngStand.capturePeak()`; it steps in the style's drawings, so in anime +2 is 2/12 s and in pixel 2/10 s; use `captureTimes` for 60 fps steps), at full resolution.
+- **Peak strip:** an evenly spaced strip misses 1 - 3 frame peaks. Always also capture frames packed around contact: -1, 0, +1, +2, +3, +5, +8, +12 frames (`window.rngStand.capturePeak()`; it steps in the style's drawings, so in anime +2 is 2/12 s and in pixel 2/10 s; use `captureTimes` for 60 fps steps). When an effect's contact is at 0, frames before contact do not exist and the -1 frame repeats contact: give effects a short real lead-in (a few frames of anticipation or a tiny glow) so the strip shows what comes before, at full resolution.
 - **Unity:** `references/engines/unity.md` > Headless frame strips.
 - **Unreal:** Movie Render Queue to a PNG sequence, then tile (`references/engines/unreal.md`).
 - Tiling frames from a folder: `ffmpeg -i frame_%04d.png -vf tile=8x1 strip.png` (pick the 8 frames first), or a few lines of Python with Pillow.

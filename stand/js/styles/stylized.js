@@ -19,7 +19,7 @@ export default {
           pos: at(HIT, 0, 0, 0.2), rot: [-0.9, 0.3, 0.6], scale: 1.15, from: 150, to: -35, rIn: 0.7, rOut: 1.5, torn: 0.15,
           coreColor: '#ffffff', coreK: 1.4, edgeColor: '#7b5cff', edgeK: 1.2, noise: 0.25, dissolve: 0.7,
           burnColor: '#d9ccff', burnK: 1.6, burnW: 0.06,
-          head: [[0, 0], [0.08, 1, 'outQuart'], [0.12, 1.05], [0.26, 1.7, 'inQuad']], alpha: [[0, 1], [0.2, 1], [0.27, 0]], tail: 0.7,
+          head: [[0, 0], [0.08, 1, 'outQuart'], [0.1, 1.05], [0.2, 1.7, 'inQuad']], alpha: [[0, 1], [0.12, 1], [0.2, 0]], tail: 0.7,
         }, 0);
         // Secondary arcs: thinner, offset, a frame behind; they give the swing volume.
         fx.slash({
@@ -34,7 +34,7 @@ export default {
         }, 0.033);
         fx.flash({
           pos: HIT, size: 0.9, spikes: 4, spikeLen: 0.9, core: 0.2, sharp: 2, soft: 4, rot: 0.4,
-          dir: HIT_DIR, aspect: 1.8, core_color: '#ffffff', coreK: 2.2, edge_color: '#8e7bff', edgeK: 1.1,
+          dir: HIT_DIR, aspect: 1.8, core_color: '#ffffff', coreK: 1.5, edge_color: '#8e7bff', edgeK: 1.1,
           scaleCurve: [[0, 0.4], [0.03, 1, 'outExpo'], [0.09, 0.7]], alphaCurve: [[0, 1], [0.05, 1], [0.09, 0]],
         }, 0.08);
         fx.ring({
@@ -63,7 +63,7 @@ export default {
         fx.target({
           dir: HIT_DIR, color: '#c9bbff', rimColor: '#8e7bff',
           flash: [[0, 0], [0.079, 0], [0.08, 0.8], [0.113, 0.8], [0.114, 0]],
-          rim: [[0, 0], [0.114, 1], [0.45, 0]],
+          rim: [[0, 0], [0.114, 1], [0.18, 0]],
           jolt: [[0, 0], [0.08, 0.04], [0.25, 0]],
           knock: [[0, 0], [0.08, 0], [0.13, 0.1, 'outQuad'], [0.6, 0, 'inOutSine']],
           squash: [[0, 0], [0.08, 0], [0.11, 0.7], [0.3, 0, 'outQuad']],
@@ -80,7 +80,7 @@ export default {
         const fireK = [[0, 1.2], [0.6, 0.6], [1.6, 0, 'outQuad']];
         fx.flash({
           pos: C, size: 1.8, spikes: 0, spikeLen: 0, core: 0.8, soft: 4,
-          core_color: '#fff4dd', coreK: 2.6, edge_color: '#ff9a3c', edgeK: 1.2,
+          core_color: '#fff4dd', coreK: 1.5, edge_color: '#ff9a3c', edgeK: 1.2,
           scaleCurve: [[0, 0.4], [0.04, 1, 'outExpo']], alphaCurve: [[0, 1], [0.04, 1], [0.08, 0]],
         }, 0);
         fx.exposure([[0, 1], [0.03, 0.75], [0.4, 1, 'outQuad']]);
@@ -89,6 +89,13 @@ export default {
           speed: [5, 8], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.2], size: [2.2, 3.4], sizePow: 0.5, aspectY: 1.35, upright: true,
           soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 3, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#fffbe0', 1.7], [0.25, '#ffd34d', 1.4], [0.55, '#ff6a1f', 1.0], [0.85, '#b3261e', 0.8], [1, '#3b0f0f', 1]]),
+        }, 0.02);
+        // Stem: the fireball connects to the ground.
+        fx.burst({
+          shape: 'fire', dir: 'cone', axis: UP, angle: 15, count: 4, seed: 61, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
+          speed: [4, 6], drag: 3.5, gravity: [0, 0.8, 0], life: [0.6, 0.9], size: [1.0, 1.5], aspectY: 1.4, upright: true,
+          soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 4, fadeDist: 0.3,
+          ramp: fx.ramp([[0, '#fffbe0', 1.5], [0.3, '#ffd34d', 1.3], [0.6, '#ff6a1f', 1.0], [1, '#3b0f0f', 1]]),
         }, 0.02);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [3, 6, 3], origin: at(C, 0, 0.3, 0), spawnR: 0.5,

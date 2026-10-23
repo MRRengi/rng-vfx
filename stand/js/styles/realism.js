@@ -44,7 +44,7 @@ export default {
         // Dust: a fast directional jet that stops dead, then a slow haze.
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: [-1, 0.35, 0.35], angle: 25, count: 6, origin: HIT, spawnR: 0.05,
-          speed: [6, 9], drag: 7, gravity: [0, 0.15, 0], life: [0.9, 1.3], size: [0.2, 0.9], sizePow: 0.4,
+          speed: [3, 5], drag: 4, gravity: [0, 0.4, 0], life: [1.0, 1.3], size: [0.4, 1.6], sizePow: 0.6,
           shadow: '#7a7068', noiseScale: 3, erode: 0.3, blend: 'alpha', order: -1, fade: [0.04, 0.7], fadeDist: 0.25,
           ramp: fx.ramp([[0, '#b0a596', 1, 0.85], [0.7, '#9a9085', 1, 0.8], [1, '#8f857a', 1, 0]]),
         }, 0.01);
@@ -84,10 +84,17 @@ export default {
         }, 0);
         fx.exposure([[0, 1], [0.03, 0.6], [0.35, 1, 'outQuad']]);
         fx.burst({
-          shape: 'fire', dir: 'cone', axis: UP, angle: 45, count: 9, sizeDist: [3, 5, 1], origin: C, spawnR: 0.45,
-          speed: [5, 8], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.5], size: [1.8, 3.4], sizePow: 0.4, aspectY: 1.35, upright: true,
+          shape: 'fire', dir: 'cone', axis: UP, angle: 45, count: 5, sizeDist: [3, 2, 0], origin: C, spawnR: 0.25,
+          speed: [2.5, 5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.5], size: [1.8, 3.4], sizePow: 0.4, aspectY: 1.35, upright: true,
           soft: 0.9, erode: 1, noiseScale: 3, vBias: 0.25, blend: 'premul', order: 3, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#fff8e6', 1.8], [0.2, '#ffd27a', 1.5], [0.45, '#ff7a1f', 1.2], [0.7, '#a3260f', 0.9], [0.88, '#2a1410', 1], [1, '#161210', 1]]),
+        }, 0);
+        // Mid and small tiers from a flipbook: each quad plays a burning, breaking puff.
+        fx.burst({
+          shape: 'sheet', sheet: { url: './textures/fire_4x4.png', grid: [4, 4], frames: 16 },
+          dir: 'sphere', count: 14, sizeDist: [0, 8, 6], seed: 52, origin: C, spawnR: 0.7, speed: [1.5, 4], drag: 3.5,
+          gravity: [0, 0.8, 0], life: [0.7, 1.2], size: [1.2, 2.2], sizePow: 0.4, spin: 0.6, soft: 0.9, blend: 'premul', order: 3, fadeDist: 0.4,
+          fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.6], [0.5, '#ffffff', 1.2], [1, '#ffffff', 1.0]]),
         }, 0);
         // Stem and base: the fireball sits on the ground.
         fx.burst({
@@ -97,8 +104,8 @@ export default {
           ramp: fx.ramp([[0, '#fff8e6', 1.6], [0.3, '#ffb347', 1.3], [0.7, '#7a200c', 0.9], [1, '#161210', 1]]),
         }, 0);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 20, sizeDist: [4, 8, 8], origin: at(C, 0, 0.3, 0), spawnR: 0.35,
-          speed: [1, 2.6], gravity: [0, 1.2, 0], drag: 2, delay: [0.12, 0.2], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
+          shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 26, sizeDist: [6, 10, 10], origin: C, spawnR: 0.45,
+          speed: [1, 2.6], gravity: [0, 1.2, 0], drag: 2, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
           shadow: '#3a3430', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.05, 0.75], fadeDist: 0.5,
           fireGlow: { color: '#ff7a2a', intensity: 0.8, height: 1.2, rim: 0.6, k: fireK },
           ramp: fx.ramp([[0, '#1c1916', 1, 0.95], [0.6, '#3d3833', 1, 0.9], [1, '#6b655f', 1, 0]]),
@@ -131,7 +138,7 @@ export default {
         fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 12, radius: [[0, 0.05], [0.3, 0.95, 'outExpo']], width: [[0, 0.06], [0.3, 0.03]], strength: [[0, 0.018], [0.3, 0]] }, 0);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.4, 0), size: 5, strength: [[0, 0.016], [2.5, 0.006], [3.8, 0]] }, 0.05);
         fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 4, hot: '#ff6a1f', hotK: 1.2, dark: '#0e0b09', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
-        fx.decal({ pos: at(BLAST, 0, 0.011, 0), size: 5.5, multiply: true, strength: 0.3, glow: [[0, 0]] }, 0);
+        fx.decal({ pos: at(BLAST, 0, 0.011, 0), size: 5.5, multiply: true, strength: 0.55, glow: [[0, 0]] }, 0);
         fx.target({
           dir: AWAY,
           jolt: [[0, 0.05], [0.5, 0]],

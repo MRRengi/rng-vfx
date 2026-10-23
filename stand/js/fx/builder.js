@@ -5,8 +5,9 @@ import { curve } from './math.js';
 // Builds one effect from its definition. Every layer gets a start time `at`
 // (seconds) and is evaluated at local time t - at, so the whole effect is a
 // pure function of the timeline.
-export function buildEffect(def, scene, distortScene, celScene) {
+export function buildEffect(def, scene, distortScene, celScene, overScene) {
   const group = new THREE.Group();
+  const overGroup = new THREE.Group();
   const distortGroup = new THREE.Group();
   const celGroup = new THREE.Group();
   let hold = null;
@@ -19,7 +20,8 @@ export function buildEffect(def, scene, distortScene, celScene) {
   let target = null;
 
   const add = (prim, at = 0) => {
-    (prim.scene === 'distort' ? distortGroup : prim.scene === 'cel' ? celGroup : group).add(prim.object);
+    const additive = prim.object.material?.blending === THREE.AdditiveBlending;
+    (prim.scene === 'distort' ? distortGroup : prim.scene === 'cel' ? celGroup : additive && overScene ? overGroup : group).add(prim.object);
     layers.push({ prim, at, kind: kindOf });
     return prim;
   };
@@ -65,6 +67,7 @@ export function buildEffect(def, scene, distortScene, celScene) {
   scene.add(group);
   distortScene.add(distortGroup);
   celScene.add(celGroup);
+  overScene?.add(overGroup);
   const remap = t => (!hold || t <= hold.at ? t : t < hold.at + hold.dur ? hold.at : t - hold.dur);
 
   return {
@@ -72,6 +75,7 @@ export function buildEffect(def, scene, distortScene, celScene) {
     duration: def.duration,
     contact: def.contact ?? 0,
     celGroup,
+    overGroup,
     celOutline: () => celOutline,
     // Layer census: solo one layer (index) or null for all. Used to prove every
     // layer actually renders; a layer that never shows is a bug, not tuning.
@@ -81,8 +85,11 @@ export function buildEffect(def, scene, distortScene, celScene) {
       // Hitstop freezes only what was already playing before contact (the
       // anticipation, the swing). Layers born at or after contact run on real
       // time, so the spark blooms through the hold and lands with the reaction.
-      layers.forEach(({ prim, at }, i) => {
-        const t = hold && at >= hold.at - 1e-4 ? tReal : remap(tReal);
+      layers.forEach(({ prim, at, kind }, i) => {
+        // Slashes freeze 2 frames at most: a held slash reads as a sticker.
+        const t = hold && at >= hold.at - 1e-4 ? tReal
+          : kind === 'slash' && hold ? (tReal <= hold.at ? tReal : Math.max(hold.at, tReal - 2 / 60))
+          : remap(tReal);
         prim.object.visible = t >= at && (solo === null || solo === i);
         prim.update(t - at, t);
       });
@@ -98,6 +105,7 @@ export function buildEffect(def, scene, distortScene, celScene) {
       scene.remove(group);
       distortScene.remove(distortGroup);
       celScene.remove(celGroup);
+      overScene?.remove(overGroup);
       for (const { prim } of layers) {
         prim.object.material?.uniforms?.uRamp?.value?.dispose?.();
         prim.dispose();

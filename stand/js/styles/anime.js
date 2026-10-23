@@ -13,7 +13,7 @@ export default {
   look: { fps: 12, tone: 'neutral', bloom: { strength: 0.2, threshold: 1.6, radius: 0.15 } },
   effects: {
     impact: {
-      duration: 1.1,
+      duration: 0.8,
       contact: 2 * D,
       build(fx) {
         const T = 2 * D;
@@ -28,9 +28,9 @@ export default {
         fx.impactFrame([[0, 0], [T - 0.001, 0], [T, 1], [T + D - 0.001, 1], [T + D, 0]]);
         fx.flash({
           pos: HIT, size: 1.1, hard: true, spikes: 4, spikeLen: 0.9, core: 0.16, sharp: 2.2, jitter: 1.0,
-          dir: HIT_DIR, aspect: 1.6, redraw: 12, bias: 0.85, angJitter: 0.35, depthTest: true, core_color: '#ffffff', coreK: 1.1, edge_color: '#3fd8ff', edgeK: 1.0,
-          scaleCurve: [[0, 1], [4 * D, 1.08], [5 * D, 0.45]],
-          alphaCurve: [[0, 1], [5 * D, 1], [5 * D + 0.001, 0]],
+          dir: HIT_DIR, aspect: 1.6, redraw: 12, bias: 0.85, angJitter: 0.35, depthTest: true, core_color: '#ffffff', coreK: 1.0, edge_color: '#3fd8ff', edgeK: 1.0,
+          scaleCurve: [[0, 1], [D, 1.08], [2 * D, 0.5]],
+          alphaCurve: [[0, 1], [3 * D, 1], [3 * D + 0.001, 0]],
         }, T);
         fx.ring({
           normal: RING_N, pos: HIT, size: 1.4, hard: true, noise: 0.5, noiseFreq: 3, coverage: 0.55, aspect: 1.6, seed: 5,
@@ -55,9 +55,9 @@ export default {
           ramp: fx.ramp([[0, '#ffffff', 1.0], [1, '#dce8f2', 1]]),
         }, T + D);
         fx.target({
-          dir: HIT_DIR, color: '#ffffff', rimColor: '#3fd8ff',
+          dir: HIT_DIR, color: '#bff3ff', rimColor: '#3fd8ff',
           flash: [[0, 0], [T + D - 0.001, 0], [T + D, 1], [T + 2 * D - 0.001, 1], [T + 2 * D, 0]],
-          rim: [[0, 0], [T + 2 * D, 1], [T + 6 * D, 0]],
+          rim: [[0, 0], [T + 2 * D, 1], [T + 3 * D, 0]],
           jolt: [[0, 0], [T, 0.05], [T + 4 * D, 0]],
           knock: [[0, 0], [T, 0], [T + D, 0.14, 'outQuad'], [T + 9 * D, 0, 'inOutSine']],
           squash: [[0, 0], [T, 0], [T + D, 1], [T + 4 * D, 0]],

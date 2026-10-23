@@ -280,8 +280,10 @@ def cmd_flipbook(a):
     sheet_a = np.zeros((grid * cell, grid * cell))
     r, _ = polar(cell)
     yy = np.linspace(-1, 1, cell)[:, None] * np.ones((1, cell))
-    base = warped_fbm(cell, 3, a.seed, periodic=False)
-    detail = fbm(cell, 6, 4, a.seed + 7, periodic=False)
+    # Periodic: the fire frames scroll the noise with np.roll, and a non-tiling
+    # field shows a hard horizontal seam where it wraps.
+    base = warped_fbm(cell, 3, a.seed, periodic=True)
+    detail = fbm(cell, 6, 4, a.seed + 7, periodic=True)
     stops = parse_stops(a.stops) if a.stops else None
     for f in range(n):
         t = f / max(n - 1, 1)

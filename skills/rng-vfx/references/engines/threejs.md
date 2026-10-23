@@ -37,9 +37,21 @@ Points (`gl_PointSize`) are simplest but cannot rotate or stretch along velocity
 
 1. **Opaque depth prepass.** Hide the effect group, set `scene.overrideMaterial` to a `MeshBasicMaterial({ colorWrite: false })`, render into a target with a `DepthTexture` the same size as the composer's render target. Effects read it: `alpha *= clamp((sceneDepth - fragDepth) / 0.3, 0, 1)` with both depths linearized from `near` / `far`.
 2. **Distortion buffer.** Distortion meshes live in their own scene and write signed UV offsets (`gl_FragColor = vec4(offset, 0, 1)`, additive) into a `HalfFloatType` target at half resolution, cleared to zero each frame.
-3. **Composer:** `RenderPass` -> distortion `ShaderPass` (sample the colour at `uv + offset`) -> `UnrealBloomPass` -> custom effect passes on linear HDR (impact frame) -> `OutputPass` (tone mapping, sRGB) -> display-space passes (palette).
+3. **Composer:** `RenderPass` -> distortion `ShaderPass` (sample the colour at `uv + offset`) -> cel pass (the cel scene rendered to its own target, union outline, laid over the image) -> additive pass (additive layers rendered to their own target over a copy of the opaque depth, then added, so cel puffs never cover sparks and sparks still pass behind the character) -> `UnrealBloomPass` -> custom effect passes on linear HDR (impact frame) -> `OutputPass` (tone mapping, sRGB) -> display-space passes (palette).
 4. **Shared uniforms.** One object holding the noise texture, depth texture, resolution, near / far, world-units-per-pixel and the key light direction in view space, spread into every effect material so they update once per frame. Note: `ShaderPass` clones its uniforms and cannot clone render-target textures; assign those after creating the pass.
 5. **Pixel mode:** a low-res drawing buffer with CSS `image-rendering: pixelated`, palette mapping at the end, flat floor.
+
+### Hit flash that can darken
+
+`emissive` only adds light, so a dark tint (dark fantasy's deep crimson) comes out pink. Lerp the albedo instead: in `onBeforeCompile`, after `#include <color_fragment>`, `diffuseColor.rgb = mix(diffuseColor.rgb, uFlashCol, uFlash)`; add a little emissive only for bright flash colours. Rim: `pow(1 - N.V, 4)` at 0.3 or less; with a lower exponent a thin capsule reads as a full-body tint.
+
+### Sorting instances
+
+Three.js sorts objects, not instances. For alpha-blended bursts (smoke, cel puffs, blood) with closed-form motion, evaluate each instance's position on the CPU (the same formula as the vertex shader, 60 instances is nothing), sort by view depth, and write the order into an instanced index attribute each frame; or split a large burst into a few depth-sorted sub-meshes. Additive layers need no sorting.
+
+### Lit smoke (six-way)
+
+Six-way lightmaps store how a smoke frame is lit from +X, -X, +Y, -Y, +Z and -Z in two RGBA textures (EmberGen and Houdini export them). In the fragment shader transform the light direction into the particle's billboard basis and weight the six channels by its components: `lit = dot(max(L, 0), posXYZ) + dot(max(-L, 0), negXYZ)`, then add the explosion's own light the same way from its direction. Cheaper fallback: a normal from the density gradient (two offset texture taps) and a wrap-lit `N.L`.
 
 ### Flipbooks
 

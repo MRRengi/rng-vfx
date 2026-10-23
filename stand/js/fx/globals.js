@@ -20,6 +20,10 @@ export const distortScene = new THREE.Scene();
 // drawn around their union instead of one per puff.
 export const celScene = new THREE.Scene();
 
+// Additive layers (sparks, flashes, glows, trails) render here, after the cel
+// layer is composited, so cel puffs never cover the spark.
+export const overScene = new THREE.Scene();
+
 // Soft-particle and screen-size helpers used by several fragment shaders.
 export const SOFT = /* glsl */ `
 uniform sampler2D uDepth;

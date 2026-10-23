@@ -8,7 +8,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import GUI from 'lil-gui';
 import { buildEffect } from './fx/builder.js';
 import { preloadSheets } from './fx/primitives.js';
-import { G, distortScene, celScene } from './fx/globals.js';
+import { G, distortScene, celScene, overScene } from './fx/globals.js';
 import { STAGE, ARCHETYPES } from './styles/layout.js';
 import anime from './styles/anime.js';
 import toon from './styles/toon.js';
@@ -89,6 +89,22 @@ const celPass = new ShaderPass({
 });
 celPass.uniforms.tCel.value = celTarget.texture;
 composer.addPass(celPass);
+
+// Additive layers: rendered on their own over the opaque depth, then added on
+// top of the composited image (after cel), so puffs never erase the spark.
+const overTarget = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
+const overPass = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, tOver: { value: null } },
+  vertexShader: FULL_VS,
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform sampler2D tOver; varying vec2 vUv;
+    void main() {
+      vec4 c = texture2D(tDiffuse, vUv);
+      gl_FragColor = vec4(c.rgb + texture2D(tOver, vUv).rgb, c.a);
+    }`,
+});
+overPass.uniforms.tOver.value = overTarget.texture;
+composer.addPass(overPass);
 
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.4, 1.0);
 composer.addPass(bloom);
@@ -190,13 +206,19 @@ scene.add(ground);
 // Dummy with a hit-reaction material: solid flash via emissive, fresnel rim
 // injected into the standard shader.
 const rimUniform = { value: new THREE.Color(0, 0, 0) };
+// Hit flash as an albedo tint: unlike emissive it can darken (dark fantasy).
+const flashCol = { value: new THREE.Color(0, 0, 0) };
+const flashAmt = { value: 0 };
 const dummyMat = new THREE.MeshStandardMaterial({ color: '#8c8f99', roughness: 0.6 });
 dummyMat.onBeforeCompile = shader => {
   shader.uniforms.uRim = rimUniform;
+  shader.uniforms.uFlashCol = flashCol;
+  shader.uniforms.uFlash = flashAmt;
   shader.fragmentShader = shader.fragmentShader
-    .replace('#include <common>', '#include <common>\nuniform vec3 uRim;')
+    .replace('#include <common>', '#include <common>\nuniform vec3 uRim;\nuniform vec3 uFlashCol;\nuniform float uFlash;')
+    .replace('#include <color_fragment>', '#include <color_fragment>\n      diffuseColor.rgb = mix(diffuseColor.rgb, uFlashCol, uFlash);')
     .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
-      float rimF = pow(1.0 - saturate(dot(normalize(vNormal), normalize(vViewPosition))), 2.5);
+      float rimF = pow(1.0 - saturate(dot(normalize(vNormal), normalize(vViewPosition))), 4.0);
       totalEmissiveRadiance += uRim * rimF;`);
 };
 const dummy = new THREE.Group();
@@ -320,7 +342,7 @@ function effectFps() {
 function load() {
   state.effect?.dispose();
   const def = state.style.effects[state.fxId];
-  state.effect = buildEffect(def, scene, distortScene, celScene);
+  state.effect = buildEffect(def, scene, distortScene, celScene, overScene);
   const co = state.effect.celOutline();
   celPass.uniforms.uOutline.value.copy(co.color);
   dummy.position.set(...STAGE[state.fxId].dummy);
@@ -454,6 +476,7 @@ function resize() {
   depthTarget.setSize(rw, rh);
   distortTarget.setSize(Math.max(1, rw >> 1), Math.max(1, rh >> 1));
   celTarget.setSize(rw, rh);
+  overTarget.setSize(rw, rh);
   maskTarget.setSize(rw, rh);
   impactPass.uniforms.tCelM.value = celTarget.texture;
   celPass.uniforms.uTexel.value.set(1 / rw, 1 / rh);
@@ -478,10 +501,16 @@ function renderAt(t) {
   dummyBody.scale.set(1, 1, 1);
   dummyMat.emissive.setRGB(0, 0, 0);
   rimUniform.value.setRGB(0, 0, 0);
+  flashAmt.value = 0;
   if (tr) {
     // Capped under the bloom threshold: a target brighter than the spark is a white-out.
-    dummyMat.emissive.copy(tr.color).multiplyScalar(Math.min(tr.flash, 1) * 0.9);
-    rimUniform.value.copy(tr.rimColor).multiplyScalar(Math.min(tr.rim, 1) * 0.5);
+    // Albedo tint always; a bright colour also glows a little, a dark one only darkens.
+    const f = Math.min(tr.flash, 1);
+    flashCol.value.copy(tr.color);
+    flashAmt.value = f;
+    const lum = tr.color.r * 0.2126 + tr.color.g * 0.7152 + tr.color.b * 0.0722;
+    dummyMat.emissive.copy(tr.color).multiplyScalar(f * 0.8 * THREE.MathUtils.smoothstep(lum, 0.15, 0.6));
+    rimUniform.value.copy(tr.rimColor).multiplyScalar(Math.min(tr.rim, 1) * 0.3);
     const j = tr.jolt * Math.sin(te * 95);
     dummyBody.position.set(tr.dir.x * j, 0, tr.dir.z * j);
     dummyBody.rotation.z = -tr.knock * tr.dir.x;
@@ -534,6 +563,23 @@ function renderAt(t) {
   renderer.clear();
   renderer.render(celScene, camera);
 
+  // Additive layer: opaque depth first (so sparks pass behind the target), then the layer.
+  state.effect.group.visible = false;
+  scene.overrideMaterial = depthOnly;
+  const bgO = scene.background;
+  scene.background = null;
+  renderer.setRenderTarget(overTarget);
+  renderer.setClearColor(0x000000, 0);
+  renderer.clear();
+  renderer.render(scene, camera);
+  scene.overrideMaterial = null;
+  scene.background = bgO;
+  state.effect.group.visible = true;
+  const ac = renderer.autoClear;
+  renderer.autoClear = false;
+  renderer.render(overScene, camera);
+  renderer.autoClear = ac;
+
   // Impact-frame mask: the effect alone, alpha only.
   if (impactAmt > 0.5) {
     const hide = [ground, dummy];
@@ -544,6 +590,10 @@ function renderAt(t) {
     renderer.setClearColor(0x000000, 0);
     renderer.clear();
     renderer.render(scene, camera);
+    const ac2 = renderer.autoClear;
+    renderer.autoClear = false;
+    renderer.render(overScene, camera);
+    renderer.autoClear = ac2;
     scene.background = bg2; scene.fog = fog2;
     ground.visible = true;
     dummy.visible = params.dummy;

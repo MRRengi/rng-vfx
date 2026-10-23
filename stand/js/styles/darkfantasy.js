@@ -66,7 +66,7 @@ export default {
         fx.target({
           dir: HIT_DIR, color: '#400404', rimColor: '#ff3a22',
           flash: [[0, 0], [0.049, 0], [0.05, 1], [0.083, 1], [0.084, 0]],
-          rim: [[0, 0], [0.05, 1], [0.22, 0]],
+          rim: [[0, 0], [0.05, 1], [0.15, 0]],
           squash: [[0, 0], [0.05, 0], [0.08, 0.6], [0.3, 0, 'outQuad']],
           jolt: [[0, 0], [0.05, 0.05], [0.3, 0]],
           knock: [[0, 0], [0.05, 0], [0.1, 0.12, 'outQuad'], [0.7, 0, 'inOutSine']],
@@ -102,7 +102,7 @@ export default {
           shape: 'fire', dir: 'cone', axis: UP, angle: 55, count: 9, sizeDist: [3, 5, 1], origin: C, spawnR: 0.45,
           speed: [5, 8], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.3], size: [2.6, 4.2], sizePow: 0.45, aspectY: 1.35, upright: true,
           soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 3, fadeDist: 0.4,
-          ramp: fx.ramp([[0, '#ffd0b0', 1.5], [0.2, '#ff3b1a', 1.3], [0.5, '#8b0a0a', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
+          ramp: fx.ramp([[0, '#ffb070', 1.2], [0.2, '#e8300f', 1.1], [0.5, '#8b0a0a', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
         }, T);
         fx.burst({
           shape: 'fire', dir: 'cone', axis: UP, angle: 18, count: 7, origin: C, spawnR: 0.2, speed: [9, 12], drag: 2.5,
@@ -110,11 +110,11 @@ export default {
           ramp: fx.ramp([[0, '#ffd0b0', 1.4], [0.3, '#ff3b1a', 1.2], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
         }, T + 0.02);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 14, sizeDist: [3, 6, 5], origin: at(C, 0, 0.4, 0), spawnR: 0.5,
-          speed: [1, 2.2], gravity: [0, 1.4, 0], drag: 1.8, delay: [0.15, 0.25], life: [2.0, 2.8], size: [1.6, 3.2], sizePow: 0.45,
+          shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 20, sizeDist: [5, 8, 7], origin: C, spawnR: 0.5,
+          speed: [1, 2.2], gravity: [0, 1.4, 0], drag: 1.8, delay: [0.03, 0.6], life: [2.0, 2.8], size: [1.6, 3.2], sizePow: 0.45,
           shadow: '#4a2020', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
           fireGlow: { color: '#ff2a12', intensity: 2.2, height: 1.2, rim: 0.8, k: fireK },
-          ramp: fx.ramp([[0, '#1e1012', 1, 0.95], [0.7, '#140a0c', 1, 0.9], [1, '#080506', 1, 0]]),
+          ramp: fx.ramp([[0, '#3a1c1c', 1, 0.95], [0.7, '#2a1414', 1, 0.9], [1, '#140a0c', 1, 0]]),
         }, T);
         fx.burst({
           shape: 'smoke', dir: 'ring', lift: 0.05, count: 18, origin: at(BLAST, 0, 0.25, 0), speed: [5, 8], drag: 5,
