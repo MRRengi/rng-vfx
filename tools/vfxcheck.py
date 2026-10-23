@@ -22,7 +22,7 @@ Checks (thresholds from numbers.md / fundamentals.md):
   white-clip      share of the effect burned to white next to its coloured body <= 15% (OKLab)
   haze            brightness rise outside the effect (bloom spill) at the brightest frame <= +25%
   hue             on the frame with the most visible effect pixels (impacts: within 0.15 s of contact),
-                  >= 15% of them are saturated and >= 30% of the saturated ones are within 25 deg of --hue
+                  >= 15% of them are saturated (OKLab chroma > 0.1) and >= 30% of those within 25 deg of --hue
   static-hold     no unchanged mask and image for longer than 4 frames (full rate) or 2 drawings
   empty-tail      at 90% of the duration the mask still holds >= 2% of its peak area
   growth          (explosions) the first frame with content is <= 50% of the peak area
@@ -304,7 +304,13 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
         # Impacts: the contact read (contact .. +0.15 s); later frames belong to residue (puffs,
         # smoke) whose shading is not the effect's colour.
         hw = max(0.15, (2.0 / a.fps_style) if getattr(a, "fps_style", 0) else 0)
-        win = [i for i, t in enumerate(times) if a.kind != "impact" or contact - 1e-6 <= t <= contact + hw] or list(range(len(fx)))
+        # Explosions: after the flash (contact + 0.1 s); the flash is white by design and judged
+        # by white-clip, the body's colour by this.
+        if a.kind == "impact":
+            win = [i for i, t in enumerate(times) if contact - 1e-6 <= t <= contact + hw]
+        else:
+            win = [i for i, t in enumerate(times) if t >= contact + 0.1]
+        win = win or list(range(len(fx)))
         bi = max(win, key=lambda i: int((luminance(fx[i])[masks[i]] > 0.3).sum()) if masks[i].any() else 0)
         px = fx[bi][masks[bi]]
         px = px[luminance(px) > 0.3] if len(px) else px
@@ -313,7 +319,10 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             res["hue"] = {"pass": False, "note": "no visible effect pixels"}
         else:
             h, s_, _ = rgb_to_hsv(px)
-            sat = s_ > 0.25
+            # Saturated = OKLab chroma above 0.1: pale tinted shading (lavender puff shadows,
+            # warm-white cores) is not the effect's colour and does not vote on the hue.
+            _, A_, B_ = oklab(px)
+            sat = np.hypot(A_, B_) > 0.1
             frac = float(sat.mean())
             # Share of the saturated pixels near the target hue: two-colour designs
             # (a cyan spark with yellow sparks) pass as long as the target colour holds
@@ -382,7 +391,8 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             hot.append(0)
             continue
         L_, A_, B_ = oklab(f_)
-        hot.append(int(((L_ > 0.62) | (np.hypot(A_, B_) > 0.12) & (L_ > 0.4))[m_].sum()))
+        # Hot = near-white or saturated and bright; light grey smoke (L about 0.75) is not hot.
+        hot.append(int(((L_ > 0.85) | (np.hypot(A_, B_) > 0.12) & (L_ > 0.4))[m_].sum()))
     hot = np.array(hot, np.float64)
     if hot.max() > 50:
         reach = [t for t, v in zip(times, hot) if t >= contact - 1e-6 and v >= 0.6 * hot.max()]

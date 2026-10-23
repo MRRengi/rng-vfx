@@ -6,7 +6,7 @@ import { HIT, HIT_DIR, BLAST, UP, AWAY, at } from './layout.js';
 // smoke is dense, lit from below and keeps billowing for seconds. Short flash,
 // exposure dip instead of a white-out, distortion, flickering light, no rims.
 // Cores at about 1.8 B: 50 overlapping sparks sum to a white ball of bloom at 2.5 B.
-const BLACKBODY = [[0, '#ffffff', 2.0], [0.15, '#fff1b8', 1.7], [0.4, '#ffb347', 1.4], [0.75, '#ff5a1a', 1.15], [1, '#661100', 1]];
+const BLACKBODY = [[0, '#ffffff', 1.8], [0.15, '#fff1b8', 1.55], [0.4, '#ffb347', 1.4], [0.75, '#ff5a1a', 1.15], [1, '#661100', 1]];
 
 export default {
   id: 'realism',

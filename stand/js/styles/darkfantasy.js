@@ -67,16 +67,16 @@ export default {
           ramp: fx.ramp([[0, '#2a1418', 1, 0.9], [0.7, '#1a0c0e', 1, 0.88], [1, '#0a0506', 1, 0]]),
         }, 0.05);
         fx.target({
-          // A pale value flash for one frame, tinted only slightly: the hit reads by value and
-          // the hot rim, the target is never repainted red (dark-fantasy.md > Common mistakes).
+          // No body flash: the target is never repainted red (dark-fantasy.md > Common mistakes);
+          // the hot rim and the jolt carry the hit.
           dir: HIT_DIR, color: '#e6d6cf', rimColor: '#ff3a22',
-          flash: [[0, 0], [0.049, 0], [0.05, 0.15], [0.067, 0.15], [0.068, 0]],
+          flash: [[0, 0]], // the hit reads through the hot rim and the body jolt, not a body flash
           rim: [[0, 0], [0.05, 1], [0.15, 0]],
           squash: [[0, 0], [0.05, 0], [0.08, 0.6], [0.3, 0, 'outQuad']],
           jolt: [[0, 0], [0.05, 0.05], [0.3, 0]],
           knock: [[0, 0], [0.05, 0], [0.1, 0.12, 'outQuad'], [0.7, 0, 'inOutSine']],
         });
-        fx.light({ pos: HIT_LIGHT, color: '#ff4a2a', distance: 2.2, intensity: [[0, 0], [0.05, 0], [0.06, 1.4], [0.13, 0, 'outQuad']] });
+        fx.light({ pos: HIT_LIGHT, color: '#ff4a2a', distance: 2.0, intensity: [[0, 0], [0.05, 0], [0.06, 0.8], [0.12, 0, 'outQuad']] });
         fx.shake([[0, 0], [0.05, 0], [0.06, 0.12], [0.4, 0, 'outQuad']]);
       },
     },

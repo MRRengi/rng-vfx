@@ -37,7 +37,7 @@ export default {
         }, 0.08);
         fx.distort({ kind: 'ring', billboard: true, pos: HIT, size: 3.2, radius: [[0, 0.2], [0.3, 0.9, 'outExpo']], width: [[0, 0.12], [0.3, 0.05]], strength: [[0, 0.0113], [0.3, 0]] }, 0.08);
         fx.burst({
-          shape: 'streak', dir: 'cone', axis: HIT_DIR, angle: 40, count: 30, origin: HIT, speed: [5, 10], gravity: [0, -9, 0],
+          shape: 'streak', dir: 'cone', axis: HIT_DIR, angle: 32, count: 30, origin: HIT, speed: [6, 11], gravity: [0, -7, 0],
           dragQ: 1.0, life: [0.35, 0.65], stretch: 0.08, size: [0.08, 0.02], soft: 1.2, ground: 0, bounce: 0.3,
           ramp: fx.ramp([[0, '#e0d6ff', 1.6], [0.3, '#a48bff', 1.3], [1, '#4b2bd1', 1.0]]),
         }, 0.08);
