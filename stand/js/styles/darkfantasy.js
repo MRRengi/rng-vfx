@@ -33,8 +33,8 @@ export default {
           }, 0.017 * (k + 1));
         }
         fx.flash({
-          pos: HIT, size: 1.6, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 0.6, blend: 'alpha', bias: 0.6,
-          dir: HIT_DIR, aspect: 1.6, core_color: '#0a0204', coreK: 1, edge_color: '#b80c04', edgeK: 1.0,
+          pos: HIT, size: 0.9, spikes: 2, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 0.4, soft: 0.6, blend: 'alpha', bias: 1.0,
+          dir: HIT_DIR, aspect: 3.0, core_color: '#0a0204', coreK: 1, edge_color: '#b80c04', edgeK: 1.0,
           scaleCurve: [[0, 0.5], [0.03, 1, 'outExpo'], [0.08, 1.15]], alphaCurve: [[0, 1], [0.05, 1], [0.08, 0]],
         }, 0.05);
         fx.flash({
@@ -45,7 +45,7 @@ export default {
           shape: 'streak', dir: 'cone', axis: HIT_DIR, angle: 40, count: 30, origin: HIT,
           speed: [3, 7], gravity: [0, -14, 0], drag: 1, life: [0.45, 0.8], stretch: 0.08,
           size: [0.14, 0.06], soft: 0.6, blend: 'alpha', ground: 0, fade: [0, 0.9], minPx: 2,
-          ramp: fx.ramp([[0, '#c0101a', 1], [1, '#6a0008', 1]]),
+          ramp: fx.ramp([[0, '#7a0a10', 1], [1, '#3a0206', 1]]),
         }, 0.05);
         fx.decal({
           pos: at(HIT, 1.1, -1.14, -0.1), size: 1.5, splat: true, dark: '#8a0010', seed: 9,
@@ -64,7 +64,7 @@ export default {
           ramp: fx.ramp([[0, '#2a1418', 1, 0.9], [0.7, '#1a0c0e', 1, 0.88], [1, '#0a0506', 1, 0]]),
         }, 0.05);
         fx.target({
-          dir: HIT_DIR, color: '#400404', rimColor: '#ff3a22',
+          dir: HIT_DIR, color: '#962e2e', rimColor: '#ff3a22',
           flash: [[0, 0], [0.049, 0], [0.05, 1], [0.083, 1], [0.084, 0]],
           rim: [[0, 0], [0.05, 1], [0.15, 0]],
           squash: [[0, 0], [0.05, 0], [0.08, 0.6], [0.3, 0, 'outQuad']],
@@ -149,7 +149,7 @@ export default {
         fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 9, radius: [[0, 0.05], [0.55, 0.95, 'outExpo']], width: [[0, 0.1], [0.55, 0.04]], strength: [[0, 0.0158], [0.55, 0]] }, T);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.4, 0), size: 4.5, strength: [[0, 0.014], [2.0, 0.006], [2.9, 0]] }, T);
         fx.target({
-          dir: AWAY, color: '#400404', rimColor: '#ff3a22',
+          dir: AWAY, color: '#962e2e', rimColor: '#ff3a22',
           rim: [[0, 0.15], [T, 0.3], [T + 0.05, 1], [T + 0.25, 0.2, 'outQuad'], [T + 1.5, 0.05]],
           jolt: [[0, 0.01], [T, 0.02], [T + 0.01, 0.06], [T + 0.5, 0]],
           knock: [[0, 0], [T, 0], [T + 0.1, 0.2, 'outQuad'], [T + 1.0, 0, 'inOutSine']],

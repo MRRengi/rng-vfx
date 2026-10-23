@@ -87,22 +87,22 @@ export default {
         fx.burst({
           // Painted fire: big noise features, three flat heat bands with hard edges.
           shape: 'fire', dir: 'cone', axis: UP, angle: 40, count: 7, sizeDist: [2, 4, 1], origin: C, spawnR: 0.35,
-          speed: [3, 6], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.1], size: [2.0, 3.0], sizePow: 0.5, aspectY: 1.25, upright: true,
+          speed: [1.5, 3], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.1], size: [2.0, 3.0], sizePow: 0.5, aspectY: 1.25, upright: true,
           soft: 0.8, erode: 1, noiseScale: 1.6, vBias: 0.25, poster: 3, blend: 'premul', order: 3, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#fff6c8', 1.3], [0.33, '#ffc23a', 1.1], [0.66, '#ff6a1f', 1.0], [0.9, '#a8261e', 0.9], [1, '#3b0f0f', 1]]),
         }, 0.02);
         // Stem: the fireball connects to the ground.
         fx.burst({
           shape: 'fire', dir: 'cone', axis: UP, angle: 15, count: 4, seed: 61, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
-          speed: [3, 4.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.1], size: [1.0, 1.5], aspectY: 1.4, upright: true,
+          speed: [0.4, 1.0], drag: 3.5, gravity: [0, 0.2, 0], life: [1.1, 1.3], size: [1.0, 1.5], aspectY: 1.4, upright: true,
           soft: 0.8, erode: 1, noiseScale: 1.6, vBias: 0.3, poster: 3, blend: 'premul', order: 4, fadeDist: 0.3,
           ramp: fx.ramp([[0, '#fffbe0', 1.5], [0.3, '#ffd34d', 1.3], [0.6, '#ff6a1f', 1.0], [1, '#3b0f0f', 1]]),
         }, 0.02);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [3, 6, 3], origin: at(C, 0, 0.3, 0), spawnR: 0.5,
-          speed: [1, 2], gravity: [0, 1.3, 0], drag: 2, delay: [0.1, 0.12], life: [2.2, 2.8], size: [1.4, 2.8], sizePow: 0.35,
+          shape: 'smoke', dir: 'cone', axis: UP, angle: 45, count: 18, sizeDist: [5, 8, 5], origin: C, spawnR: 0.6,
+          speed: [0.8, 1.8], gravity: [0, 1.0, 0], drag: 2, delay: [0.08, 0.5], life: [1.3, 1.6], size: [1.6, 3.0], sizePow: 0.35,
           shadow: '#7a6a80', noiseScale: 2.5, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
-          fireGlow: { color: '#ff7a2a', intensity: 1.0, height: 2.0, rim: 0.5, k: fireK },
+          fireGlow: { color: '#ff7a2a', intensity: 1.0, height: 0.8, rim: 0.4, k: fireK },
           ramp: fx.ramp([[0, '#4a3a52', 1, 0.92], [0.7, '#3a3042', 1, 0.88], [1, '#2a2430', 1, 0]]),
         }, 0.02);
         fx.burst({

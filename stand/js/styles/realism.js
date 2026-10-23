@@ -105,7 +105,7 @@ export default {
         }, 0);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 26, sizeDist: [6, 10, 10], origin: C, spawnR: 0.6,
-          speed: [1, 2.6], gravity: [0, 0.8, 0], drag: 2, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
+          speed: [1, 2.6], gravity: [0, 1.3, 0], drag: 1.6, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
           shadow: '#3a3430', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.05, 0.75], fadeDist: 0.5,
           fireGlow: { color: '#ff7a2a', intensity: 0.8, height: 1.2, rim: 0.6, k: fireK },
           ramp: fx.ramp([[0, '#1c1916', 1, 0.95], [0.6, '#3d3833', 1, 0.9], [1, '#6b655f', 1, 0]]),
@@ -138,7 +138,7 @@ export default {
         fx.distort({ kind: 'ring', pos: at(BLAST, 0, 0.05, 0), size: 12, radius: [[0, 0.05], [0.3, 0.95, 'outExpo']], width: [[0, 0.06], [0.3, 0.03]], strength: [[0, 0.018], [0.3, 0]] }, 0);
         fx.distort({ kind: 'heat', pos: at(C, 0, 1.4, 0), size: 5, strength: [[0, 0.016], [2.5, 0.006], [3.8, 0]] }, 0.05);
         // Scorch darkens the ground (multiply) with ejecta streaks; never an alpha-black disc.
-        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 5, multiply: true, strength: 0.55, hot: '#ff6a1f', hotK: 1.2, dark: '#0e0b09', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
+        fx.decal({ pos: at(BLAST, 0, 0.012, 0), size: 5, multiply: true, strength: 0.8, hot: '#ff6a1f', hotK: 1.2, dark: '#0e0b09', glow: [[0, 1], [1.2, 0, 'outQuad']] }, 0);
         fx.target({
           dir: AWAY,
           jolt: [[0, 0.05], [0.5, 0]],

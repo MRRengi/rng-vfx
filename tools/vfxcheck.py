@@ -31,6 +31,11 @@ Checks (thresholds from numbers.md / fundamentals.md):
   slash-crosses   (stand) each slash's arc midpoint projects inside the target's screen box
   hit-vector      (stand) the slash swing and the spray agree: the effect's centroid after contact
                   lies on the hit side, within 60 deg of the projected hit direction
+  target-visible  (stand) the hit target keeps >= half its rest luminance and >= 0.08 during the hit
+  grounded        (explosions, stand) the core mask's bottom stays within 4% of the frame of the
+                  blast's ground point for the 0.4 s after the peak
+  dark-background (dark styles, stand) the effect keeps >= half its visible area on Night arena
+  static-hold is per region (8x8 tiles), so a frozen spark fails even while smoke moves
 Exit code 1 when any check fails.
 """
 import argparse
@@ -266,7 +271,29 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             worst = max(worst, run_t)
         else:
             run_t = 0.0
-    res["static-hold"] = {"pass": worst <= limit + 1e-6, "longest_s": round(worst, 3), "max_s": round(limit, 3)}
+    # Per region: a frozen spark passes the whole-effect test while smoke moves
+    # elsewhere. Split the frame into tiles and track holds in each tile with content.
+    T = 8
+    th, tw = H // T, W // T
+    tile_run = np.zeros((T, T))
+    tile_worst = 0.0
+    for i in range(1, len(masks)):
+        dt = times[i] - times[i - 1]
+        for ty in range(T):
+            for tx in range(T):
+                sl = (slice(ty * th, (ty + 1) * th), slice(tx * tw, (tx + 1) * tw))
+                u = masks[i][sl] | masks[i - 1][sl]
+                if u.sum() < 40:
+                    tile_run[ty, tx] = 0
+                    continue
+                ch = float(np.abs(fx[i][sl] - fx[i - 1][sl]).max(-1)[u].mean())
+                if ch < 0.004 and (masks[i][sl] ^ masks[i - 1][sl]).sum() < 0.01 * u.sum():
+                    tile_run[ty, tx] += dt
+                    tile_worst = max(tile_worst, tile_run[ty, tx])
+                else:
+                    tile_run[ty, tx] = 0
+    worst = max(worst, tile_worst)
+    res["static-hold"] = {"pass": worst <= limit + 1e-6, "longest_s": round(worst, 3), "max_s": round(limit, 3), "per_region": True}
 
     # empty tail
     i90 = min(range(len(times)), key=lambda i: abs(times[i] - 0.9 * duration))
@@ -301,6 +328,24 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
         res["target-flash"] = {"pass": not early and cap_ok, "sprite_flash": a.sprite_flash,
                                "before_contact": early[:4], "target_peak": round(flash, 3),
                                "target_rest": round(float(rest), 3), "spark_body": round(spark, 3)}
+
+        # Target never vanishes: during the reaction it keeps at least half its rest luminance.
+        low = float(np.nanmin(tl[win])) if win and np.isfinite(tl[win]).any() else rest
+        res["target-visible"] = {"pass": low >= 0.5 * rest and low >= 0.08, "min_during_hit": round(low, 3), "rest": round(float(rest), 3)}
+
+        if a.kind == "explosion" and info.get("blastGround"):
+            gy = info["blastGround"][1] * H
+            pk = int(np.argmax(carea))
+            span = [i for i, t in enumerate(times) if times[pk] <= t <= times[pk] + 0.4]
+            gaps = []
+            for i in span:
+                ys, xs = np.nonzero(cores[i])
+                if len(ys) < 50:
+                    continue
+                bottom = np.quantile(ys, 0.98)
+                if gy - bottom > 0.04 * H:
+                    gaps.append(round(times[i], 3))
+            res["grounded"] = {"pass": len(gaps) <= len(span) // 4, "floating_at": gaps[:6]}
 
         if info.get("slashes"):
             bad = []
@@ -342,6 +387,18 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
     return res
 
 
+def dark_check(ts, dfx, dbase, lfx, lbase):
+    """Dark styles: the effect (smoke and residue included) keeps at least half of its
+    visible area on the darkest background."""
+    bad = []
+    for t, f1, b1, f2, b2 in zip(ts, dfx, dbase, lfx, lbase):
+        a_dark = effect_mask(f1, b1).sum()
+        a_lit = effect_mask(f2, b2).sum()
+        if a_lit > 200 and a_dark < 0.5 * a_lit:
+            bad.append({"t": round(t, 3), "dark_area": int(a_dark), "lit_area": int(a_lit)})
+    return {"dark-background": {"pass": not bad, "vanishing": bad}}
+
+
 def sample_times(dur, contact, fps_style):
     if fps_style:  # held drawings: one sample per drawing
         return list(np.arange(0, dur + 1e-6, 1.0 / fps_style))
@@ -381,6 +438,7 @@ def cmd_stand(a):
             dur = pg.evaluate("window.rngStand.duration()")
             contact = pg.evaluate("window.rngStand.contact()")
             fps_style = pg.evaluate("window.rngStand.styles.length && window.rngStand.info().fps")
+            a.dark = a.dark or a.style in ("darkfantasy", "realism")
             times = sample_times(dur, contact, fps_style)
             lights = "window.rngStand.layers().filter(l => l.kind.startsWith('light') || l.kind.startsWith('decal')).map(l => l.i)"
 
@@ -400,6 +458,14 @@ def cmd_stand(a):
             fx, base = shoot(a.camera, times)
             pg.evaluate(f"window.rngStand.seek({contact + 2 / 60})")
             info = pg.evaluate("window.rngStand.info()")
+            dark = None
+            if a.dark:
+                dt_ = [contact + 0.05, contact + 0.2, dur * 0.5, dur * 0.75, dur * 0.9]
+                pg.evaluate("window.rngStand.set('background', 'Night arena')")
+                dfx, dbase = shoot(a.camera, dt_)
+                pg.evaluate(f"window.rngStand.set('background', '{a.background}')")
+                lfx, lbase = shoot(a.camera, dt_)
+                dark = (dt_, dfx, dbase, lfx, lbase)
             close = None
             if a.close_fps > 0:
                 ct = list(np.arange(0, dur + 1e-6, 1.0 / (fps_style or a.close_fps)))
@@ -422,7 +488,10 @@ def cmd_stand(a):
     if a.style == "pixel":
         a.sprite_flash = True
         a.min_sat_share = min(a.min_sat_share, 0.1)
-    return run_checks(fx, base, times, contact, dur, a, close=close, info=info)
+    res = run_checks(fx, base, times, contact, dur, a, close=close, info=info)
+    if dark:
+        res.update(dark_check(*dark))
+    return res
 
 
 def main():
@@ -451,6 +520,7 @@ def main():
             s.add_argument("--camera", default="Gameplay")
             s.add_argument("--close-fps", type=float, default=15, help="extra Close-camera pass for shape checks; 0 to skip")
             s.add_argument("--background", default="Dusk field")
+            s.add_argument("--dark", action="store_true", help="also check visibility on the Night arena background (on by default for darkfantasy and realism)")
             s.add_argument("--width", type=int, default=640)
             s.add_argument("--height", type=int, default=360)
             s.add_argument("--port", type=int, default=8790)

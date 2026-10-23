@@ -15,9 +15,9 @@ export default {
       build(fx) {
         fx.celOutline('#2b2b55', 3);
         fx.flash({
-          pos: HIT, size: 0.85, hard: true, spikes: 5, spikeLen: 0.75, core: 0.4, sharp: 0.9, jitter: 0.5, bias: 0.4, blend: 'alpha', outline: 0.1, outlineColor: '#2b2b55', redraw: 20,
-          dir: HIT_DIR, aspect: 1.6, core_color: '#fffbd0', coreK: 1.0, edge_color: '#ffc62e', edgeK: 1.0, rot: 0.3, order: 0,
-          scaleCurve: [[0, 0], [0.06, 1.12, 'outBack'], [0.09, 0.95], [0.12, 1.06], [0.16, 0, 'inQuad']],
+          pos: HIT, size: 0.85, hard: true, spikes: 5, spikeLen: 0.75, core: 0.4, sharp: 1.0, jitter: 0.2, bias: 0.4, blend: 'alpha', outline: 0.1, outlineColor: '#2b2b55', redraw: 20, rot: 0,
+          dir: HIT_DIR, aspect: 1.6, core_color: '#fffbd0', coreK: 1.0, edge_color: '#ffc62e', edgeK: 1.0, order: 0,
+          scaleCurve: [[0, 0.85], [0.06, 1.12, 'outBack'], [0.09, 0.95], [0.12, 1.06], [0.16, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.16, 1], [0.161, 0]],
         }, 0);
         fx.ring({

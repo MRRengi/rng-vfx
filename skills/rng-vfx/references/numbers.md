@@ -84,7 +84,7 @@ Screen-space numbers are for a 1080p frame through the gameplay camera. Scale by
 | Flash core radius | at most 0.6x the primary shape's radius |
 | Impact ring | 1.0 - 1.2x the primary shape, 0.5 - 0.8 m radius |
 | Ground ring on big explosions | 2 m radius at most, low alpha, or replaced by a dust skirt plus distortion |
-| Medium explosion fireball | 2.5 - 4 m tall |
+| Medium explosion fireball | 2.2 - 4 m tall (toon and pixel may sit at the low end) |
 
 ## Motion budgets
 
@@ -98,6 +98,27 @@ Screen-space numbers are for a 1080p frame through the gameplay camera. Scale by
 | Target squash on contact | about 0.85 along the hit axis and 1.1 across, recovering over 6 - 15 frames |
 | Camera shake, hits | 0.02 - 0.1 m, decays within 6 - 15 frames |
 | Camera shake, explosions | 0.1 - 0.3 m, decays within 0.4 - 1 s |
+
+## Contrast floors (positive minimums)
+
+The rules elsewhere cap brightness; these floors stop effects from going timid. Values are grayscale luminance (or OKLab L) on the gameplay camera frame.
+
+| Pair | Minimum difference |
+|---|---|
+| Spark against the target behind it, on the contact frame | 0.3 (or give the spark a dark under-shape) |
+| Cel shading bands (lit vs shadow) | 0.18 OKLab L |
+| Lit vs shadow side of smoke | 0.2 |
+| Smoke against the background | 0.25 on mid backgrounds; 0.06 and a rim on the darkest level |
+| Hit target against the background, at any moment | 0.1, and the target's own luminance stays at 0.08 or more |
+| Primary shape against its own residue (smoke, dust) | 0.3 |
+
+Outlines on cel shapes: at least max(2 px, 7% of the shape's radius) at the gameplay camera. A 5% outline on a 30 px puff is under a pixel.
+
+## Sparks
+
+- **Length from speed:** `length = max(12 px, |v_screen| * 1.5 / 60 s)` (a streak covers about 1.5 frames of motion), at least 3x its width.
+- **Spread:** lengths vary 0.3 - 1.6x the mean; speeds vary x3; angles jitter by up to ±35% of their spacing. About 25% are heroes (longer, brighter, with a trail); the rest are accents. Equal lengths in an even fan read as a peacock tail.
+- **Birth:** white-hot (cores above B) for the first 20 - 30% of life, then down the blackbody or style ramp.
 
 ## Effect lights
 

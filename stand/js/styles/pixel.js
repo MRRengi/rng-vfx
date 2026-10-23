@@ -69,7 +69,7 @@ export default {
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 11, sizeDist: [2, 4, 6], origin: C, spawnR: 0.4,
           speed: [2.5, 4.5], drag: 5, life: [5 * D, 8 * D], size: [1.3, 0.3], sizePow: 1.6, bands: 2, outline: 0,
           shadow: '#b8261e', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0,
-          ramp: fx.ramp([[0, '#ffffff', 1], [0.2, '#ffe14d', 1], [0.5, '#ff7a1a', 1], [1, '#6a1a1a', 1]]),
+          ramp: fx.ramp([[0, '#ffe14d', 1], [0.4, '#ff7a1a', 1], [1, '#6a1a1a', 1]]),
         }, D);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 8, origin: at(C, 0, 0.6, 0), spawnR: 0.5, speed: [1.2, 2],

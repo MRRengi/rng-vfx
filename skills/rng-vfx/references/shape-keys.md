@@ -40,7 +40,7 @@ Use these when the user gives no references. Sizes are fractions of the target's
 
 ### Toon explosion
 - **Contact:** a white puff pop 0.4 H.
-- **Peak (+3 frames):** a cluster of 5 - 7 fire puffs, 1.3 H tall, round but squashed and stretched, on a 3-puff stem.
+- **Peak (+3 frames):** a cluster of 5 - 7 fire puffs, 1.3 - 1.5 H tall, round but squashed and stretched, on a 3-puff stem.
 - **Break-up (+12 frames):** fire puffs shrinking; lavender smoke puffs (2 tones, outline) rising from inside the fire's footprint; a dust skirt of small puffs at ground level.
 
 ### Stylized impact

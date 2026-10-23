@@ -736,6 +736,7 @@ window.rngStand = {
     return {
       target: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)],
       hit: proj(hit),
+      blastGround: proj([0.6, 0, 0]),
       hitDir: dir ? proj(hit.map((c, k) => c + dir[k] * 0.5)) : null,
       slashes: state.effect.probes().map(p => ({ at: p.at, mid: proj(p.mid), swingEnd: p.swing ? proj(p.mid.map((c, k) => c + p.swing[k] * 0.5)) : null })),
       contact: state.effect.contact,

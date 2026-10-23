@@ -88,6 +88,11 @@ Sample at 60 fps around contact (or at the drawing rate for held-drawing styles)
 - **Growth** (`--kind explosion`). The first frame with content after contact is at most 50% of the peak area.
 - **Target flash, slash crossing, hit vector** (stand, which exports the target's screen box, slash midpoints and swing directions, and the projected hit direction). The target never brightens before contact and stays below 0.75x the spark body. Every slash midpoint lies inside the target box. The spray leaves the target within 60 degrees of the hit direction, and no slash swings against it. In another engine, export the same points and add them to the run.
 
+- **Static hold per region.** The frame is split into 8 x 8 tiles; a tile with effect content that does not change for longer than the limit fails, so a frozen spark is caught even while smoke moves elsewhere.
+- **Target visible.** During the hit the target keeps at least half its rest luminance and 0.08 or more (dark tints must not erase it).
+- **Grounded** (explosions). For 0.4 s after the peak, the bottom of the effect stays within 4% of the frame of the blast's ground point.
+- **Dark background** (dark fantasy and realism by default, `--dark` for others). At five moments the effect keeps at least half of its visible area on the darkest background.
+
 Passing is necessary, not sufficient. The script finds known cheap tells; the shape keys and the references judge the rest.
 
 ### Checks the script does not do

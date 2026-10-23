@@ -68,7 +68,7 @@ The universal envelope: **anticipation -> contact -> follow-through -> dissipati
 | Follow-through | energy leaves: bursts, shockwaves, sparks travel |
 | Dissipation | residue: smoke, embers, decals, afterglow |
 
-- Peak within the first 2 to 4 frames after contact. A slow rise kills the hit.
+- Impacts peak within 2 - 4 frames after contact; explosions within 3 - 6 frames (realism up to 8). A slow rise kills the hit.
 - Ease out on almost everything that expands (outExpo, outQuart). Ease in on things that fall or collapse. Overshoot (outBack, elastic) only in toon and playful styles.
 - Stagger secondary layers by 1 to 3 frames after the primary. Everything starting on the same frame looks mechanical.
 - **Hitstop sits on contact,** never on the first frame of an effect that has nothing before it (freezing the first frame freezes nothing). What it freezes and for how long: `numbers.md` > Per style and the hitstop rule under that table.
@@ -97,7 +97,7 @@ Shape:
 - **Bystanders** near an effect who were not hit get light only, never a flash, rim or reaction.
 - **One hit vector.** Define `hitDir` once (the swing direction at contact, or the projectile's velocity) and derive every layer from it: spray axis, flash elongation, blood, puff side, ring tilt, target lean. The slash swing and the spray point the same way; a slash moving left with blood spraying right reads as two different hits.
 - **Target flash.** It starts on the contact frame, never before, and its luminance stays below 0.75x the spark's body. Pixel art is the exception: the full-white sprite flash for one drawing is the intended hit cue. Dark tints keep the body at luminance 0.08 or more on a dark background, or the target vanishes.
-- **No static holds.** Nothing is held unchanged for more than 4 frames at 60 fps, including frames frozen by hitstop, or for more than 2 drawings in held-drawing styles. Held shapes drift in scale 5 - 10%, erode, or get redrawn.
+- **No static holds** (per layer, not just for the effect as a whole). Nothing is held unchanged for more than 4 frames at 60 fps, including frames frozen by hitstop, or for more than 2 drawings in held-drawing styles. Held shapes drift in scale 5 - 10%, erode, or get redrawn. The pixel sprite flash (exactly 1 drawing) is exempt.
 - **Explosions are grounded and hand over to smoke.** Construction rules and checks in `recipes/explosion.md`.
 - **Explosion silhouette.** Ground explosions are taller than wide (about 1.3 - 1.4) and sit on a stem that touches the ground. Air bursts are round with a dust ring below. Toon may stay round but squashes and stretches.
 - **Framing.** The whole effect, peak to dissipation, stays inside the gameplay camera's frame.
