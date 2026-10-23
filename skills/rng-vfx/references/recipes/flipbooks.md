@@ -55,6 +55,24 @@ Worked example (the stand's anime explosion, `stand/textures/anime_fire_3x2.png`
 2. `python tools/packframes.py frame_1.png ... frame_5.png -o anime_fire_3x2.png --cell 320 --cols 3 --bg 808080` keys out the grey background with a soft edge, un-mixes the grey from the edge pixels, crops all frames to one shared box so the pivot stays fixed, and packs them.
 3. In the effect: one hero quad, stepped, two drawings per keyframe, in the cel layer so it sorts with the cel puffs and gets the union outline.
 
+Keying choices in `packframes.py`, by what the model painted:
+
+| Backdrop / body | Flags | Why |
+|---|---|---|
+| Flat grey, coloured body (fire) | default (`--bg 808080`) | only backdrop connected to the image border is keyed |
+| Grey smoke whose highlights match the grey | default, never `--holes` | flood keying keeps grey pixels inside the shape opaque |
+| Drawn dissolve holes inside a puff | `--holes` | also keys enclosed backdrop-coloured regions of 30 px or more |
+| Mottled or gradient backdrop (painted, realistic) | `--auto-bg --tol 0.03 --soft 0.06` | takes the backdrop colour and its noise from a border band per frame |
+
+Always preview the packed sheet on the stand's sky and on black before wiring it: a grey fringe means `--soft` is too wide or the backdrop estimate is off; holes in the body mean `--tol` is too high.
+
+Using a sheet in an effect:
+- **Pivot:** the shared crop centres the union box, so a fire drawn growing from its base has its base near the cell bottom. Place the quad's centre about 0.4x its size above the ground, and keep it `upright` with no spin; a rotated flame reads as wind.
+- **Value:** drawn and rendered greys arrive at mid value. Tint the ramp down to the style's smoke floor (dark fantasy 0.08 - 0.12) instead of regenerating.
+- **Variation:** 2 - 3 copies at different sizes and start delays, plus a few procedural sprites breaking the outline, so the drawn shape never reads as one stamp.
+
+Sheets shipped with the stand (`stand/textures/`), usable as starting points under MIT: `anime_fire_3x2`, `anime_smoke_2x2`, `toon_puff_2x2`, `toon_fire_2x2`, `toon_smoke_2x2`, `stylized_fire_3x2`, `stylized_smoke_2x2`, `dark_fire_3x2`, `dark_smoke_2x2`, `realism_smoke_2x2`, plus the procedural `fire_4x4` and `puff_4x4` from `tools/texgen.py`.
+
 ## Life-map erosion (the cheapest designed shape)
 
 One grayscale texture where each pixel's value is the time at which that pixel disappears (or appears). The shader thresholds it with a moving time, so one painted image gives a fully designed dissolve with controlled holes, tips and break-up:

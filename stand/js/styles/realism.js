@@ -104,11 +104,20 @@ export default {
           ramp: fx.ramp([[0, '#fff8e6', 1.6], [0.3, '#ffb347', 1.3], [0.7, '#7a200c', 0.9], [1, '#161210', 1]]),
         }, 0);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 26, sizeDist: [6, 10, 10], origin: C, spawnR: 0.6,
-          speed: [1, 2.6], gravity: [0, 1.3, 0], drag: 1.6, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
+          shape: 'smoke', dir: 'cone', axis: UP, angle: 30, count: 16, sizeDist: [6, 10, 10], origin: C, spawnR: 0.6,
+          speed: [1, 2.2], gravity: [0, 0.9, 0], drag: 1.6, delay: [0.03, 0.6], life: [3.5, 4.5], size: [1.4, 4.2], sizePow: 0.45,
           shadow: '#3a3430', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.05, 0.75], fadeDist: 0.5,
           fireGlow: { color: '#ff7a2a', intensity: 0.8, height: 1.2, rim: 0.6, k: fireK },
           ramp: fx.ramp([[0, '#1c1916', 1, 0.95], [0.6, '#3d3833', 1, 0.9], [1, '#6b655f', 1, 0]]),
+        }, 0);
+        fx.burst({
+          // Rendered smoke keyframes (image model, self-shadowed volume) as the hero mass; the
+          // procedural puffs underneath carry the fire light and fill the gaps.
+          shape: 'sheet', sheet: { url: './textures/realism_smoke_2x2.png', grid: [2, 2], frames: 4 },
+          dir: 'cone', axis: UP, angle: 30, count: 5, sizeDist: [1, 3, 1], origin: at(BLAST, 0, 1.4, 0), spawnR: 0.7,
+          speed: [0.1, 0.3], gravity: [0, 0.25, 0], drag: 1.8, delay: [0.35, 0.9], life: [3.0, 3.8], size: [3.2, 4.2], sizeIn: 0.2, spin: 0.08,
+          blend: 'alpha', order: 2, fade: [0.08, 0.8], fadeDist: 0.5,
+          ramp: fx.ramp([[0, '#8a8178', 1, 0.95], [1, '#a29a90', 1, 0.9]]),
         }, 0);
         fx.burst({
           shape: 'smoke', dir: 'ring', lift: 0.15, count: 50, sizeDist: [4, 10, 30], origin: at(BLAST, 0, 0.25, 0), speed: [5, 14],

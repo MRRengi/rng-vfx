@@ -99,10 +99,18 @@ export default {
           scaleCurve: [[0, 0.4], [0.04, 1, 'outExpo']], alphaCurve: [[0, 1], [0.04, 1], [0.08, 0]],
         }, T);
         fx.burst({
-          // A few big dark tongues: deep red that stays red under AgX (mid HDR under 1.2), black edges.
-          shape: 'fire', dir: 'cone', axis: UP, angle: 35, count: 6, sizeDist: [2, 4, 0], origin: C, spawnR: 0.8,
-          speed: [3, 5.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.2], size: [2.4, 3.8], sizePow: 0.45, aspectY: 1.2, spin: 0.3, sizeIn: 0.15,
-          soft: 0.8, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 3, fadeDist: 0.4,
+          // Hero tongues: drawn dark-fire keyframes (image model), red that stays red under AgX,
+          // turning to black smoke in the last keys.
+          shape: 'sheet', sheet: { url: './textures/dark_fire_3x2.png', grid: [3, 2], frames: 5 },
+          dir: 'cone', axis: UP, angle: 18, count: 3, sizeDist: [1, 2, 0], origin: at(BLAST, 0, 1.75, 0), spawnR: 0.5,
+          speed: [0.1, 0.4], drag: 3, gravity: [0, 0.15, 0], life: [1.2, 1.5], size: [3.6, 4.4], sizeIn: 0.15, spin: 0, upright: true,
+          blend: 'alpha', order: 3, fadeDist: 0.4, fade: [0, 0.92], ramp: fx.ramp([[0, '#ffffff', 1.1], [1, '#ffffff', 0.9]]),
+        }, T);
+        fx.burst({
+          // Procedural tongues break the drawn silhouette so the three heroes never read as stamps.
+          shape: 'fire', dir: 'cone', axis: UP, angle: 35, count: 4, sizeDist: [0, 2, 2], origin: C, spawnR: 0.8,
+          speed: [3, 5.5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.8, 1.1], size: [1.6, 2.6], sizePow: 0.45, aspectY: 1.2, spin: 0.3, sizeIn: 0.15,
+          soft: 0.8, erode: 1, noiseScale: 2.2, vBias: 0.5, blend: 'premul', order: 4, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#ff7a30', 1.0], [0.2, '#d8280c', 0.9], [0.5, '#6a0808', 1.0], [0.75, '#200406', 1], [1, '#050203', 1]]),
         }, T);
         fx.burst({
@@ -112,11 +120,21 @@ export default {
           ramp: fx.ramp([[0, '#ffd0a0', 1.0], [0.3, '#d8280c', 0.9], [0.7, '#5a0606', 1], [1, '#050203', 1]]),
         }, T + 0.02);
         fx.burst({
-          shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 20, sizeDist: [5, 8, 7], origin: C, spawnR: 0.5,
+          shape: 'smoke', dir: 'cone', axis: UP, angle: 40, count: 12, sizeDist: [5, 8, 7], origin: C, spawnR: 0.5,
           speed: [1, 2.2], gravity: [0, 1.4, 0], drag: 1.8, delay: [0.03, 0.6], life: [2.0, 2.8], size: [1.6, 3.2], sizePow: 0.45,
           shadow: '#4a2020', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
           fireGlow: { color: '#ff2a12', intensity: 0.5, height: 0.6, rim: 0.4, k: fireK },
-          ramp: fx.ramp([[0, '#2a1214', 1, 0.95], [0.7, '#1e0c0e', 1, 0.9], [1, '#120609', 1, 0]]),
+          ramp: fx.ramp([[0, '#2a1a1c', 1, 0.95], [0.7, '#2a1a1c', 1, 0.9], [1, '#241618', 1, 0]]),
+        }, T);
+        fx.burst({
+          // Drawn black smoke keyframes, fire light baked into the bottom third; born inside the
+          // fire's footprint and taking over as the tongues burn off.
+          shape: 'sheet', sheet: { url: './textures/dark_smoke_2x2.png', grid: [2, 2], frames: 4 },
+          dir: 'cone', axis: UP, angle: 30, count: 5, sizeDist: [1, 3, 1], origin: at(BLAST, 0, 1.3, 0), spawnR: 0.6,
+          speed: [0.1, 0.35], gravity: [0, 0.25, 0], drag: 2, delay: [0.35, 0.8], life: [1.8, 2.4], size: [3.2, 4.0], sizeIn: 0.2, spin: 0.1,
+          blend: 'alpha', order: 2, fade: [0.1, 0.85], fadeDist: 0.4,
+          // The drawn greys are mid value; dark fantasy smoke sits at a 0.08 - 0.12 floor.
+          ramp: fx.ramp([[0, '#6a6064', 1, 0.95], [1, '#5a5054', 1, 0.95]]),
         }, T);
         fx.burst({
           shape: 'smoke', dir: 'ring', lift: 0.05, count: 18, origin: at(BLAST, 0, 0.25, 0), speed: [5, 8], drag: 5,
