@@ -159,6 +159,10 @@ void main() {
   vCenterView = length(vCenterView) > 0.0001 ? normalize(vCenterView) : vec3(0.0, 0.0, 1.0);
   float worldPerPx = -mv.z * uPxScale;
   float minSz = uMinPx * worldPerPx;
+#if SHAPE == 1
+  // Lobed puffs reach past the unit circle; the quad gets a margin so no lobe is cut square.
+  sz *= 1.3;
+#endif
   vec2 corner = position.xy;
   vec3 vv = (modelViewMatrix * vec4(vel, 0.0)).xyz;
   float sp = length(vv.xy);
@@ -247,6 +251,7 @@ void main() {
 #elif SHAPE == 1
   // Cel puff: worley-lobed silhouette, banded shading from the cluster centre,
   // outline, dissolves through cell-shaped holes.
+  r *= 1.3; // matches the quad margin in the vertex shader
   float lobes = tn(vUv * 0.18 * uNoiseScale + vSeed.xy).g;
   float m = 1.0 - r + (lobes - 0.5) * 0.5;
   if (m <= 0.0) discard;
@@ -282,6 +287,8 @@ void main() {
   float f = nA.r * 0.55 + nA.b * 0.45;
   float f2 = nB.r * 0.55 + nB.b * 0.45;
   float dens = clamp((f * 1.7 - 0.3 - r * 1.05 - vN * uErode * 0.55) * 3.5, 0.0, 1.0);
+  // Round window: density reaches zero before the quad border, never a straight cut.
+  dens *= 1.0 - smoothstep(0.65, 0.98, length((vUv - 0.5) * 2.0));
   float lit = clamp(0.7 + (f - f2) * 6.0, 0.15, 1.1);
   col.rgb *= mix(uShadow, vec3(1.0), lit);
   col.rgb += uFireColor * uFireK * (1.0 - smoothstep(0.0, uFireH, vHeight)) * (1.0 - vN * 0.6);
@@ -312,14 +319,17 @@ void main() {
   vec2 base = vUv * 0.12 * uNoiseScale + vSeed.xy;
   vec4 n4 = tnDual(base, vec2(0.0, -0.35), vec2(0.06, -0.55), uTimeAbs + vSeed.z * 3.0);
   float f = n4.r * 0.6 + n4.b * 0.4;
-  r = length((vUv - 0.5) * 2.0 + (tn(vUv * 0.3 + vSeed.zw + vec2(0.0, -uTimeAbs * 0.2)).rb - 0.5) * 0.6);
-  float shape = 1.0 - r * 1.2;
+  r = length((vUv - 0.5) * 2.0 + (tn(vUv * 0.3 + vSeed.zw + vec2(0.0, -uTimeAbs * 0.2)).rb - 0.5) * 0.9);
+  // Noise leads, the radius only masks: a strong radial term maps the heat
+  // ramp into concentric rings (the fried-egg look).
+  float shape = smoothstep(1.0, 0.35, r);
   // Keep a hot core early in life: threshold stays low for the first ~30%.
   float thr = mix(0.05, 0.95, pow(clamp(vN, 0.0, 1.0), 1.6)) * uErode + (1.0 - uErode) * 0.1
             + (vUv.y - 0.5) * uVBias;
-  float heat = (f * shape * 1.9 + (1.0 - r) * 0.4 - thr) / max(uSoft, 0.001);
-  // Window: the body never reaches the quad edge, so no card outline shows.
-  heat *= smoothstep(0.0, 0.18, min(vUv.x, 1.0 - vUv.x)) * smoothstep(0.0, 0.12, min(vUv.y, 1.0 - vUv.y));
+  float heat = ((f * 1.8 - 0.35) * shape + 0.25 * shape * shape - thr) / max(uSoft, 0.001);
+  // A round window, not a rectangular one: a rectangular fade still leaves
+  // straight contours parallel to the quad edge after the threshold.
+  heat *= 1.0 - smoothstep(0.6, 0.98, length((vUv - 0.5) * 2.0));
   if (heat <= 0.0) discard;
   col = texture2D(uRamp, vec2(clamp(1.0 - heat, 0.0, 1.0), 0.5));
   a = clamp(heat * 3.0, 0.0, 1.0);
@@ -624,6 +634,7 @@ uniform vec3 uPos;
 uniform float uSize;
 uniform vec3 uDir;
 uniform float uAspect;
+uniform float uExt;
 varying vec2 vUv;
 void main() {
   vUv = uv;
@@ -632,7 +643,8 @@ void main() {
   float L = length(d);
   d = L > 0.0001 ? d / L : vec2(1.0, 0.0);
   vec2 pp = vec2(-d.y, d.x);
-  mv.xy += (d * position.x * uAspect + pp * position.y) * uSize;
+  // The quad is grown to fit the longest spike, so tips are never cut square.
+  mv.xy += (d * position.x * uAspect + pp * position.y) * uSize * uExt;
   gl_Position = projectionMatrix * mv;
 }`;
 
@@ -650,13 +662,14 @@ uniform float uJitter;
 uniform float uRound;
 uniform float uAngJit;
 uniform float uBias;
+uniform float uExt;
 uniform vec3 uCoreColor;
 uniform vec3 uEdgeColor;
 uniform float uSeed;
 varying vec2 vUv;
 ${NOISE}
 void main() {
-  vec2 c = (vUv - 0.5) * 2.0 / max(uScale, 0.0001);
+  vec2 c = (vUv - 0.5) * 2.0 * uExt / max(uScale, 0.0001);
   float r = length(c);
   float ang0 = atan(c.y, c.x);
   float ang = ang0 + uRot;
@@ -680,6 +693,13 @@ void main() {
   gl_FragColor = vec4(col, alpha);
 }`;
 
+// Largest radius the star can reach (in quad half-sizes), over all its scale keys.
+function flashExtent(o) {
+  const spikes = (o.spikes ?? 5) > 0 ? (o.spikeLen ?? 0.6) * (1 + (o.jitter ?? 0) * 0.5) : 0;
+  const maxScale = Math.max(1, ...(o.scaleCurve || [[0, 1]]).map(k => k[1]));
+  return Math.max(1, ((o.core ?? 0.25) + spikes) * (1 + (o.bias ?? 0)) * maxScale * 1.04);
+}
+
 export function flash(o) {
   const geo = new THREE.PlaneGeometry(1, 1);
   const mat = new THREE.ShaderMaterial({
@@ -688,6 +708,7 @@ export function flash(o) {
       uSize: { value: o.size ?? 1.5 },
       uDir: { value: v3(o.dir || [1, 0, 0]) },
       uAspect: { value: o.aspect ?? 1 },
+      uExt: { value: flashExtent(o) },
       uScale: { value: 0 },
       uAlpha: { value: 0 },
       uSpikes: { value: o.spikes ?? 5 },
@@ -1129,9 +1150,14 @@ void main() {
     float x = (r - uR) / max(uW, 0.0001);
     off = (c / max(r, 0.0001)) * x * exp(-x * x * 2.0) * 1.65 * (1.0 - smoothstep(0.85, 1.0, r));
   } else {
-    float mask = (1.0 - smoothstep(0.3, 1.0, abs(c.x))) * smoothstep(-1.0, -0.6, c.y) * (1.0 - smoothstep(0.2, 1.0, c.y));
-    vec4 n = tnDual(vUv * 0.6, vec2(0.0, -0.5), vec2(0.04, -0.8), uTimeAbs);
-    off = (n.rb - 0.5) * 2.0 * mask;
+    // Round, soft mask (taller than wide): a rectangular mask bends the image
+    // inside a visible box.
+    float mask = 1.0 - smoothstep(0.2, 0.95, length(c * vec2(1.0, 0.75)));
+    mask *= mask;
+    // Fine ripples, not a coarse field: a low-frequency offset moves the whole
+    // patch at once and its border reads as a box around the fire.
+    vec4 n = tnDual(vUv * 3.0, vec2(0.0, -1.2), vec2(0.07, -1.9), uTimeAbs);
+    off = (n.rb - 0.5) * 2.0 * mask * 0.5;
   }
   gl_FragColor = vec4(off * uStrength, 0.0, 1.0);
 }`;
