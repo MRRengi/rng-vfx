@@ -1,0 +1,12 @@
+{
+  "name": "rng-vfx",
+  "description": "rng-vfx: game VFX skill for coding agents",
+  "owner": { "name": "Maks", "url": "https://rengi.dev" },
+  "plugins": [
+    {
+      "name": "rng-vfx",
+      "source": "./",
+      "description": "Game VFX across six styles and three engines, with physics, shaders, materials, textures and a live test stand."
+    }
+  ]
+}

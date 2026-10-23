@@ -1,0 +1,44 @@
+# Realism (physically based, cinematic)
+
+Reference points: Battlefield, Call of Duty, The Last of Us Part II, Red Dead Redemption 2, Ghost of Tsushima, film VFX and real high-speed footage.
+
+## What defines it
+
+- **Physics is the art direction.** Sparks fall under gravity and slow down with air drag, smoke rises by buoyancy and spreads, debris arcs and bounces, dust hugs the ground. Viewers know real motion and notice when it is wrong.
+- **Temperature drives color.** Hot things glow along the blackbody curve: white, then yellow, orange, red, dark red, black. Fire cools into smoke as it rises; sparks and debris cool as they fly.
+- **Scale cues.** Real explosions are huge and slow; a large explosion that dissipates in one second looks like a firecracker. Small things are fast, big things are slow.
+- **HDR and exposure.** Flashes are very bright and very short; the scene exposure reacts. Use filmic tone mapping (AgX, ACES).
+- **Volume.** Smoke has self-shadowing, density variation and soft edges; it is lit by the environment and by the fire inside it.
+- **Lighting integration.** Explosions light the environment strongly; muzzle flashes cast light; sparks are too small to cast light but their reflections on wet surfaces sell them.
+
+## Color and value
+
+- Fire: blackbody ramp. Smoke: neutral to slightly warm dark grays (combustion), lighter gray-brown for dust. Lit from below by fire.
+- Avoid saturated non-physical colors unless the source is chemical (green copper flames, magnesium white).
+- Bloom: moderate, high threshold, follows HDR values naturally.
+
+## Signature techniques
+
+- **Simulated flipbooks:** fire, smoke and explosions from fluid simulations (EmberGen, Houdini, Blender Mantaflow, or the engine's own fluid tools) baked to flipbooks with motion vectors for smooth frame blending. When no sim tool is available, layered fbm puffs with domain warping and fake self-shadow get close for mid-distance effects.
+- **Motion vector flipbook blending** to play low frame count flipbooks smoothly at any speed.
+- **Six-way or normal-mapped smoke lighting** so smoke responds to scene lights.
+- **Soft particles** (depth fade) everywhere particles meet geometry.
+- **Ballistic sparks** with stretched billboards along velocity, bounce or slide on collision.
+- **Ground dust rings** for explosions and landings: ring emitter, high initial speed, very high drag, low and wide.
+- **Heat distortion** above fires and after explosions.
+- **Light curves:** very short peak (2 to 3 frames), long tail.
+- **Decals:** scorch marks, bullet holes, wet splashes with roughness changes.
+
+## Default numbers
+
+- Spark impact: flash 2 - 4 frames, sparks 0.4 - 1.1 s, dust puff 1 - 1.6 s, chips 0.6 - 1 s.
+- Medium explosion: flash 4 - 9 frames, fireball 0.7 - 1.3 s, smoke 2 - 3 s rising, dust ring 1.2 - 1.8 s, debris 1.2 - 2 s, scorch persistent.
+- Gravity 9.81 m/s^2 at real scale; check the project's unit scale first.
+
+## Common mistakes
+
+- Additive smoke (smoke is alpha-blended and occludes).
+- Fire that stays the same color for its whole life.
+- Sparks with no gravity, or gravity with no drag.
+- Explosions that are too fast for their size.
+- Missing ground interaction: dust, scorch, light on the ground.

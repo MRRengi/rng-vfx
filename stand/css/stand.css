@@ -1,0 +1,72 @@
+:root {
+  --bg: #0b0c10;
+  --panel: #13151c;
+  --line: #232633;
+  --text: #e7e9f0;
+  --dim: #8a90a3;
+  --accent: #ff6a3d;
+  --accent2: #4fd2ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font: 13px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body { display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+button, select, input { font: inherit; color: inherit; }
+
+.bar { display: flex; align-items: center; gap: 14px; padding: 8px 14px; background: var(--panel);
+  border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.brand { font-weight: 800; letter-spacing: -0.02em; font-size: 16px; color: var(--text); text-decoration: none; white-space: nowrap; }
+.brand span { color: var(--accent); }
+.tabs { display: flex; gap: 2px; background: #0d0f15; padding: 3px; border-radius: 9px; border: 1px solid var(--line); }
+.tabs button { border: 0; background: transparent; padding: 6px 11px; border-radius: 7px; cursor: pointer; color: var(--dim); white-space: nowrap; }
+.tabs button:hover { color: var(--text); }
+.tabs button.on { background: #222634; color: var(--text); box-shadow: inset 0 0 0 1px #30354a; }
+.tabs.mode { margin-left: auto; }
+
+.stage { position: relative; display: grid; grid-template-columns: 1fr; min-height: 0; }
+.stage.split { grid-template-columns: 1fr minmax(260px, 38%); }
+.view { position: relative; min-height: 0; overflow: hidden; }
+#c { display: block; width: 100%; height: 100%; }
+#c.pixel { image-rendering: pixelated; }
+#c.gray { filter: grayscale(1); }
+.caption { position: absolute; left: 14px; bottom: 12px; max-width: min(560px, 70%); padding: 8px 11px;
+  background: rgba(10, 11, 16, 0.72); border: 1px solid var(--line); border-radius: 8px; color: var(--dim);
+  backdrop-filter: blur(6px); pointer-events: none; }
+.caption b { color: var(--text); }
+.hint { position: absolute; right: 14px; bottom: 12px; color: #6b7184; font-size: 11px; pointer-events: none; }
+
+.compare { display: none; flex-direction: column; gap: 10px; padding: 12px; background: var(--panel);
+  border-left: 1px solid var(--line); overflow-y: auto; }
+.stage.split .compare { display: flex; }
+.compare-head { display: flex; flex-direction: column; gap: 2px; }
+.compare-head span { color: var(--dim); font-size: 12px; }
+.slots { display: grid; gap: 10px; }
+.slot { position: relative; background: #000; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.slot video, .slot img { display: block; width: 100%; height: auto; }
+.slot .tag { position: absolute; left: 6px; top: 6px; padding: 2px 7px; font-size: 11px; border-radius: 5px;
+  background: rgba(0, 0, 0, 0.7); color: var(--text); }
+.slot .x { position: absolute; right: 6px; top: 6px; border: 0; border-radius: 5px; background: rgba(0, 0, 0, 0.7); cursor: pointer; padding: 2px 7px; }
+.drop { display: grid; place-items: center; min-height: 70px; border: 1px dashed #3a3f55; border-radius: 8px;
+  color: var(--dim); cursor: pointer; text-align: center; padding: 10px; }
+.drop.over { border-color: var(--accent2); color: var(--text); }
+
+.timeline { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); border-top: 1px solid var(--line); }
+.timeline button { border: 1px solid var(--line); background: #1a1d27; border-radius: 7px; padding: 5px 9px; cursor: pointer; min-width: 34px; }
+.timeline button:hover { background: #232736; }
+#scrub { flex: 1; min-width: 80px; accent-color: var(--accent); }
+#time { font-variant-numeric: tabular-nums; color: var(--dim); min-width: 66px; text-align: right; }
+.timeline select { background: #1a1d27; border: 1px solid var(--line); border-radius: 7px; padding: 4px 6px; }
+.chk { color: var(--dim); display: flex; gap: 4px; align-items: center; }
+
+.lil-gui.root { --background-color: #13151c; --widget-color: #232736; --focus-color: #2c3144;
+  --hover-color: #2a2f40; --font-size: 12px; position: absolute; top: 10px; right: 10px; z-index: 5; }
+
+@media (max-width: 720px) {
+  .hint { display: none; }
+  .stage.split { grid-template-columns: 1fr; grid-template-rows: 1fr 45%; }
+  .stage.split .compare { border-left: 0; border-top: 1px solid var(--line); }
+  .lil-gui.root { top: auto; bottom: 60px; max-height: 45vh; }
+  .caption { max-width: calc(100% - 28px); }
+}

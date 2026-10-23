@@ -1,0 +1,10 @@
+{
+  "name": "rng-vfx",
+  "description": "Real-time game VFX skill: anime, toon, stylized, dark fantasy, pixel and realism styles for Unity VFX Graph, Unreal Niagara and three.js, with physics, shaders, materials, textures and a live test stand.",
+  "version": "0.1.0",
+  "author": { "name": "Maks", "url": "https://rengi.dev" },
+  "homepage": "https://github.com/MRRengi/rng-vfx",
+  "repository": "https://github.com/MRRengi/rng-vfx",
+  "license": "MIT",
+  "keywords": ["vfx", "gamedev", "unity", "vfx-graph", "unreal", "niagara", "threejs", "shaders", "particles"]
+}

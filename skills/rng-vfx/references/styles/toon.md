@@ -1,0 +1,40 @@
+# Toon (cartoon)
+
+Reference points: Western cartoon animation, cel-shaded adventure games (The Legend of Zelda: The Wind Waker), rhythm action games like Hi-Fi Rush, Nintendo-style party games.
+
+## What defines it
+
+- **Round, friendly shapes.** Puffs are circles and clusters of circles, stars have rounded points, splashes are blobs.
+- **Squash and stretch, overshoot.** Shapes pop past their final size and settle (outBack, elastic). Fast things stretch along their motion.
+- **Full frame rate,** usually 60 fps smooth motion; snappy because of easing, not frame holds. Holds can still be used for comic timing (a freeze before a pop).
+- **Thick outlines, two tones.** One light tone and one shadow tone, a confident dark outline (often a dark tint of the fill, not black).
+- **Dissipation by shrinking.** Puffs scale down to nothing, stars twinkle out. Rarely erosion, almost never alpha fades.
+- **Symbols.** Stars, sparkles, swirls, sweat drops, "pow" shapes are allowed and expected.
+
+## Color and value
+
+- Bright saturated primaries and candy colors. Shadows are hue-shifted (lavender or blue shadows on white, red-pink shadows on yellow-orange).
+- High value overall; readability comes from outlines and shape rather than darkness.
+- Bloom: very little. A soft halo around a flash at most.
+
+## Signature techniques
+
+- **Two-tone puff:** circle silhouette with slight noise wobble, one shading band, outline. Size curve: pop up to full with outBack in 3 - 6 frames, hold, shrink with ease in.
+- **Cluster puffs:** spawn 3 - 5 puffs together with offset sizes so a cloud reads as a bunch of grapes.
+- **Star burst:** 4 - 6 pointed star, low sharpness for rounded tips, overshoot scale, then vanish in one frame or shrink.
+- **Bouncy rings:** ring radius with outBack, width shrinking to zero.
+- **Sparkle:** four-point star particle, scale and rotation pulse, twinkle out.
+- **Rim and toon ramp on meshes:** a 1D ramp texture with 2 - 3 hard steps for lighting, a fresnel rim for magic.
+
+## Default numbers
+
+- Impact: star 6 - 12 frames with overshoot, ring 15 - 20 frames, puffs 30 - 40 frames shrink out, sparkles 25 - 40 frames.
+- Explosion: white disc pop 5 frames, fire puffs 30 - 50 frames, lavender smoke puffs drifting up 50 - 70 frames, stars falling with gravity.
+- Outline width 7 - 10% of puff radius.
+
+## Common mistakes
+
+- Sharp aggressive spikes (that is anime or stylized combat).
+- Realistic smoke or volumetrics.
+- Fading instead of shrinking.
+- Linear motion: toon needs strong easing on everything.
