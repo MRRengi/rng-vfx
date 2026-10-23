@@ -14,7 +14,7 @@ The core artifact: 6 to 12 frames evenly spaced over the effect's duration, side
 
 ## Checklist
 
-Check each against the breakdown written before building (SKILL.md step 3):
+Check each against the breakdown written before building (SKILL.md step 4):
 
 1. **Peak frame:** is there a clearly readable peak within the first few frames after contact? Is it the brightest, highest-contrast frame?
 2. **Timing:** fast in, slow out? Layers staggered? Total length matches the brief?
@@ -66,6 +66,17 @@ Any yes means the effect still looks cheap:
 - Is any shape held unchanged for more than 4 frames?
 - Does the fire have no hot core at its peak (islands)?
 - Did the layer census pass?
+
+### Mechanical checks (script)
+
+`tools/vfxcheck.py` runs these on any frame sequence. Give it the effect frames and matching frames of the same shot without the effect; it derives the effect mask by difference:
+
+```
+python tools/vfxcheck.py frames --fx out/fx --base out/base --fps 60 --contact 0.1 --hue 25
+python tools/vfxcheck.py stand realism explosion --camera Gameplay      # renders the stand itself
+```
+
+It reports PASS or FAIL for straight edges (long straight segments on the mask outline with effect on one side only), size at peak (1080p-equivalent pixels), white clip, luminance rise, hue and saturation of the hottest 10% at peak, static holds and empty tail, and exits 1 on any failure. Render the base frames with the effect hidden but the target reaction still playing, from the same camera and times.
 
 ### Mechanical checks
 

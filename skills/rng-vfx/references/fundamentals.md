@@ -93,7 +93,10 @@ Shape:
 - **Rings are small, broken and short.** Size and lifetime from `numbers.md`; coverage 40 - 70% of the circle, stretched 1.4 - 1.8x along the hit. A closed even ring larger than the character reads as a selection circle.
 - **No straight cuts.** No straight edge on any frame where a shape ends on its quad or strip border (see Shape language).
 - **Slashes cross the target.** Built from the swing (`recipes/slash.md`); the projected arc midpoint lies inside the target's silhouette.
+- **Redraw designed shapes.** A spark, star or splash visible for more than 2 drawings (or 4 frames) changes every drawing: new point lengths, rotation, or silhouette (`recipes/spark-star.md` > Life).
+- **Bystanders** near an effect who were not hit get light only, never a flash, rim or reaction.
 - **No static holds.** Nothing is held unchanged for more than 4 frames at 60 fps, including frames frozen by hitstop, or for more than 2 drawings in held-drawing styles. Held shapes drift in scale 5 - 10%, erode, or get redrawn.
+- **Explosions are grounded and hand over to smoke.** Construction rules and checks in `recipes/explosion.md`.
 - **Explosion silhouette.** Ground explosions are taller than wide (about 1.3 - 1.4) and sit on a stem that touches the ground. Air bursts are round with a dust ring below. Toon may stay round but squashes and stretches.
 - **Framing.** The whole effect, peak to dissipation, stays inside the gameplay camera's frame.
 

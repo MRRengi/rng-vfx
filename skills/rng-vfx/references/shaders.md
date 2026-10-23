@@ -120,7 +120,7 @@ Heat haze, shockwaves, invisibility, magic portals. Unity URP: Scene Color node 
 
 Procedural masks without textures:
 - circle `r - radius`, ring `abs(r - radius) - width`
-- star with spikes `r - (core + len * pow(abs(cos(a * n / 2)), sharp))`
+- star with spikes: `r - (core + len * pow(tri(a * n / 2pi), sharp))` with `tri(x) = 1 - abs(fract(x + 0.5) - 0.5) * 2`. A triangle wave gives pointed spikes with straight edges at sharp 1, concave needles above 2; `pow(abs(cos))` gives rounded petals (a flower) and is only for toon blobs
 - line segment distance for lightning and beams
 - smooth union (`smin`) for blob shapes
 

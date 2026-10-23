@@ -22,7 +22,7 @@ Choose by what the element is physically: light adds, matter occludes. Dark fant
 ## Lit or unlit
 
 - **Unlit** (most VFX): flashes, energy, stylized fire, anime and toon puffs (their shading is designed in the shader), sparks.
-- **Lit:** realistic smoke and dust (they must respond to the sun and to explosion light), debris, liquids, decals. Options from cheap to good: vertex lighting, normal-mapped particles, six-way lightmaps (smoke sims baked with lighting from six directions, blended by the light direction at runtime; supported in Unity VFX Graph and Unreal).
+- **Lit:** realistic smoke and dust (they must respond to the sun and to explosion light), debris, liquids, decals. Options from cheap to good: vertex lighting, normal-mapped particles, six-way lightmaps (smoke sims baked with lighting from six directions, blended by the light direction at runtime; built into Unity VFX Graph as an output; in Unreal and three.js it is built in the material, see `recipes/smoke-lighting.md`).
 - Toon-lit meshes (shields, domes) use a ramp texture for hard light bands.
 
 ## Sorting and depth

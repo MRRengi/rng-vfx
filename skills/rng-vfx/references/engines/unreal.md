@@ -69,6 +69,13 @@ Niagara drives the Dynamic Parameter with curves over Normalized Age (Dynamic Ma
   - The renderer's Sort Order Hint between emitters of one system.
   - Separate translucency (material: Translucency Pass "After DOF") keeps effects sharp when depth of field is on.
 
+## Temporal anti-aliasing (TSR / TAA)
+
+Temporal upscalers smear thin, fast, translucent things: sparks turn into faint ghost trails, and flipbook frames blend into each other.
+- On spark and flash materials, enable **Responsive AA** (Translucency section). It reduces TSR/TAA history for those pixels.
+- Enable **Output Velocity** on translucent materials (UE5, Translucency section) so TSR can reproject them instead of ghosting.
+- Review strips with the project's real anti-aliasing on. A strip rendered without TSR hides the ghosting players will see.
+
 ## Lights, decals, camera
 
 - Light renderer in Niagara (CPU emitters) or a Point Light component animated in a Blueprint or Sequencer.

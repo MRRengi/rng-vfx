@@ -16,11 +16,11 @@ export default {
       build(fx) {
         fx.hitstop(0.05, 4);
         fx.slash({
-          pos: at(HIT, 0, 0, 0.2), swing: [-0.6, -0.8, 0], normal: [0.2, 0.45, 1], scale: 1.05, from: 160, to: -30, rIn: 0.8, rOut: 1.5,
+          pos: at(HIT, 0.35, 0.45, 0.2), swing: [-0.6, -0.8, 0], normal: [0.2, 0.45, 1], scale: 1.05, from: 160, to: -30, rIn: 1.1, rOut: 1.38,
           blend: 'alpha', hard: false, coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1,
           rimColor: '#ff3a22', rimK: 2.0, rimW: 0.28, noise: 0.3, dissolve: 0.3, thick: 0.85,
           burnColor: '#ff5a2a', burnK: 1.6, burnW: 0.05,
-          head: [[0, 0], [0.07, 1.0, 'outQuart'], [0.1, 1.05], [0.26, 1.75, 'inQuad']], alpha: [[0, 1], [0.18, 1], [0.26, 0]], tail: 0.75,
+          head: [[0, 0], [0.05, 1.0, 'outQuart'], [0.083, 1.1], [0.25, 1.75, 'outQuad']], alpha: [[0, 1], [0.18, 1], [0.26, 0]], tail: 0.75,
         }, 0);
         // Claw strands: thin torn arcs riding the main slash, each a frame late.
         for (const [k, rIn, rOut] of [[0, 1.56, 1.64], [1, 0.64, 0.72]]) {
@@ -43,7 +43,7 @@ export default {
         }, 0.05);
         fx.burst({
           shape: 'streak', dir: 'cone', axis: HIT_DIR, angle: 40, count: 30, origin: HIT,
-          speed: [3, 7], gravity: [0, -14, 0], drag: 1, life: [0.45, 0.8], stretch: 0.03,
+          speed: [3, 7], gravity: [0, -14, 0], drag: 1, life: [0.45, 0.8], stretch: 0.08,
           size: [0.14, 0.06], soft: 0.6, blend: 'alpha', ground: 0, fade: [0, 0.9], minPx: 2,
           ramp: fx.ramp([[0, '#c0101a', 1], [1, '#6a0008', 1]]),
         }, 0.05);
@@ -71,7 +71,7 @@ export default {
           jolt: [[0, 0], [0.05, 0.05], [0.3, 0]],
           knock: [[0, 0], [0.05, 0], [0.1, 0.12, 'outQuad'], [0.7, 0, 'inOutSine']],
         });
-        fx.light({ pos: HIT_LIGHT, color: '#ff2a1a', distance: 3, intensity: [[0, 0], [0.05, 0], [0.06, 6], [0.3, 0, 'outQuad']] });
+        fx.light({ pos: HIT_LIGHT, color: '#ff2a1a', distance: 2.5, intensity: [[0, 0], [0.05, 0], [0.06, 3], [0.15, 0, 'outQuad']] });
         fx.shake([[0, 0], [0.05, 0], [0.06, 0.12], [0.4, 0, 'outQuad']]);
       },
     },
@@ -95,7 +95,7 @@ export default {
         }, 0);
         fx.flash({
           pos: C, size: 2.2, spikes: 0, spikeLen: 0, core: 0.7, soft: 4,
-          core_color: '#ffd8c8', coreK: 1.8, edge_color: '#ff1a0a', edgeK: 1.2,
+          core_color: '#ffd8c8', coreK: 1.3, edge_color: '#ff1a0a', edgeK: 1.0,
           scaleCurve: [[0, 0.4], [0.04, 1, 'outExpo']], alphaCurve: [[0, 1], [0.04, 1], [0.08, 0]],
         }, T);
         fx.burst({

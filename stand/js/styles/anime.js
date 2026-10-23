@@ -62,7 +62,7 @@ export default {
           knock: [[0, 0], [T, 0], [T + D, 0.14, 'outQuad'], [T + 9 * D, 0, 'inOutSine']],
           squash: [[0, 0], [T, 0], [T + D, 1], [T + 4 * D, 0]],
         });
-        fx.light({ pos: HIT_LIGHT, color: '#7fe4ff', distance: 4, intensity: [[0, 0], [T, 0], [T + 0.001, 8], [T + 5 * D, 0]] });
+        fx.light({ pos: HIT_LIGHT, color: '#7fe4ff', distance: 2.5, intensity: [[0, 0], [T, 0], [T + 0.001, 3], [T + 2 * D, 0]] });
         fx.shake([[0, 0], [T, 0], [T + 0.001, 0.1], [T + 5 * D, 0, 'outQuad']]);
       },
     },
@@ -81,7 +81,7 @@ export default {
         }, 0);
         fx.impactFrame([[0, 0], [T - 0.001, 0], [T, 1], [T + D - 0.001, 1], [T + D, 0]]);
         fx.flash({
-          pos: C, size: 1.1, hard: true, spikes: 5, spikeLen: 1.0, core: 0.3, sharp: 2.0, jitter: 0.8, blend: 'alpha',
+          pos: C, size: 1.1, hard: true, spikes: 5, spikeLen: 0.6, core: 0.3, sharp: 2.0, jitter: 0.8, blend: 'alpha',
           dir: [0.45, 1, 0.1], aspect: 1.8, redraw: 12, angJitter: 0.7, bias: 0.5, core_color: '#fffbe6', coreK: 1.15, edge_color: '#ffb12a', edgeK: 1.0,
           scaleCurve: [[0, 0.8], [3 * D, 1.1], [4 * D, 0.3]], alphaCurve: [[0, 1], [4 * D, 1], [4 * D + 0.001, 0]],
         }, T);

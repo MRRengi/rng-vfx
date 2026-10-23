@@ -53,6 +53,24 @@ function orientSlash(mesh, a0, a1, swing, normal) {
 
 **Mandatory check:** project the arc's midpoint to the screen through the gameplay camera. It must fall inside the target's screen silhouette. If it does not, the slash misses, however good it looks.
 
+## Shape: thickness profile
+
+A slash is not a uniform tube. Its silhouette carries the speed.
+
+- **Width along the visible band** (from the head back toward the tail):
+  - Rises from a rounded point at the head to its maximum at 20 - 35% behind the head.
+  - Maximum width is 0.12 - 0.18 of the arc radius: a 1.3 m arc is 0.16 - 0.23 m thick at its widest. Thicker reads as a banana, thinner as a scratch.
+  - Tapers with a smoothstep to zero at the tail.
+- **Across the band:**
+  - The outer edge (the blade's tip side) is sharp: anti-aliasing only, no soft falloff.
+  - The inner edge is soft: the last 30% of the width fades.
+  - The core band (brightest colour) is 15 - 25% of the width and hugs the outer edge.
+- **After contact,** head and tail move monotonically with outQuad or linear curves, never inQuad (an ease-in after contact reads as a hold, then a jump).
+- **Mechanical checks:**
+  - After the 2-frame hold, the slash mask changes by more than 3% of its pixels every frame until it is gone.
+  - At contact, the projected arc midpoint lies inside the target's screen bounding box.
+  - The arc ends above the ground or tapers to zero before touching it: an arc cut by the floor shows a straight edge.
+
 ## Shading
 
 - **Reveal:**

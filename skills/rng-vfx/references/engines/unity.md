@@ -62,6 +62,13 @@ WebGL builds: VFX Graph does not run on WebGL; use Shuriken there.
   - Output ParticleStrip Quad (trails, slashes following a socket);
   - Output Particle Six-way Smoke (recent versions) for six-way lightmapped flipbooks (`../recipes/smoke-lighting.md`).
 
+## Temporal anti-aliasing
+
+TAA (HDRP, and URP in recent versions) smears thin fast sparks and blends flipbook frames.
+- **HDRP:** enable *Transparent Writes Motion Vectors* on materials of fast elements so TAA reprojects them.
+- **URP:** prefer SMAA or FXAA on cameras that show heavy effects. Otherwise keep sparks at least 2 px wide (`../recipes/screen-size.md`) so the history does not erase them.
+- Always review strips with the project's real anti-aliasing on.
+
 ## Lights, decals, camera
 
 - Short light flash: a Light with an animation curve, or the Shuriken Lights module. VFX Graph does not spawn lights; add a Light component driven by the same timeline.

@@ -25,7 +25,7 @@ float width = max(widthWorld, 2.0 * worldPerPx);
 float len   = max(lenWorld, 12.0 * worldPerPx);
 ```
 
-HLSL is the same. In Unity Shader Graph, get the view depth from the Position node (View space, negate z). In Unreal, get it from the PixelDepth or CameraVector length node in a vertex-shader custom node.
+HLSL is the same. In Unity Shader Graph, get the view depth from the Position node (View space, negate z). In Unreal, PixelDepth does not exist in the vertex (World Position Offset) stage and CameraVector is normalized; use `distance(AbsoluteWorldPosition, CameraPositionWS)` (Absolute World Position and Camera Position nodes) in the WPO graph, or scale the sprite size in a Niagara module from the particle's distance to the camera.
 
 Clamp thin things too: a 0.01 m spark at 15 m is under a pixel and flickers. Clamp its width to 2 px and its length to 12 px, and lower its brightness slightly as the clamp kicks in. The spark then reads as a thin streak rather than a flickering dot.
 

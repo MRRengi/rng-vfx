@@ -15,7 +15,7 @@ export default {
       build(fx) {
         fx.celOutline('#2b2b55', 3);
         fx.flash({
-          pos: HIT, size: 1.2, hard: true, spikes: 5, spikeLen: 0.8, core: 0.3, sharp: 1.0, jitter: 0.5, bias: 0.4, blend: 'alpha',
+          pos: HIT, size: 1.2, hard: true, spikes: 5, spikeLen: 0.75, core: 0.4, sharp: 0.6, jitter: 0.5, bias: 0.4, blend: 'alpha', outline: 0.1, outlineColor: '#2b2b55', redraw: 20,
           dir: HIT_DIR, aspect: 1.6, core_color: '#fffbd0', coreK: 1.0, edge_color: '#ffc62e', edgeK: 1.0, rot: 0.3, order: 0,
           scaleCurve: [[0, 0], [0.06, 1.12, 'outBack'], [0.09, 0.95], [0.12, 1.06], [0.16, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.16, 1], [0.161, 0]],
@@ -45,19 +45,19 @@ export default {
           knock: [[0, 0], [0.06, 0.2, 'outQuad'], [0.4, -0.05, 'inOutSine'], [0.6, 0, 'inOutSine']],
           squash: [[0, 0], [0.04, 1, 'outQuad'], [0.14, -0.5, 'inOutSine'], [0.26, 0.2, 'inOutSine'], [0.38, 0, 'inOutSine']],
         });
-        fx.light({ pos: HIT_LIGHT, color: '#fff0b0', distance: 4, intensity: [[0, 0], [0.02, 5], [0.4, 0]] });
+        fx.light({ pos: HIT_LIGHT, color: '#fff0b0', distance: 2.5, intensity: [[0, 0], [0.02, 3], [0.12, 0]] });
         fx.shake([[0, 0.05], [0.22, 0, 'outQuad']]);
       },
     },
     explosion: {
-      duration: 1.25,
+      duration: 0.95,
       contact: 0,
       build(fx) {
         const C = at(BLAST, 0, 0.5, 0);
         fx.celOutline('#3a1e3a', 3);
         // Short pop disc under the puffs, smaller than the fireball.
         fx.flash({
-          pos: C, size: 1.1, hard: true, spikes: 0, spikeLen: 0, core: 0.9, depthTest: true, order: 0,
+          pos: C, size: 1.1, hard: true, spikes: 6, spikeLen: 0.35, core: 0.55, sharp: 0.6, outline: 0.1, outlineColor: '#3a1e3a', blend: 'alpha', depthTest: true, order: 0,
           core_color: '#ffffff', coreK: 1.0, edge_color: '#fff2a8', edgeK: 1.0,
           scaleCurve: [[0, 0], [0.05, 1, 'outBack'], [0.085, 0, 'inQuad']],
           alphaCurve: [[0, 1], [0.085, 1], [0.086, 0]],
@@ -96,7 +96,6 @@ export default {
         }, 0.05);
         fx.target({
           dir: AWAY, color: '#fff3c0', rimColor: '#ffb627',
-          flash: [[0, 0], [0.04, 1], [0.073, 1], [0.074, 0]],
           knock: [[0, 0], [0.08, 0.25, 'outQuad'], [0.45, -0.06, 'inOutSine'], [0.7, 0, 'inOutSine']],
           squash: [[0, 0], [0.06, 1, 'outQuad'], [0.2, -0.6, 'inOutSine'], [0.34, 0.25, 'inOutSine'], [0.5, 0, 'inOutSine']],
         });

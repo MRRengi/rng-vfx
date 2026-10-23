@@ -720,6 +720,8 @@ uniform float uRound;
 uniform float uAngJit;
 uniform float uBias;
 uniform float uExt;
+uniform float uOutlineW;
+uniform vec3 uOutlineCol;
 uniform vec3 uCoreColor;
 uniform vec3 uEdgeColor;
 uniform float uSeed;
@@ -745,6 +747,8 @@ void main() {
   float s = 1.0 - r / max(rad, 0.0001);
   float a = uHard > 0.5 ? step(0.0, s) : pow(clamp(s, 0.0, 1.0), uSoft);
   vec3 col = mix(uEdgeColor, uCoreColor, uHard > 0.5 ? step(0.45, s) : smoothstep(0.0, 0.6, s));
+  // Optional ink outline (toon): a dark band inside the silhouette edge.
+  if (uOutlineW > 0.0 && s < uOutlineW) col = uOutlineCol;
   float alpha = a * uAlpha;
   if (alpha < 0.002) discard;
   gl_FragColor = vec4(col, alpha);
@@ -766,6 +770,8 @@ export function flash(o) {
       uDir: { value: v3(o.dir || [1, 0, 0]) },
       uAspect: { value: o.aspect ?? 1 },
       uExt: { value: flashExtent(o) },
+      uOutlineW: { value: o.outline ?? 0 },
+      uOutlineCol: { value: color3(o.outlineColor || '#1a1a2e', 1) },
       uScale: { value: 0 },
       uAlpha: { value: 0 },
       uSpikes: { value: o.spikes ?? 5 },
@@ -971,12 +977,15 @@ void main() {
   if (tl < 0.0 || tl > 1.0) discard;
   // Both ends taper to points.
   float ends = pow(sin(3.1416 * clamp(vUv.x, 0.0, 1.0)), 0.7);
-  // Rounded head: the width closes to zero at the leading edge instead of a straight cut.
-  float w = uThick * pow(1.0 - tl, 0.6) * ends * sqrt(clamp(tl / 0.05, 0.0, 1.0));
+  // Thickness profile (recipes/slash.md): rounded point at the head, widest
+  // 20 - 35% behind it, smooth taper to zero at the tail and at both arc ends.
+  float prof = sqrt(clamp(tl / 0.05, 0.0, 1.0)) * smoothstep(0.0, 0.28, tl) * pow(1.0 - smoothstep(0.28, 1.0, tl), 0.8);
+  float w = uThick * max(prof, 0.0) * ends;
   float nz = tn(vec2(vUv.x * 1.5 - uHead * 0.4, vUv.y * 0.35) + uSeed * 0.21).b;
-  float dr = abs(vUv.y - 0.5) * 2.0 + (nz - 0.5) * uWobble;
   float torn = uTorn * tn(vUv * vec2(6.0, 1.0) + uSeed * 0.11).a;
-  float s = 1.0 - (dr + torn) / max(w, 0.0001);
+  // Across the band: q = -1 inner edge, +1 outer (blade tip side).
+  float q = ((vUv.y - 0.5) * 2.0 + (nz - 0.5) * uWobble) / max(w, 0.0001);
+  float s = 1.0 - abs(q) - torn / max(w, 0.0001);
   if (s <= 0.0) discard;
   float rimW = uRimW * (0.5 + tn(vUv * vec2(4.0, 0.5) + uSeed * 0.07).a);
   float tear = tn(vec2(vUv.x * 2.5, vUv.y * 0.6) + uSeed * 0.37).a;
@@ -984,10 +993,13 @@ void main() {
   // or as outlined pockmarks (alpha). The body stays solid.
   float thr = uDissolve * smoothstep(0.45, 1.0, tl);
   if (tear < thr) discard;
-  float a = uHard > 0.5 ? 1.0 : smoothstep(0.0, 0.35, s) * smoothstep(thr, thr + 0.06, tear);
-  float k = uHard > 0.5 ? step(0.55, s) * step(tl, 0.75) : smoothstep(0.2, 0.9, s) * (1.0 - tl);
+  // Sharp outer edge (anti-aliasing only), soft inner edge (last 30%).
+  float edgeSoft = q > 0.0 ? 0.04 : 0.3;
+  float a = uHard > 0.5 ? 1.0 : smoothstep(0.0, edgeSoft, s) * smoothstep(thr, thr + 0.06, tear);
+  // Core band hugs the outer edge (15 - 25% of the width).
+  float k = uHard > 0.5 ? step(0.45, q) * step(tl, 0.75) : smoothstep(0.35, 0.65, q) * (1.0 - smoothstep(0.5, 1.0, tl));
   vec3 col = mix(uEdge, uCore, k);
-  if (s < rimW) col = uRim;
+  if (s < rimW && q > -0.2) col = uRim;
   if (uBurnW > 0.0 && thr > 0.001 && tear < thr + uBurnW) col = uBurn;
   float alpha = a * uAlpha;
   if (alpha < 0.002) discard;

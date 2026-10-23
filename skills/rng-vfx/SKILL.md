@@ -13,21 +13,34 @@ A correct chain rendered as procedural blobs on round quads still looks cheap. F
 
 ## The chain
 
-0. **Audit the project.** Before designing, record the engine and pipeline, tone mapper, bloom threshold (**B**), exposure mode, units, gameplay camera and its pixels per metre, frame rate, colour language, and render 2 - 3 existing effects as a reference strip (`references/audit.md`). Every brightness and size in this skill is relative to these. With no project, use the neutral defaults listed there and say so.
+0. **Audit the project.** Before designing, record:
+   - the engine and pipeline, tone mapper, bloom threshold (**B**) and exposure mode;
+   - units, the gameplay camera and its pixels per metre, frame rate;
+   - the game's colour language;
+   - a reference strip of 2 - 3 existing effects.
+
+   Details in `references/audit.md`. Every brightness and size in this skill is relative to these. With no project, use the neutral defaults listed there and say so.
 1. **Brief.** In one or two lines: what gameplay event this is, how important it is compared to everything else on screen (`references/fundamentals.md` > Hierarchy), where the camera is, and how long the effect may last.
-2. **Engine and system.** Decide where it is built: VFX Graph or Shuriken, Niagara, three.js instancing, meshes or sprites, which blend modes and post effects exist (`references/engines/*.md`). This limits everything after it.
-3. **Style.** Pick exactly one style file and follow its rules. Mixing rules from two styles is the most common reason an effect looks "off".
-4. **References.** Ask the user for 2 - 3 reference clips or frames of the look they want, unless they already gave some. If a shell with network access exists, `yt-dlp` plus `ffmpeg -ss <time> -frames:v 24` cuts frames around contact. Break each reference down as frames: what is on screen at contact, +2, +6, the end. With no references, write the breakdown from the style file and say that you did.
-5. **Timing.** Anticipation, contact, follow-through, dissipation, with numbers from `references/numbers.md`.
-6. **Blockout.** Before any texture or shader work: flat, unlit, grayscale shapes with the final timing, seen through the gameplay camera. Check the silhouette, the size on screen, the hit direction and the framing. Fix them here; they do not get fixed by textures later.
-7. **Layers.** Decide the layer stack (core, flash, shape, secondary, residue, light, distortion, decal, target reaction, camera). Each layer has one job.
+2. **References.** Ask the user for 2 - 3 reference clips or frames of the look they want, unless they already gave some.
+   - If a shell with network access exists, `yt-dlp` plus `ffmpeg -ss <time> -frames:v 24` cuts frames around contact.
+   - Break each reference down as frames: what is on screen at contact, +2, +6, the end.
+   - With no references, write the breakdown from the style file and say that you did.
+3. **Style.** Pick exactly one style file and follow its rules. Mixing rules from two styles is the most common reason an effect looks "off". When the references contradict the style file, the references win; note where.
+4. **Engine and system.** Decide where it is built: VFX Graph or Shuriken, Niagara, three.js instancing, meshes or sprites, which blend modes and post effects exist (`references/engines/*.md`).
+5. **Layers.** Decide the layer stack (core, flash, shape, secondary, residue, light, distortion, decal, target reaction, camera). Each layer has one job. Construction rules for the common ones are in `references/recipes/`.
+6. **Timing.** Anticipation, contact, follow-through, dissipation per layer, with numbers from `references/numbers.md`.
+7. **Blockout with motion.** Before any texture or shader work:
+   - flat, unlit, grayscale shapes with the final timing and motion (`references/physics.md`), seen through the gameplay camera;
+   - check the silhouette, the size on screen, the hit direction, the framing, the grounding;
+   - run the mechanical checks (`tools/vfxcheck.py`, `references/verification.md`).
+
+   Fix problems here; textures will not fix them later.
 8. **Shape sources.** For each body, choose an authored source:
    - a flipbook (simulated or drawn), a life map or a swept mesh (`references/recipes/`);
    - procedural noise only for masks, erosion and accents (`references/textures.md`).
-9. **Shaders and materials.** Build from the technique catalog (`references/shaders.md`, `references/materials.md`, `references/recipes/smoke-lighting.md`).
-10. **Motion.** Particle physics, curves, forces (`references/physics.md`).
-11. **Budget.** Check against `references/performance.md`.
-12. **Verify.** Render frame strips (even, peak, gameplay camera) next to the references and the existing effects. Run the checks in `references/verification.md`.
+9. **Shaders and materials.** Build from the technique catalog (`references/shaders.md`, `references/materials.md`, `references/recipes/smoke-lighting.md`). Verify again: strips plus mechanical checks.
+10. **Budget.** Check against `references/performance.md`.
+11. **Final verify.** Render the even, peak and gameplay-camera strips next to the references and the existing effects. Run every check in `references/verification.md` and the cheapness checklist. Any failure goes back to the step that owns it.
 
 ## Which file to read
 
@@ -42,7 +55,10 @@ A correct chain rendered as procedural blobs on round quads still looks cheap. F
 | Pixel art, retro, low-res | `references/styles/pixel.md` |
 | Realistic, cinematic, military, physically based | `references/styles/realism.md` |
 | Slashes, sword trails, swings | `references/recipes/slash.md` |
-| Fire, smoke, explosions, puffs, anything that needs a flipbook or a designed dissolve | `references/recipes/flipbooks.md` |
+| Hit sparks, stars, flashes at contact | `references/recipes/spark-star.md` |
+| Explosions: grounding, growth, clusters, fire-to-smoke handoff | `references/recipes/explosion.md`, `references/physics.md` |
+| Projectiles, beams, lightning, auras and buffs, heals, telegraphs, target reaction | `references/recipes/archetypes.md` |
+| Fire, smoke, puffs, anything that needs a flipbook or a designed dissolve | `references/recipes/flipbooks.md`, `references/physics.md` |
 | Smoke, dust, steam that must look lit | `references/recipes/smoke-lighting.md` |
 | Shockwave cones, domes, beams, tornadoes, ground shocks, scorch and crack decals | `references/recipes/meshes-decals.md` |
 | Effects too small at the gameplay camera, minimum pixel sizes | `references/recipes/screen-size.md` |

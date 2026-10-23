@@ -90,7 +90,6 @@ export default {
         }, D);
         fx.target({
           dir: AWAY, color: '#ffffff',
-          flash: [[0, 1], [D - 0.001, 1], [D, 0]],
           knock: [[0, 0], [D, 0.15], [5 * D, 0]],
         });
         fx.shake([[0, 0.12], [5 * D, 0]]);

@@ -90,7 +90,7 @@ export function buildEffect(def, scene, distortScene, celScene, overScene) {
         const t = hold && at >= hold.at - 1e-4 ? tReal
           : kind === 'slash' && hold ? (tReal <= hold.at ? tReal : Math.max(hold.at, tReal - 2 / 60))
           : remap(tReal);
-        prim.object.visible = t >= at && (solo === null || solo === i);
+        prim.object.visible = t >= at && (solo === null || solo === i || (Array.isArray(solo) && solo.includes(i)));
         prim.update(t - at, t);
       });
     },

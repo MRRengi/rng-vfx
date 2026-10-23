@@ -17,7 +17,7 @@ Absolute values like "HDR 2" mean nothing across engines. UE5 has auto exposure 
 Conversions:
 - **Unity HDR picker:** intensity is in stops. +1 doubles the value, so with URP's default bloom threshold of 0.9, 2B is about +1.
 - **UE5:** lock exposure first (Min EV100 = Max EV100 in a post-process volume, or Manual metering). Emissive values are then relative to that fixed exposure. With the default bloom threshold of -1 (everything blooms a little), measure B as the value where the bloom halo becomes clearly visible.
-- **three.js:** B is `UnrealBloomPass.threshold` in linear values before `OutputPass` tone mapping, times `toneMappingExposure`.
+- **three.js:** with `EffectComposer`, B is simply `UnrealBloomPass.threshold` in linear values. `toneMappingExposure` is applied later in `OutputPass`, so it does not change what blooms; an exposure dip there darkens the frame but not the bloom input (scale the effect's emissive too, or apply exposure before the bloom pass).
 
 Summed brightness counts too. Ten overlapping fire quads at 1.2 B add up to a white blob. Check the hue at peak: an orange fireball that reads white is too bright, whatever its per-quad values say.
 
@@ -78,6 +78,21 @@ Screen-space numbers are for a 1080p frame through the gameplay camera. Scale by
 | Target squash on contact | about 0.85 along the hit axis and 1.1 across, recovering over 6 - 15 frames |
 | Camera shake, hits | 0.02 - 0.1 m, decays within 6 - 15 frames |
 | Camera shake, explosions | 0.1 - 0.3 m, decays within 0.4 - 1 s |
+
+## Effect lights
+
+A light sells contact, but too strong or too long it tints the whole target and flattens the spark against the body.
+
+| | Peak on the target | Radius | Duration |
+|---|---|---|---|
+| Hit spark light | lit albedo at most 0.5 B brighter than without it | 1.5 - 2.5x the primary shape | falls to 10% within the flash frames + 4 frames, or 1 drawing |
+| Slash light | 0.3 B | 1.5x the arc radius | head travel + 2 frames |
+| Explosion light | ground and nearby characters at most 1 B | 3 - 5x the fireball radius | follows the fireball: peak on the flash, 40% at the fireball's peak, gone when the fire is |
+| Fire loop light | 0.2 - 0.4 B | 2 - 3x the flame height | flicker at the size-dependent frequency (`physics.md` > Fire) |
+
+- Put the light in front of the target on the hit side, never inside it.
+- Check: once the flash frames are over, the target's luminance is back at or below rim level.
+- **Bystanders** (characters near the effect who were not hit) get light only: no flash, no rim, no reaction.
 
 ## Counts
 
