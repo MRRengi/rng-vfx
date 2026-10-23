@@ -59,7 +59,7 @@ export default {
           knock: [[0, 0], [0.05, 0.05, 'outQuad'], [0.4, 0, 'inOutSine']],
         });
         // Small hot spot on the surface, close and short.
-        fx.light({ pos: at(HIT, 0, 0, 0.3), color: '#ffb066', distance: 2, intensity: [[0, 12], [0.05, 0, 'outQuad']] });
+        fx.light({ pos: at(HIT, 0, 0, 0.3), color: '#ffb066', distance: 1.5, intensity: [[0, 3], [0.05, 0, 'outQuad']] });
         fx.shake([[0, 0.035], [0.15, 0, 'outQuad']]);
       },
     },

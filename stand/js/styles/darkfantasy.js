@@ -23,8 +23,8 @@ export default {
           head: [[0, 0], [0.09, 1.0, 'outQuart'], [0.16, 1.05], [0.45, 1.75, 'inQuad']], alpha: [[0, 1], [0.38, 1], [0.45, 0]], tail: 0.75,
         }, 0);
         fx.flash({
-          pos: HIT, size: 1.5, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 1.5, blend: 'alpha',
-          dir: HIT_DIR, aspect: 2.6, core_color: '#0a0204', coreK: 1, edge_color: '#ff3a22', edgeK: 1.4,
+          pos: HIT, size: 1.2, spikes: 4, spikeLen: 1.1, core: 0.22, sharp: 2.5, jitter: 2.0, soft: 1.5, blend: 'alpha',
+          dir: HIT_DIR, aspect: 1.6, core_color: '#0a0204', coreK: 1, edge_color: '#ff3a22', edgeK: 1.4,
           scaleCurve: [[0, 0.5], [0.04, 1, 'outExpo'], [0.12, 1.15]], alphaCurve: [[0, 1], [0.07, 1], [0.12, 0]],
         }, 0.05);
         fx.flash({
@@ -38,7 +38,7 @@ export default {
           ramp: fx.ramp([[0, '#c0101a', 1], [1, '#6a0008', 1]]),
         }, 0.05);
         fx.decal({
-          pos: at(HIT, 1.0, -1.14, -0.3), size: 0.9, splat: true, dark: '#5a0008', seed: 9,
+          pos: at(HIT, 1.1, -1.14, -0.1), size: 1.5, splat: true, dark: '#8a0010', seed: 9,
           alpha: [[0, 0], [0.28, 0], [0.3, 0.95], [10, 0.95]], reveal: [[0, 0], [0.28, 0], [0.45, 1.1, 'outQuad']],
         }, 0.05);
         fx.burst({
@@ -78,8 +78,8 @@ export default {
           alpha: [[0, 0], [0.04, 1], [10, 1]],
         }, 0);
         fx.burst({
-          shape: 'glow', dir: 'sphere', count: 18, origin: C, spawnR: 1.8, speed: [-5, -6], drag: 0.001,
-          life: [0.25, 0.3], size: [0.06, 0.12], soft: 2, ramp: fx.ramp([[0, '#ff6a40', 1.5], [1, '#ffd0b0', 1.8]]),
+          shape: 'glow', dir: 'sphere', count: 26, origin: C, spawnR: 1.8, speed: [-5, -6], drag: 0.001,
+          life: [0.25, 0.3], size: [0.1, 0.18], soft: 2, ramp: fx.ramp([[0, '#ff6a40', 1.5], [1, '#ffd0b0', 1.8]]),
         }, 0);
         fx.flash({
           pos: C, size: 2.2, spikes: 0, spikeLen: 0, core: 0.7, soft: 4,

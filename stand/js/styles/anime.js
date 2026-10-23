@@ -87,26 +87,26 @@ export default {
         // Stem: the fireball connects to the ground.
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 15, count: 5, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
-          speed: [4, 6], drag: 4, life: [7 * D, 10 * D], size: [0.8, 1.2], sizeIn: 0.12, bands: 2, outline: 0,
+          speed: [4, 6], drag: 4, life: [7 * D, 10 * D], size: [0.8, 1.2], sizeIn: 0.12, bands: 2, outline: 0, order: 2,
           shadow: '#a8402c', erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff2c0', 1.2], [0.4, '#ffb02a', 1.0], [1, '#7a2a1a', 0.8]]),
         }, T);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 55, count: 16, sizeDist: [3, 5, 8], origin: C, spawnR: 0.4,
-          speed: [3, 6], drag: 4, life: [8 * D, 13 * D], size: [1.3, 2.3], sizePow: 0.35, sizeIn: 0.1, bands: 2, outline: 0,
+          speed: [3, 6], drag: 4, life: [8 * D, 13 * D], size: [1.3, 2.3], sizePow: 0.35, sizeIn: 0.1, bands: 2, outline: 0, order: 3,
           shadow: '#a8402c', erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff7d6', 1.3], [0.25, '#ffd23f', 1.1], [0.55, '#ff6a1a', 1.0], [1, '#5a1e1e', 0.8]]),
         }, T);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 6, origin: C, spawnR: 0.3, speed: [6, 9], drag: 3,
-          life: [6 * D, 9 * D], size: [0.6, 0.3], stretch: 0.12, bands: 2, outline: 0,
+          life: [6 * D, 9 * D], size: [0.6, 0.3], stretch: 0.12, bands: 2, outline: 0, order: 4,
           shadow: '#a8402c', erode: 1, noiseScale: 2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff2c0', 1.2], [0.5, '#ffb02a', 1.0], [1, '#c2401a', 0.9]]),
         }, T);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [2, 4, 6], origin: at(BLAST, 0, 0.9, 0),
           spawnR: 0.6, speed: [1.5, 2.6], gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [12 * D, 18 * D],
-          size: [1.2, 2.1], sizePow: 0.5, sizeIn: 0.1, bands: 1, outline: 0, shadow: '#8a5070',
+          size: [1.2, 2.1], sizePow: 0.5, sizeIn: 0.1, bands: 1, outline: 0, order: 0, shadow: '#8a5070',
           erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           fireGlow: { color: '#e07a50', intensity: 0.6, height: 0.8, k: [[0, 1], [1.5, 0]] },
           ramp: fx.ramp([[0, '#3a2e40', 1], [1, '#241e2a', 1]]),
@@ -114,7 +114,7 @@ export default {
         // Dust skirt instead of a giant ground hoop.
         fx.burst({
           shape: 'puff', cel: true, dir: 'ring', lift: 0.05, count: 14, origin: at(BLAST, 0, 0.2, 0), speed: [6, 8], drag: 5,
-          life: [5 * D, 8 * D], size: [0.7, 0.2], sizePow: 1.5, sizeIn: 0.15, bands: 1, outline: 0, shadow: '#9a7a6a',
+          life: [5 * D, 8 * D], size: [0.7, 0.2], sizePow: 1.5, sizeIn: 0.15, bands: 1, outline: 0, order: 1, shadow: '#9a7a6a',
           erode: 1, noiseScale: 2, blend: 'alpha', ground: 0, fadeDist: 0.05,
           ramp: fx.ramp([[0, '#e8d8c0', 1], [1, '#b8a890', 1]]),
         }, T + D);
