@@ -57,6 +57,16 @@ Any yes means the effect still looks cheap:
 - Does the fire have no hot core at its peak (islands)?
 - Did the layer census pass?
 
+### Mechanical checks
+
+Run these on rendered frames instead of judging by eye:
+
+- **Held shape:** no region of the effect is pixel-identical (or within 1%) across more than 4 frames at 60 fps (2 drawings on twos).
+- **Empty tail:** the effect's mask is non-empty in the frame at 90% of the duration.
+- **Silhouette aspect:** the explosion's bounding box at peak is taller than wide (1.2 or more); the impact spark is longer along the hit than across it.
+- **Post-palette colour (pixel):** sample the effect's main colours after the palette pass. If smoke maps to a hue it was not meant to have, the palette lacks neutrals.
+- **Grayscale separation:** the main shape and its shadow side differ by 0.25 or more in grayscale; smoke and background differ by 0.25 or more on the mid background.
+
 Review on a mid or dusk background by default. Black backgrounds flatter additive effects and hide the problems above.
 
 ## The stand

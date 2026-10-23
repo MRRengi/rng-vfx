@@ -41,3 +41,7 @@ Reference points: Diablo II, III and IV, Path of Exile, Grim Dawn, Dark Souls, E
 - Too many saturated colors; dark fantasy is restrained.
 - Additive blending on dark elements (they disappear).
 - Pretty, clean, symmetrical magic that belongs to a high fantasy game.
+- Smoke glowing from the fire everywhere: fire light lives in the bottom 30% of the column plus a hot rim on the density edge.
+- A single slash for a claw or blade attack: add thin torn strands riding the main arc.
+- Round blood dots: drops stretch into teardrops along velocity and land as splats with satellite drops.
+- A target flash in bright red: dark fantasy tints the hit body dark (deep crimson) and lets the rim carry the heat.

@@ -7,6 +7,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import GUI from 'lil-gui';
 import { buildEffect } from './fx/builder.js';
+import { preloadSheets } from './fx/primitives.js';
 import { G, distortScene, celScene } from './fx/globals.js';
 import { STAGE, ARCHETYPES } from './styles/layout.js';
 import anime from './styles/anime.js';
@@ -91,20 +92,24 @@ composer.addPass(bloom);
 // into alpha by the dummy's material during the frame), the background goes
 // flat white, bright effect pixels go black with a crisp edge.
 const impactPass = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uAmount: { value: 0 }, uMode: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uAmount: { value: 0 }, uMode: { value: 0 }, tMask: { value: null }, tCelM: { value: null } },
   vertexShader: FULL_VS,
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float uAmount; uniform float uMode; varying vec2 vUv;
+    uniform sampler2D tDiffuse; uniform sampler2D tMask; uniform sampler2D tCelM; uniform float uAmount; uniform float uMode; varying vec2 vUv;
     void main() {
       vec4 c = texture2D(tDiffuse, vUv);
       float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
-      float ink = step(0.75, l);
+      // Ink from the effect's own coverage (so coloured edges stay in the
+      // silhouette), the cel layer, and the boosted target.
+      float ink = max(step(0.75, l), max(step(0.12, texture2D(tMask, vUv).a), step(0.5, texture2D(tCelM, vUv).a)));
       vec3 paper = uMode > 0.5 ? vec3(0.85, 0.06, 0.05) : vec3(1.0, 0.98, 0.95);
       vec3 frame = mix(paper, vec3(0.0), ink);
       gl_FragColor = vec4(mix(c.rgb, frame, uAmount), c.a);
     }`,
 });
 composer.addPass(impactPass);
+const maskTarget = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
+impactPass.uniforms.tMask.value = maskTarget.texture;
 composer.addPass(new OutputPass());
 
 // Pixel style palette: every pixel maps to the nearest colour of a fixed
@@ -444,6 +449,8 @@ function resize() {
   depthTarget.setSize(rw, rh);
   distortTarget.setSize(Math.max(1, rw >> 1), Math.max(1, rh >> 1));
   celTarget.setSize(rw, rh);
+  maskTarget.setSize(rw, rh);
+  impactPass.uniforms.tCelM.value = celTarget.texture;
   celPass.uniforms.uTexel.value.set(1 / rw, 1 / rh);
   G.uSnapRes.value.set(px ? rw : 0, px ? rh : 0);
   G.uRes.value.set(rw, rh);
@@ -463,16 +470,20 @@ function renderAt(t) {
   const tr = params.reaction ? state.effect.targetAt(te) : null;
   dummyBody.position.set(0, 0, 0);
   dummyBody.rotation.set(0, 0, 0);
+  dummyBody.scale.set(1, 1, 1);
   dummyMat.emissive.setRGB(0, 0, 0);
   rimUniform.value.setRGB(0, 0, 0);
   if (tr) {
     // Capped under the bloom threshold: a target brighter than the spark is a white-out.
     dummyMat.emissive.copy(tr.color).multiplyScalar(Math.min(tr.flash, 1) * 0.9);
-    rimUniform.value.copy(tr.rimColor).multiplyScalar(Math.min(tr.rim, 1) * 1.5);
+    rimUniform.value.copy(tr.rimColor).multiplyScalar(Math.min(tr.rim, 1) * 0.5);
     const j = tr.jolt * Math.sin(te * 95);
     dummyBody.position.set(tr.dir.x * j, 0, tr.dir.z * j);
     dummyBody.rotation.z = -tr.knock * tr.dir.x;
     dummyBody.rotation.x = tr.knock * tr.dir.z;
+    // Squash: positive flattens, negative stretches (volume roughly kept).
+    // squash 1 = 0.85 on the vertical, 1.1 across; negative values stretch.
+    dummyBody.scale.set(1 + tr.squash * 0.1, 1 - tr.squash * 0.15, 1 + tr.squash * 0.1);
   }
 
   // Impact frame: the target is pushed to full brightness so the two-tone
@@ -517,6 +528,21 @@ function renderAt(t) {
   renderer.setClearColor(0x000000, 0);
   renderer.clear();
   renderer.render(celScene, camera);
+
+  // Impact-frame mask: the effect alone, alpha only.
+  if (impactAmt > 0.5) {
+    const hide = [ground, dummy];
+    hide.forEach(o => { o.visible = false; });
+    const bg2 = scene.background, fog2 = scene.fog;
+    scene.background = null; scene.fog = null;
+    renderer.setRenderTarget(maskTarget);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.render(scene, camera);
+    scene.background = bg2; scene.fog = fog2;
+    ground.visible = true;
+    dummy.visible = params.dummy;
+  }
 
   // Distortion offsets.
   renderer.setRenderTarget(distortTarget);
@@ -611,6 +637,7 @@ const [noise, gAlb, gNrm, gRgh] = await Promise.all([
   loadTex('./textures/ground_normal.png', false),
   loadTex('./textures/ground_rough.png', false),
 ]);
+await preloadSheets(['./textures/fire_4x4.png', './textures/puff_4x4.png']);
 G.uNoise.value = noise;
 for (const t of [gAlb, gNrm, gRgh]) t.repeat.set(12, 12);
 groundMaps = [gAlb, gNrm, gRgh];

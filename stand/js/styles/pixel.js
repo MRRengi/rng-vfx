@@ -1,6 +1,6 @@
 import { RING_N, HIT, HIT_DIR, BLAST, UP, AWAY, at } from './layout.js';
 
-// Pixel art. Low-res render, nearest upscale, a fixed 24-colour palette (OKLab
+// Pixel art. Low-res render, nearest upscale, a fixed 28-colour palette (OKLab
 // nearest), 10 fps, particle centres snapped to the pixel grid, 2px+ strokes,
 // one 1px outline around the cel layer, white sprite flash on the target,
 // a flat floor and no light falloff (it bands when quantized), no bloom.
@@ -9,6 +9,7 @@ const D = 1 / 10;
 const PALETTE = [
   '#0e0e17', '#1a1630', '#2b2b55', '#3e4a7a', '#5a6a9c', '#8a9ac8', '#c8d2ee', '#ffffff',
   '#2a2420', '#4a423a', '#6e665c', '#9a9184', '#c8bea8',
+  '#3a3a44', '#5c5a66', '#8a8894', '#b4b2bc',
   '#3a1012', '#6a1a1a', '#b8261e', '#ff7a1a', '#ffb030', '#ffe14d', '#fff5c8',
   '#1e4a2e', '#3a7a3e', '#5a3a7a', '#9a6ad8',
 ];
@@ -16,18 +17,17 @@ const PALETTE = [
 export default {
   id: 'pixel',
   name: 'Pixel',
-  blurb: 'Low-res render, 24-colour palette, 10 fps, grid-snapped particles, 1px outline, white sprite flash, flat floor, no haze.',
+  blurb: 'Low-res render, 28-colour palette, 10 fps, grid-snapped particles, 1px outline, white sprite flash, flat floor, no haze.',
   look: { fps: 10, tone: 'neutral', pixel: 5, palette: PALETTE, bloom: { strength: 0.0, threshold: 2, radius: 0 } },
   effects: {
     impact: {
       duration: 1.0,
       contact: 0,
       build(fx) {
-        fx.hitstop(0.01, 6);
         fx.celOutline('#0e0e17', 1);
         fx.flash({
           pos: HIT, size: 1.6, hard: true, spikes: 4, spikeLen: 0.8, core: 0.32, sharp: 2, jitter: 0.8,
-          dir: HIT_DIR, aspect: 1.3, core_color: '#ffffff', coreK: 1, edge_color: '#ffe14d', edgeK: 1,
+          dir: HIT_DIR, aspect: 1.3, redraw: 10, bias: 0.5, core_color: '#ffffff', coreK: 1, edge_color: '#ffe14d', edgeK: 1,
           scaleCurve: [[0, 0.7], [D, 1], [2 * D, 0.5]], alphaCurve: [[0, 1], [3 * D - 0.001, 1], [3 * D, 0]],
         }, 0);
         fx.ring({
@@ -74,8 +74,8 @@ export default {
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 8, origin: at(C, 0, 0.6, 0), spawnR: 0.5, speed: [1.2, 2],
           gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [8 * D, 11 * D], size: [1.1, 0.2], sizePow: 2, bands: 1, outline: 0,
-          shadow: '#5a5268', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0,
-          ramp: fx.ramp([[0, '#8a8498', 1], [1, '#5a5468', 1]]),
+          shadow: '#3a3a44', erode: 0, noiseScale: 2, blend: 'alpha', fadeDist: 0, dither: true,
+          ramp: fx.ramp([[0, '#b4b2bc', 1], [1, '#5c5a66', 1]]),
         }, 3 * D);
         fx.burst({
           shape: 'square', cel: true, dir: 'hemi', count: 18, sizeDist: [4, 8, 6], origin: C, speed: [5, 9], gravity: [0, -14, 0], drag: 1,

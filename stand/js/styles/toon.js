@@ -10,7 +10,7 @@ export default {
   look: { fps: 0, tone: 'neutral', bloom: { strength: 0.12, threshold: 1.6, radius: 0.15 } },
   effects: {
     impact: {
-      duration: 1.1,
+      duration: 0.8,
       contact: 0,
       build(fx) {
         fx.hitstop(0.02, 3);
@@ -23,7 +23,7 @@ export default {
         }, 0);
         fx.ring({
           billboard: true, pos: HIT, size: 1.7, hard: true, noise: 0, blend: 'alpha', coverage: 0.6, seed: 3,
-          color: '#ffffff', colorK: 1, color2: '#2b2b55', color2K: 1,
+          color: '#ffffff', colorK: 1, color2: '#ffffff', color2K: 1,
           radius: [[0, 0.5], [0.22, 0.8, 'outBack']], width: [[0, 0.05], [0.22, 0.0, 'inQuad']],
           alpha: [[0, 1], [0.21, 1], [0.22, 0]],
         }, 0.05);
@@ -45,13 +45,14 @@ export default {
           flash: [[0, 1], [0.033, 1], [0.034, 0]],
           rim: [[0, 0], [0.034, 1], [0.3, 0]],
           knock: [[0, 0], [0.06, 0.2, 'outQuad'], [0.4, -0.05, 'inOutSine'], [0.6, 0, 'inOutSine']],
+          squash: [[0, 0], [0.04, 1, 'outQuad'], [0.14, -0.5, 'inOutSine'], [0.26, 0.2, 'inOutSine'], [0.38, 0, 'inOutSine']],
         });
         fx.light({ pos: HIT_LIGHT, color: '#fff0b0', distance: 4, intensity: [[0, 0], [0.02, 5], [0.4, 0]] });
         fx.shake([[0, 0.05], [0.22, 0, 'outQuad']]);
       },
     },
     explosion: {
-      duration: 2.0,
+      duration: 1.3,
       contact: 0,
       build(fx) {
         const C = at(BLAST, 0, 0.5, 0);
@@ -71,7 +72,7 @@ export default {
         }, 0.02);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 40, count: 10, sizeDist: [3, 4, 3], origin: at(C, 0, 0.6, 0), spawnR: 0.5,
-          speed: [1.5, 2.5], gravity: [0, 1.5, 0], drag: 3, delay: [0, 0.08], life: [0.8, 1.2], size: [1.4, 0.08],
+          speed: [1.5, 2.5], gravity: [0, 1.5, 0], drag: 3, delay: [0, 0.08], life: [0.7, 1.0], size: [1.4, 0.08],
           sizePow: 2.5, sizeIn: 0.12, bands: 1, outline: 0, shadow: '#9aa2e6', erode: 0, noiseScale: 1.4,
           blend: 'alpha', fadeDist: 0.05, ramp: fx.ramp([[0, '#ffffff', 1], [1, '#d8dcff', 1]]),
         }, 0.12);
@@ -85,13 +86,14 @@ export default {
         }
         fx.burst({
           shape: 'sparkle', soft: 100, dir: 'hemi', count: 8, origin: C, speed: [5, 8], drag: 1.5,
-          gravity: [0, -9, 0], life: [0.7, 1.0], size: [0.42, 0.2], sizeIn: 0.15, spin: 6, fade: [0, 1],
+          gravity: [0, -9, 0], life: [0.6, 0.9], size: [0.42, 0.2], sizeIn: 0.15, spin: 6, fade: [0, 1],
           ramp: fx.ramp([[0, '#fff7a0', 1.1], [1, '#ffd000', 1.0]]),
         }, 0.05);
         fx.target({
           dir: AWAY, color: '#fff3c0', rimColor: '#ffb627',
           flash: [[0, 0], [0.04, 1], [0.073, 1], [0.074, 0]],
           knock: [[0, 0], [0.08, 0.25, 'outQuad'], [0.45, -0.06, 'inOutSine'], [0.7, 0, 'inOutSine']],
+          squash: [[0, 0], [0.06, 1, 'outQuad'], [0.2, -0.6, 'inOutSine'], [0.34, 0.25, 'inOutSine'], [0.5, 0, 'inOutSine']],
         });
         fx.light({ pos: C, color: '#ffd38a', distance: 8, shadow: true, intensity: [[0, 0], [0.03, 18], [0.6, 0]] });
         fx.shake([[0, 0.1], [0.4, 0, 'outQuad']]);

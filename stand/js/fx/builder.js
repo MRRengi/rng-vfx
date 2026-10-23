@@ -28,6 +28,7 @@ export function buildEffect(def, scene, distortScene, celScene) {
   const fx = {
     ramp: P.ramp,
     burst: k('burst', P.burst),
+    trail: k('trail', P.trail),
     flash: k('flash', P.flash),
     ring: k('ring', P.ring),
     slash: k('slash', P.slash),
@@ -55,6 +56,7 @@ export function buildEffect(def, scene, distortScene, celScene) {
         rimColor: new THREE.Color(o.rimColor || o.color || '#ffffff'),
         jolt: curve(o.jolt || [[0, 0]]),
         knock: curve(o.knock || [[0, 0]]),
+        squash: curve(o.squash || [[0, 0]]),
         dir: new THREE.Vector3(...(o.dir || [1, 0, 0])).normalize(),
       };
     },
@@ -88,7 +90,7 @@ export function buildEffect(def, scene, distortScene, celScene) {
     exposureAt: t => exposure(t),
     targetAt: t => target && {
       color: target.color, flash: target.flash(t), rim: target.rim(t), rimColor: target.rimColor,
-      jolt: target.jolt(t), knock: target.knock(t), dir: target.dir,
+      jolt: target.jolt(t), knock: target.knock(t), squash: target.squash(t), dir: target.dir,
     },
     dispose() {
       scene.remove(group);

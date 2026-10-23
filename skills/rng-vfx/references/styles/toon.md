@@ -39,3 +39,6 @@ Reference points: Western cartoon animation, cel-shaded adventure games (The Leg
 - Realistic smoke or volumetrics.
 - Fading instead of shrinking.
 - Linear motion: toon needs strong easing on everything.
+- Anything held still: every shape keeps squashing, bobbing or shrinking; a held toon puff reads as a sticker.
+- Two-colour rings with an outline colour: toon rings are one flat colour.
+- A target that only slides: toon targets squash, stretch and settle.

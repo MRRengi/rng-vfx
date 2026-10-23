@@ -8,19 +8,30 @@ export default {
   id: 'stylized',
   name: 'Stylized',
   blurb: 'Value hierarchy, eroding texture noise through ramps, slash across the target with burn edge, distortion shock, fire-lit painted smoke.',
-  look: { fps: 0, tone: 'neutral', bloom: { strength: 0.35, threshold: 1.2, radius: 0.2 } },
+  look: { fps: 0, tone: 'neutral', bloom: { strength: 0.3, threshold: 1.4, radius: 0.2 } },
   effects: {
     impact: {
-      duration: 1.2,
+      duration: 0.9,
       contact: 0.08,
       build(fx) {
         fx.hitstop(0.08, 4);
         fx.slash({
-          pos: at(HIT, 0, 0, 0.25), rot: [-0.9, 0.3, 0.6], scale: 0.95, from: 150, to: -35, rIn: 0.7, rOut: 1.5,
-          coreColor: '#ffffff', coreK: 2.0, edgeColor: '#7b5cff', edgeK: 1.2, noise: 0.25, dissolve: 0.7,
-          burnColor: '#d9ccff', burnK: 1.8, burnW: 0.06,
-          head: [[0, 0], [0.08, 1, 'outQuart'], [0.14, 1.05], [0.34, 1.7, 'inQuad']], alpha: [[0, 1], [0.3, 1], [0.36, 0]], tail: 0.7,
+          pos: at(HIT, 0, 0, 0.2), rot: [-0.9, 0.3, 0.6], scale: 1.15, from: 150, to: -35, rIn: 0.7, rOut: 1.5, torn: 0.15,
+          coreColor: '#ffffff', coreK: 1.4, edgeColor: '#7b5cff', edgeK: 1.2, noise: 0.25, dissolve: 0.7,
+          burnColor: '#d9ccff', burnK: 1.6, burnW: 0.06,
+          head: [[0, 0], [0.08, 1, 'outQuart'], [0.12, 1.05], [0.26, 1.7, 'inQuad']], alpha: [[0, 1], [0.2, 1], [0.27, 0]], tail: 0.7,
         }, 0);
+        // Secondary arcs: thinner, offset, a frame behind; they give the swing volume.
+        fx.slash({
+          pos: at(HIT, 0, 0, 0.2), rot: [-0.9, 0.3, 0.6], scale: 1.15, from: 140, to: -20, rIn: 1.58, rOut: 1.68, torn: 0.3,
+          coreColor: '#d9ccff', coreK: 1.1, edgeColor: '#6a4cff', edgeK: 1.0, noise: 0.35, dissolve: 0.8,
+          head: [[0, 0], [0.08, 1, 'outQuart'], [0.2, 1.6, 'inQuad']], alpha: [[0, 0.8], [0.14, 0.8], [0.2, 0]], tail: 0.5,
+        }, 0.017);
+        fx.slash({
+          pos: at(HIT, 0, 0, 0.2), rot: [-0.9, 0.3, 0.6], scale: 1.15, from: 160, to: -10, rIn: 0.55, rOut: 0.63, torn: 0.3,
+          coreColor: '#bfaeff', coreK: 1.0, edgeColor: '#4b2bd1', edgeK: 0.9, noise: 0.4, dissolve: 0.8,
+          head: [[0, 0], [0.09, 1, 'outQuart'], [0.2, 1.5, 'inQuad']], alpha: [[0, 0.7], [0.13, 0.7], [0.19, 0]], tail: 0.45,
+        }, 0.033);
         fx.flash({
           pos: HIT, size: 0.9, spikes: 4, spikeLen: 0.9, core: 0.2, sharp: 2, soft: 4, rot: 0.4,
           dir: HIT_DIR, aspect: 1.8, core_color: '#ffffff', coreK: 2.2, edge_color: '#8e7bff', edgeK: 1.1,
@@ -40,14 +51,14 @@ export default {
         }, 0.08);
         fx.burst({
           shape: 'glow', dir: 'cone', axis: HIT_DIR, angle: 80, count: 16, sizeDist: [2, 5, 9], origin: HIT, spawnR: 0.3,
-          speed: [0.6, 1.6], drag: 2, gravity: [0, 0.6, 0], curl: 0.5, delay: [0, 0.15], life: [0.6, 1.1],
+          speed: [0.6, 1.6], drag: 2, gravity: [0, 0.6, 0], curl: 0.5, delay: [0, 0.1], life: [0.4, 0.7],
           size: [0.18, 0.04], soft: 2, ramp: fx.ramp([[0, '#d5c9ff', 1.6], [1, '#5a37ff', 1.0]]),
         }, 0.08);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: HIT_DIR, angle: 70, count: 6, origin: HIT, spawnR: 0.2, speed: [0.6, 1.4], drag: 3,
-          gravity: [0, 0.5, 0], delay: [0, 0.05], life: [0.9, 1.3], size: [0.8, 1.6], sizePow: 0.35,
-          shadow: '#3a3060', noiseScale: 3, erode: 0.5, blend: 'alpha', order: -1, fade: [0.12, 0.45],
-          ramp: fx.ramp([[0, '#7a68b8', 1, 0.85], [1, '#3a3060', 1, 0]]),
+          gravity: [0, 0.5, 0], delay: [0, 0.05], life: [0.6, 0.75], size: [0.8, 1.6], sizePow: 0.35,
+          shadow: '#3a3060', noiseScale: 3, erode: 0.3, blend: 'alpha', order: -1, fade: [0.08, 0.75],
+          ramp: fx.ramp([[0, '#7a68b8', 1, 0.9], [0.7, '#5a4a90', 1, 0.85], [1, '#3a3060', 1, 0]]),
         }, 0.08);
         fx.target({
           dir: HIT_DIR, color: '#c9bbff', rimColor: '#8e7bff',
@@ -55,6 +66,7 @@ export default {
           rim: [[0, 0], [0.114, 1], [0.45, 0]],
           jolt: [[0, 0], [0.08, 0.04], [0.25, 0]],
           knock: [[0, 0], [0.08, 0], [0.13, 0.1, 'outQuad'], [0.6, 0, 'inOutSine']],
+          squash: [[0, 0], [0.08, 0], [0.11, 0.7], [0.3, 0, 'outQuad']],
         });
         fx.light({ pos: HIT_LIGHT, color: '#a48bff', distance: 4, intensity: [[0, 0], [0.08, 0], [0.09, 8], [0.5, 0, 'outQuad']] });
         fx.shake([[0, 0], [0.08, 0], [0.09, 0.07], [0.35, 0, 'outQuad']]);
@@ -73,16 +85,16 @@ export default {
         }, 0);
         fx.burst({
           shape: 'fire', dir: 'cone', axis: UP, angle: 60, count: 14, sizeDist: [3, 6, 3], origin: C, spawnR: 0.5,
-          speed: [2, 4], drag: 3.5, gravity: [0, 1.6, 0], life: [0.8, 1.2], size: [2.2, 3.4], sizePow: 0.5, stretch: 0.03,
+          speed: [5, 8], drag: 2.3, gravity: [0, 3, 0], life: [0.8, 1.2], size: [2.2, 3.4], sizePow: 0.5, aspectY: 1.35, upright: true,
           soft: 0.8, erode: 1, noiseScale: 3, vBias: 0.3, blend: 'premul', order: 3, fadeDist: 0.4,
           ramp: fx.ramp([[0, '#fffbe0', 2.6], [0.25, '#ffd34d', 1.5], [0.55, '#ff6a1f', 1.0], [0.85, '#b3261e', 0.8], [1, '#3b0f0f', 1]]),
         }, 0.02);
         fx.burst({
           shape: 'smoke', dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [3, 6, 3], origin: at(C, 0, 0.3, 0), spawnR: 0.5,
           speed: [1, 2], gravity: [0, 1.3, 0], drag: 2, delay: [0.1, 0.12], life: [2.2, 2.8], size: [1.4, 2.8], sizePow: 0.35,
-          shadow: '#7a6a80', noiseScale: 2.5, erode: 0.45, blend: 'alpha', order: 2, fade: [0.1, 0.5], fadeDist: 0.4,
-          fireGlow: { color: '#ff7a2a', intensity: 1.0, height: 2.0, k: fireK },
-          ramp: fx.ramp([[0, '#4a3a52', 1, 0.92], [1, '#2a2430', 1, 0]]),
+          shadow: '#7a6a80', noiseScale: 2.5, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
+          fireGlow: { color: '#ff7a2a', intensity: 1.0, height: 2.0, rim: 0.5, k: fireK },
+          ramp: fx.ramp([[0, '#4a3a52', 1, 0.92], [0.7, '#3a3042', 1, 0.88], [1, '#2a2430', 1, 0]]),
         }, 0.02);
         fx.burst({
           shape: 'streak', dir: 'hemi', count: 30, origin: C, speed: [6, 12], gravity: [0, -10, 0], drag: 1.2,

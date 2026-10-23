@@ -46,3 +46,5 @@ Reference points: Battlefield, Call of Duty, The Last of Us Part II, Red Dead Re
 - Sparks with no gravity, or gravity with no drag.
 - Explosions that are too fast for their size.
 - Missing ground interaction: dust, scorch, light on the ground.
+- Hitstop on an explosion: realism never freezes the world for a blast.
+- A scorch drawn as an alpha-black disc: darken the ground with a multiply decal and radial ejecta streaks, keep the albedo texture visible.

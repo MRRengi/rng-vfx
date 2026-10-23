@@ -41,6 +41,14 @@ Points (`gl_PointSize`) are simplest but cannot rotate or stretch along velocity
 4. **Shared uniforms.** One object holding the noise texture, depth texture, resolution, near / far, world-units-per-pixel and the key light direction in view space, spread into every effect material so they update once per frame. Note: `ShaderPass` clones its uniforms and cannot clone render-target textures; assign those after creating the pass.
 5. **Pixel mode:** a low-res drawing buffer with CSS `image-rendering: pixelated`, palette mapping at the end, flat floor.
 
+### Flipbooks
+
+A sheet is a grid of frames (4x4 at 256 px per cell is enough for most bodies). Pick the frame from the particle's normalized age, `frame = floor(age01 * frames)`, optionally stepped (no blend between frames, for hand-drawn sheets) or blended between two frames for smoke. Load sheets once, share the texture across materials, `colorSpace = SRGBColorSpace`, mipmaps on, clamp to edge, and leave half a texel of padding at cell borders or neighbours bleed in. Randomize the start frame and flip per particle so a burst of 20 does not play the same drawing in sync. The stand's `shape: 'sheet'` uses `sheet: { url, grid: [4, 4], frames: 16, stepped }`.
+
+### Ribbon trails from the closed form
+
+When motion is a closed-form function of time, a trail needs no history buffer: build a strip of N segments per particle and place segment i at `motion(age - i / N * trailTime)`. The ribbon bends with gravity and drag for free, stays deterministic and scrubbable, and costs one instanced draw. Expand each vertex across the screen-space tangent (perpendicular to the projected segment direction), keep the width at least 2 px, taper toward the tail, and make the head 2x brighter. Use them for the hero subset of sparks, not all of them.
+
 ## Determinism and review
 
 - Seed every random value (a small xorshift is enough) and drive everything from a single effect time. Then any frame can be rendered on demand: scrubbing, frame strips and automated checks become trivial.

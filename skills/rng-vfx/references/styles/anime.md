@@ -44,6 +44,9 @@ Reference points: hand-drawn TV and film effects animation (the "sakuga" traditi
 - Gradient-heavy textures or volumetric smoke.
 - Heavy bloom haze.
 - Uniform random particle size; anime bursts have a few big designed shapes and many tiny accents.
+- An impact frame that inverts the whole screen: mask it to the effect and the character (draw the effect alone into a mask target), not the sky.
+- Ramps sampled by age alone: in sakuga the colour bands follow the radius of the shape (white core, colour band, dark edge) as well as time.
+- Symmetric protrusions (ears on a puff cluster, a star with even spikes): bias spikes along the hit, jitter their angles, vary their lengths.
 
 ## Stand
 

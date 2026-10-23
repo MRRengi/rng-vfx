@@ -71,6 +71,10 @@ Defaults:
 - Overshoot (outBack, elastic) only in toon and playful styles.
 - Stagger secondary layers by 1 to 3 frames after the primary. Everything starting on the same frame looks mechanical.
 - Long tails are cheap and add a lot: lingering embers or a cooling decal extend the effect without hurting readability.
+- **Hitstop sits on contact, never on frame 0** of an effect that has nothing before it: freezing the first frame freezes nothing. Explosions in realism get no hitstop; elsewhere put it on the eruption, not on the anticipation.
+- **No empty tail.** The last element stays visible until at least 90% of the effect's duration. Trim the duration to the content, not the other way round.
+- **Opacity over life is faded in one place.** Either the ramp alpha or the `fade` window carries the fade-out, not both multiplied: a ramp going 0.9 -> 0 times a fade window going 1 -> 0 makes smoke transparent by mid-life. Keep ramp alpha nearly constant (about 0.9) and fade over the last quarter (`fade: [0.05, 0.75]`), erosion 0.3 or less.
+- **Spark travel budget.** With linear drag the distance a spark covers is `d = v0 (1 - e^(-k t)) / k`, at most `v0 / k`. Pick drag from the distance you want: impacts 1 - 3 m, explosions 3 - 6 m. Speeds of 10 m/s with drag 0.5 throw sparks 20 m away and off screen.
 
 ### Drawings per second (frame holds)
 
@@ -95,6 +99,8 @@ Hard minimums. An effect that misses one of these looks cheap regardless of how 
 - **Smoke has mass.** At its peak a smoke puff covers 55% or more of its quad with alpha 0.8 or more in the core, and differs from the background by at least 0.25 in grayscale value.
 - **Visible residue.** Dark layers (smoke, blood, ash) must read on dark backgrounds: give them a value floor, a rim, or light from the fire below. Check on a dark and a mid background.
 - **Ground contact.** No hard lines where quads cut the ground or a character (soft particles), and something touches the ground on big events (light pool, dust, scorch, cracks).
+- **Explosion silhouette.** The fireball is taller than wide (aspect 1.3 - 1.4, upright), sits on a stem that touches the ground, and its smoke column keeps that silhouette. A round symmetrical ball floating in the air reads as a balloon.
+- **Target reaction numbers.** Rim at most HDR 0.5 for 2 - 6 frames; squash to about 0.85 on the hit axis and 1.1 across it on contact, recover with ease-out over 6 - 15 frames. Toon gets a squash-stretch-squash bounce, realism a small one.
 
 ## Layer anatomy
 

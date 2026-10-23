@@ -29,6 +29,25 @@ export function ramp(stops, size = 256) {
   return tex;
 }
 
+// Sprite sheets are loaded once and shared. main.js preloads them at boot.
+const SHEETS = new Map();
+const loader = new THREE.TextureLoader();
+export function sheet(url) {
+  if (!SHEETS.has(url)) {
+    const t = loader.load(url);
+    t.colorSpace = THREE.SRGBColorSpace;
+    SHEETS.set(url, t);
+  }
+  return SHEETS.get(url);
+}
+export function preloadSheets(urls) {
+  return Promise.all(urls.map(u => new Promise(res => {
+    const t = loader.load(u, () => res(t), undefined, () => res(t));
+    t.colorSpace = THREE.SRGBColorSpace;
+    SHEETS.set(u, t);
+  })));
+}
+
 function blending(mat, mode) {
   if (mode === 'premul') {
     mat.blending = THREE.CustomBlending;
@@ -52,7 +71,7 @@ const v3 = a => new THREE.Vector3(...a);
 // Burst: GPU particles whose motion is solved in closed form (gravity + linear
 // drag), so any time can be rendered directly and the timeline can scrub.
 // ---------------------------------------------------------------------------
-const SHAPES = { glow: 0, puff: 1, streak: 2, smoke: 3, square: 4, sparkle: 5, shard: 6, fire: 7 };
+const SHAPES = { glow: 0, puff: 1, streak: 2, smoke: 3, square: 4, sparkle: 5, shard: 6, fire: 7, sheet: 8 };
 
 const BURST_VS = /* glsl */ `
 uniform float uTime;
@@ -74,6 +93,8 @@ uniform float uMinPx;
 uniform float uPxScale;
 uniform float uSizeIn;
 uniform vec2 uSnapRes;
+uniform float uAspectY;
+uniform float uUpright;
 attribute vec4 aSeed;
 attribute vec3 aDir;
 attribute float aScale;
@@ -97,6 +118,23 @@ vec3 curlAt(vec3 q) {
   float dpxdy = pot(q + dy) - pot(q - dy);
   return vec3(dpzdy - dpydz, dpxdz - dpzdx, dpydx - dpxdy) / (2.0 * e);
 }
+// Closed-form ballistic motion with linear drag, plus curl turbulence.
+void motion(float age, float life, out vec3 p, out vec3 vel) {
+  float spd = mix(uSpeed.x, uSpeed.y, aSeed.y);
+  vec3 v0 = aDir * spd;
+  float k = max(uDrag, 0.001);
+  float e = exp(-k * age);
+  p = uOrigin + aDir * uSpawnR * aSeed.z + v0 * (1.0 - e) / k
+    + uGravity * (age / k - (1.0 - e) / (k * k));
+  vel = v0 * e + uGravity * (1.0 - e) / k;
+  if (uCurl > 0.0) p += curlAt(p * 0.8 + aSeed.xyz * 9.0 + vec3(0.0, age * 0.3, 0.0)) * uCurl * pow(clamp(age / life, 0.0, 1.0), 1.2);
+  if (p.y < uGround) {
+    // Mirror below the ground: a cheap closed-form bounce with energy loss.
+    p.y = uGround + (uGround - p.y) * uBounce;
+    vel.y = -vel.y * uBounce;
+    vel.xz *= 0.6;
+  }
+}
 void main() {
   float delay = uDelay.x + aSeed.w * uDelay.y;
   float life = mix(uLife.x, uLife.y, aSeed.x);
@@ -106,25 +144,13 @@ void main() {
   vN = n;
   vSeed = aSeed;
   if (n < 0.0 || n > 1.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
-  float spd = mix(uSpeed.x, uSpeed.y, aSeed.y);
-  vec3 v0 = aDir * spd;
-  float k = max(uDrag, 0.001);
-  float e = exp(-k * age);
-  vec3 p = uOrigin + aDir * uSpawnR * aSeed.z + v0 * (1.0 - e) / k
-         + uGravity * (age / k - (1.0 - e) / (k * k));
-  vec3 vel = v0 * e + uGravity * (1.0 - e) / k;
-  if (uCurl > 0.0) p += curlAt(p * 0.8 + aSeed.xyz * 9.0 + vec3(0.0, age * 0.3, 0.0)) * uCurl * pow(n, 1.2);
+  vec3 p, vel;
+  motion(age, life, p, vel);
   float sz = mix(uSize.x, uSize.y, pow(clamp(n, 0.0, 1.0), uSizePow)) * aScale;
   if (uSizeIn > 0.0 && n < uSizeIn) {
     // Pop in with overshoot (outBack) over the first part of life.
     float x = n / uSizeIn - 1.0;
     sz *= 1.0 + 2.70158 * x * x * x + 1.70158 * x * x;
-  }
-  if (p.y < uGround) {
-    // Mirror below the ground: a cheap closed-form bounce with energy loss.
-    p.y = uGround + (uGround - p.y) * uBounce;
-    vel.y = -vel.y * uBounce;
-    vel.xz *= 0.6;
   }
   p.y = max(p.y, uGround + sz * 0.25);
   vHeight = p.y - uOrigin.y;
@@ -146,9 +172,9 @@ void main() {
     mv.xy += ax * (corner.y - 0.5) * len + perp * corner.x * wid;
   } else {
     sz = max(sz, minSz);
-    float r = aSeed.x * 6.2831 + uSpin * age * (aSeed.y - 0.5) * 2.0;
+    float r = (aSeed.x * 6.2831 + uSpin * age * (aSeed.y - 0.5) * 2.0) * (1.0 - uUpright);
     float c = cos(r), s = sin(r);
-    mv.xy += mat2(c, s, -s, c) * corner * sz;
+    mv.xy += mat2(c, s, -s, c) * (corner * vec2(1.0, uAspectY)) * sz;
   }
   gl_Position = projectionMatrix * mv;
   if (uSnapRes.x > 0.0) {
@@ -178,7 +204,14 @@ uniform float uVBias;
 uniform vec3 uFireColor;
 uniform float uFireK;
 uniform float uFireH;
+uniform float uFireRim;
 uniform vec3 uLightView;
+uniform float uHoleScale;
+uniform float uRampShade;
+uniform sampler2D uSheet;
+uniform vec2 uGrid;
+uniform float uFrames;
+uniform float uStepped;
 varying vec2 vUv;
 varying float vN;
 varying vec4 vSeed;
@@ -187,6 +220,21 @@ varying float vHeight;
 ${NOISE}
 ${TEXNOISE}
 ${SOFT}
+float bayer4(vec2 p) {
+  vec2 q = mod(floor(p), 4.0);
+  float i = q.x + q.y * 4.0;
+  // 4x4 Bayer matrix, row major.
+  float m[16];
+  m[0]=0.;m[1]=8.;m[2]=2.;m[3]=10.;m[4]=12.;m[5]=4.;m[6]=14.;m[7]=6.;
+  m[8]=3.;m[9]=11.;m[10]=1.;m[11]=9.;m[12]=15.;m[13]=7.;m[14]=13.;m[15]=5.;
+  for (int k = 0; k < 16; k++) if (float(k) == i) return (m[k] + 0.5) / 16.0;
+  return 0.5;
+}
+vec4 sheetFrame(float f) {
+  float cols = uGrid.x;
+  vec2 cell = vec2(mod(f, cols), uGrid.y - 1.0 - floor(f / cols));
+  return texture2D(uSheet, (cell + vUv) / uGrid);
+}
 void main() {
   vec2 c = vUv - 0.5;
   float r = length(c) * 2.0;
@@ -202,7 +250,7 @@ void main() {
   float lobes = tn(vUv * 0.18 * uNoiseScale + vSeed.xy).g;
   float m = 1.0 - r + (lobes - 0.5) * 0.5;
   if (m <= 0.0) discard;
-  float holes = tn(vUv * 0.3 * uNoiseScale + vSeed.zw).g;
+  float holes = tn(vUv * uHoleScale + vSeed.zw).g;
   float thr = uErode * smoothstep(0.35, 1.0, vN);
   if (holes < thr) discard;
   vec2 q = c * 2.0;
@@ -210,6 +258,10 @@ void main() {
   vec3 N = normalize(sN + 1.2 * vCenterView);
   float sh = clamp(dot(N, uLightView) * 0.5 + 0.5, 0.0, 1.0);
   float band = clamp(floor(sh * (uBands + 1.0)) / max(uBands, 1.0), 0.0, 1.0);
+  // The shadow side and the rim sit further down the ramp than the lit side,
+  // so a mass keeps a hot core and a darker outer band instead of changing
+  // colour all at once.
+  col = texture2D(uRamp, vec2(clamp(vN * (1.0 - 0.3 * uRampShade) + uRampShade * ((1.0 - band) * 0.35 + r * 0.2), 0.0, 1.0), 0.5));
   col.rgb = mix(col.rgb * uShadow, col.rgb, band);
   if (m < uOutline || holes < thr + uOutline * 0.6) col.rgb = uOutlineColor;
   a = 1.0;
@@ -233,6 +285,8 @@ void main() {
   float lit = clamp(0.7 + (f - f2) * 6.0, 0.15, 1.1);
   col.rgb *= mix(uShadow, vec3(1.0), lit);
   col.rgb += uFireColor * uFireK * (1.0 - smoothstep(0.0, uFireH, vHeight)) * (1.0 - vN * 0.6);
+  // Hot rim at the density edge where the fire is behind: an edge, not a fill.
+  col.rgb += uFireColor * uFireK * uFireRim * pow(1.0 - dens, 3.0) * step(0.02, dens);
   a = dens;
 #elif SHAPE == 4
   // Hard pixel square.
@@ -269,6 +323,19 @@ void main() {
   a = clamp(heat * 3.0, 0.0, 1.0);
   // Hot parts glow through, cooled parts occlude like smoke.
   occl = mix(0.35, 1.0, smoothstep(0.2, 0.9, 1.0 - clamp(heat, 0.0, 1.0)));
+#elif SHAPE == 8
+  // Flipbook: a drawn or simulated sprite sheet. Stepped (anime, pixel) or
+  // blended between frames (realism). Grey sheets take colour from the ramp.
+  float fr = clamp(vN, 0.0, 0.9999) * uFrames;
+  vec4 s0 = sheetFrame(floor(fr));
+  vec4 s1 = sheetFrame(min(floor(fr) + 1.0, uFrames - 1.0));
+  vec4 sh = uStepped > 0.5 ? s0 : mix(s0, s1, fract(fr));
+  col.rgb *= sh.rgb;
+  a = sh.a;
+#endif
+#ifdef DITHER
+  // Pixel dissolve: ordered dither instead of smooth alpha.
+  if (bayer4(gl_FragCoord.xy) > 1.0 - smoothstep(0.6, 1.0, vN)) discard;
 #endif
   float fade = smoothstep(0.0, uFade.x, vN) * (1.0 - smoothstep(uFade.y, 1.0, vN));
   float alpha = col.a * a * fade * uOpacity * softFade(uFadeDist);
@@ -346,6 +413,7 @@ export function burst(o) {
   const fireK = curve(o.fireGlow?.k || [[0, 0]]);
   const defines = { SHAPE: SHAPES[o.shape || 'glow'] };
   if (o.blend === 'premul') defines.PREMUL = 1;
+  if (o.dither) defines.DITHER = 1;
 
   const mat = new THREE.ShaderMaterial({
     defines,
@@ -369,6 +437,14 @@ export function burst(o) {
       uBounce: { value: o.bounce ?? 0 },
       uMinPx: { value: o.minPx ?? 2 },
       uSizeIn: { value: o.sizeIn ?? 0 },
+      uAspectY: { value: o.aspectY ?? 1 },
+      uUpright: { value: o.upright ? 1 : 0 },
+      uHoleScale: { value: o.holeScale ?? 0.3 * (o.noiseScale ?? 4) },
+      uRampShade: { value: o.rampShade ?? (o.shape === 'puff' ? 1 : 0) },
+      uSheet: { value: o.sheet ? sheet(o.sheet.url) : null },
+      uGrid: { value: new THREE.Vector2(...(o.sheet?.grid || [1, 1])) },
+      uFrames: { value: o.sheet?.frames ?? 1 },
+      uStepped: { value: o.sheet?.stepped ? 1 : 0 },
       uRamp: { value: o.ramp },
       uOpacity: { value: o.opacity ?? 1 },
       uFade: { value: new THREE.Vector2(Math.max(0.001, fade[0]), Math.min(0.999, fade[1])) },
@@ -385,6 +461,7 @@ export function burst(o) {
       uFireColor: { value: color3(o.fireGlow?.color || '#000000', o.fireGlow?.intensity ?? 1) },
       uFireK: { value: 0 },
       uFireH: { value: o.fireGlow?.height ?? 1.5 },
+      uFireRim: { value: o.fireGlow?.rim ?? 0 },
     },
     vertexShader: BURST_VS,
     fragmentShader: BURST_FS,
@@ -404,6 +481,134 @@ export function burst(o) {
       mat.uniforms.uFireK.value = fireK(tAbs);
     },
     dispose() { geo.dispose(); base.dispose(); mat.dispose(); },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Trail: a ribbon per particle with no history buffer. Because motion is a
+// closed-form function of age, segment i sits at p(age - i * dt), so trails
+// bend under gravity and drag exactly like their particle.
+// ---------------------------------------------------------------------------
+const TRAIL_VS = BURST_VS.slice(0, BURST_VS.lastIndexOf('void main()')) + /* glsl */ `
+uniform float uTrailTime;
+uniform float uWidth;
+uniform float uTaper;
+varying float vSegT;
+void main() {
+  float delay = uDelay.x + aSeed.w * uDelay.y;
+  float life = mix(uLife.x, uLife.y, aSeed.x);
+  float age = uTime - delay;
+  float n = age / life;
+  vN = n;
+  vSeed = aSeed;
+  float segT = position.y;
+  vSegT = segT;
+  vUv = vec2(position.x + 0.5, segT);
+  vCenterView = vec3(0.0, 0.0, 1.0);
+  vHeight = 0.0;
+  if (n < 0.0 || n > 1.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+  float a2 = max(age - segT * uTrailTime, 0.0);
+  vec3 p, vel, pB, velB;
+  motion(a2, life, p, vel);
+  motion(max(a2 - 0.012, 0.0), life, pB, velB);
+  p.y = max(p.y, uGround);
+  pB.y = max(pB.y, uGround);
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  vec4 mvB = modelViewMatrix * vec4(pB, 1.0);
+  vec2 d = mv.xy - mvB.xy;
+  d = length(d) > 0.00001 ? normalize(d) : vec2(0.0, 1.0);
+  vec2 perp = vec2(d.y, -d.x);
+  float worldPerPx = -mv.z * uPxScale;
+  float w = max(uWidth * aScale * pow(1.0 - segT, uTaper), uMinPx * worldPerPx * (1.0 - segT));
+  mv.xy += perp * position.x * w;
+  gl_Position = projectionMatrix * mv;
+}`;
+
+const TRAIL_FS = /* glsl */ `
+uniform sampler2D uRamp;
+uniform float uOpacity;
+uniform vec2 uFade;
+uniform float uIntensity;
+uniform float uSoft;
+varying vec2 vUv;
+varying float vN;
+varying float vSegT;
+void main() {
+  vec4 col = texture2D(uRamp, vec2(clamp(vN + vSegT * 0.25, 0.0, 1.0), 0.5));
+  float across = 1.0 - abs(vUv.x - 0.5) * 2.0;
+  float a = pow(clamp(across, 0.0, 1.0), uSoft) * pow(1.0 - vSegT, 1.3);
+  col.rgb *= 1.0 + 1.2 * (1.0 - smoothstep(0.0, 0.15, vSegT));
+  float fade = smoothstep(0.0, uFade.x, vN) * (1.0 - smoothstep(uFade.y, 1.0, vN));
+  float alpha = col.a * a * fade * uOpacity;
+  if (alpha < 0.002) discard;
+  gl_FragColor = vec4(col.rgb * uIntensity, alpha);
+}`;
+
+export function trail(o) {
+  const count = o.count ?? 20;
+  const segs = o.segments ?? 10;
+  const r = rng(o.seed ?? 7);
+  const pos = [], idx = [];
+  for (let i = 0; i <= segs; i++) {
+    pos.push(-0.5, i / segs, 0, 0.5, i / segs, 0);
+    if (i < segs) { const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+  }
+  const geo = new THREE.InstancedBufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(new Array((segs + 1) * 4).fill(0), 2));
+  geo.setIndex(idx);
+  const seeds = new Float32Array(count * 4);
+  for (let i = 0; i < seeds.length; i++) seeds[i] = r();
+  geo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 4));
+  geo.setAttribute('aDir', new THREE.InstancedBufferAttribute(directions(count, o.dir || 'sphere', r, o), 3));
+  geo.setAttribute('aScale', new THREE.InstancedBufferAttribute(scales(count, r, o), 1));
+  geo.instanceCount = count;
+  const fade = o.fade || [0, 0.8];
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      ...G,
+      uTime: { value: 0 },
+      uDelay: { value: new THREE.Vector2(...(o.delay || [0, 0])) },
+      uLife: { value: new THREE.Vector2(...(o.life || [0.4, 0.8])) },
+      uSpeed: { value: new THREE.Vector2(...(o.speed || [1, 3])) },
+      uGravity: { value: v3(o.gravity || [0, 0, 0]) },
+      uDrag: { value: o.drag ?? 0.001 },
+      uSize: { value: new THREE.Vector2(0, 0) },
+      uSizePow: { value: 1 },
+      uStretch: { value: 0 },
+      uSpawnR: { value: o.spawnR ?? 0 },
+      uOrigin: { value: v3(o.origin || [0, 1, 0]) },
+      uCurl: { value: o.curl ?? 0 },
+      uSpin: { value: 0 },
+      uGround: { value: o.ground ?? -100 },
+      uBounce: { value: o.bounce ?? 0 },
+      uMinPx: { value: o.minPx ?? 2 },
+      uSizeIn: { value: 0 },
+      uAspectY: { value: 1 },
+      uUpright: { value: 0 },
+      uTrailTime: { value: o.trailTime ?? 0.12 },
+      uWidth: { value: o.width ?? 0.04 },
+      uTaper: { value: o.taper ?? 1 },
+      uRamp: { value: o.ramp },
+      uOpacity: { value: o.opacity ?? 1 },
+      uFade: { value: new THREE.Vector2(Math.max(0.001, fade[0]), Math.min(0.999, fade[1])) },
+      uIntensity: { value: o.intensity ?? 1 },
+      uSoft: { value: o.soft ?? 1 },
+    },
+    vertexShader: TRAIL_VS,
+    fragmentShader: TRAIL_FS,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  blending(mat, o.blend || 'add');
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.frustumCulled = false;
+  mesh.renderOrder = o.order ?? 0;
+  return {
+    object: mesh,
+    update(t) { mat.uniforms.uTime.value = t; },
+    dispose() { geo.dispose(); mat.dispose(); },
   };
 }
 
@@ -441,6 +646,8 @@ uniform float uHard;
 uniform float uSoft;
 uniform float uJitter;
 uniform float uRound;
+uniform float uAngJit;
+uniform float uBias;
 uniform vec3 uCoreColor;
 uniform vec3 uEdgeColor;
 uniform float uSeed;
@@ -449,7 +656,11 @@ ${NOISE}
 void main() {
   vec2 c = (vUv - 0.5) * 2.0 / max(uScale, 0.0001);
   float r = length(c);
-  float ang = atan(c.y, c.x) + uRot;
+  float ang0 = atan(c.y, c.x);
+  float ang = ang0 + uRot;
+  // Angular jitter: spikes are not evenly spaced in a designed spark.
+  float slot = floor((ang + 3.1416) / 6.2832 * uSpikes);
+  ang += (hash12(vec2(slot, uSeed + 1.7)) - 0.5) * uAngJit;
   // Pointed spikes from a triangle wave (straight-edged star at sharp 1,
   // concave anime spikes at 2-4); rounded tips from a cosine for toon.
   float tri = 1.0 - abs(fract(ang / 6.2832 * uSpikes + 0.5) - 0.5) * 2.0;
@@ -457,6 +668,8 @@ void main() {
   float idx = floor((ang + 3.1416) / 6.2832 * uSpikes + 0.5);
   float jit = 1.0 + (hash12(vec2(idx, uSeed)) - 0.5) * uJitter;
   float rad = uCore + uSpikeLen * sp * max(jit, 0.2);
+  // Longest spikes point along the hit (local +x is the hit direction).
+  rad *= 1.0 + uBias * pow(max(0.0, cos(ang0)), 4.0);
   float s = 1.0 - r / max(rad, 0.0001);
   float a = uHard > 0.5 ? step(0.0, s) : pow(clamp(s, 0.0, 1.0), uSoft);
   vec3 col = mix(uEdgeColor, uCoreColor, uHard > 0.5 ? step(0.45, s) : smoothstep(0.0, 0.6, s));
@@ -484,6 +697,8 @@ export function flash(o) {
       uSoft: { value: o.soft ?? 4 },
       uJitter: { value: o.jitter ?? 0 },
       uRound: { value: o.round ? 1 : 0 },
+      uAngJit: { value: o.angJitter ?? 0 },
+      uBias: { value: o.bias ?? 0 },
       uSeed: { value: o.seed ?? 3 },
       uCoreColor: { value: color3(o.core_color || '#ffffff', o.coreK ?? 2.5) },
       uEdgeColor: { value: color3(o.edge_color || '#66ccff', o.edgeK ?? 1.2) },
@@ -500,12 +715,14 @@ export function flash(o) {
   mesh.renderOrder = o.order ?? 8;
   const scale = curve(o.scaleCurve || [[0, 0], [0.05, 1, 'outExpo'], [0.2, 0.6]]);
   const alpha = curve(o.alphaCurve || [[0, 1], [0.05, 1], [0.1, 0]]);
+  const aspect = o.aspectCurve ? curve(o.aspectCurve) : null;
   const rotSpeed = o.rotSpeed ?? 0;
   return {
     object: mesh,
     update(t) {
       mat.uniforms.uScale.value = scale(t);
       mat.uniforms.uAlpha.value = alpha(t);
+      if (aspect) mat.uniforms.uAspect.value = aspect(t);
       mat.uniforms.uRot.value = (o.rot ?? 0) + rotSpeed * t;
       if (o.redraw) {
         // A new designed drawing each held frame: new spike lengths, count and angle.
@@ -665,24 +882,28 @@ uniform vec3 uRim;
 uniform float uRimW;
 uniform vec3 uBurn;
 uniform float uBurnW;
+uniform float uTorn;
 varying vec2 vUv;
 ${TEXNOISE}
 void main() {
   float tl = (uHead - vUv.x) / max(uTail, 0.0001);
   if (tl < 0.0 || tl > 1.0) discard;
-  float ends = smoothstep(0.0, 0.08, vUv.x) * (1.0 - smoothstep(0.85, 1.0, vUv.x));
+  // Both ends taper to points.
+  float ends = pow(sin(3.1416 * clamp(vUv.x, 0.0, 1.0)), 0.7);
   float w = uThick * pow(1.0 - tl, 0.6) * ends;
   float nz = tn(vec2(vUv.x * 1.5 - uHead * 0.4, vUv.y * 0.35) + uSeed * 0.21).b;
   float dr = abs(vUv.y - 0.5) * 2.0 + (nz - 0.5) * uWobble;
-  float s = 1.0 - dr / max(w, 0.0001);
+  float torn = uTorn * tn(vUv * vec2(6.0, 1.0) + uSeed * 0.11).a;
+  float s = 1.0 - (dr + torn) / max(w, 0.0001);
   if (s <= 0.0) discard;
+  float rimW = uRimW * (0.5 + tn(vUv * vec2(4.0, 0.5) + uSeed * 0.07).a);
   float tear = tn(vec2(vUv.x * 2.5, vUv.y * 0.6) + uSeed * 0.37).a;
   float thr = uDissolve * tl;
   if (tear < thr) discard;
   float a = uHard > 0.5 ? 1.0 : smoothstep(0.0, 0.35, s);
   float k = uHard > 0.5 ? step(0.55, s) * step(tl, 0.75) : smoothstep(0.2, 0.9, s) * (1.0 - tl);
   vec3 col = mix(uEdge, uCore, k);
-  if (s < uRimW) col = uRim;
+  if (s < rimW) col = uRim;
   if (uBurnW > 0.0 && tear < thr + uBurnW) col = uBurn;
   float alpha = a * uAlpha;
   if (alpha < 0.002) discard;
@@ -730,6 +951,7 @@ export function slash(o) {
       uRimW: { value: o.rimW ?? 0 },
       uBurn: { value: color3(o.burnColor || '#ffffff', o.burnK ?? 2) },
       uBurnW: { value: o.burnW ?? 0 },
+      uTorn: { value: o.torn ?? 0 },
     },
     vertexShader: PLANE_VS,
     fragmentShader: SLASH_FS,
@@ -767,6 +989,7 @@ uniform float uCracks;
 uniform float uReveal;
 uniform float uScorch;
 uniform float uSplat;
+uniform float uStrength;
 uniform vec3 uDark;
 uniform vec3 uHot;
 varying vec2 vUv;
@@ -818,19 +1041,27 @@ void main() {
          * (0.55 + tn(c * 0.6).r * 0.9) * uCracks;
     // Prune some borders so it branches instead of forming a web.
     vein *= step(0.35, hash12(floor(pp + vec2(0.0, uSeed)) + 3.7));
-    cellCool = clamp(uGlow * 1.6 - vc.y * 0.6, 0.0, 1.0);
+    cellCool = clamp(uGlow * 1.6 - vc.y * 1.2, 0.0, 1.0);
   }
-  float molten = (1.0 - smoothstep(0.0, 0.3, r)) * uGlow * uCracks;
+  float molten = (1.0 - smoothstep(0.0, 0.15, r)) * uGlow * uCracks;
   if (uSplat > 0.0) {
     // Splat: thresholded warped blob plus satellite drops, hard edged.
     float blob = tn(c * 0.35 + uSeed * 0.17).b * (1.25 - r * 1.15);
-    float sat = tn(c * 1.3 + uSeed * 0.23).g * (1.0 - smoothstep(0.5, 1.0, r));
-    float m = step(0.62, max(blob, sat * 0.85)) * reveal;
+    float sat = tn(c * 0.6 + uSeed * 0.23).g * (1.0 - smoothstep(0.5, 1.0, r));
+    float m = step(0.5, max(blob, sat * 0.85)) * reveal;
     if (m < 0.5) discard;
     gl_FragColor = vec4(uDark * (0.8 + 0.4 * tn(c * 2.0).r), uAlpha);
     return;
   }
-  vec3 col = uDark + uHot * (vein * 3.0 * cellCool + molten * 2.0 + scorch * 0.3 * uGlow * (1.0 - r));
+#ifdef MULTIPLY
+  // Scorch as darkening, with radial ejecta rays: never an alpha-black hole.
+  float ang = atan(c.y, c.x) / 6.2832 + 0.5;
+  float rays = tn(vec2(ang * 8.0, r * 0.5 + uSeed)).r;
+  float dark = clamp((scorch * 0.8 + rays * scorch * 0.5) * uAlpha * reveal, 0.0, 1.0) * uStrength;
+  gl_FragColor = vec4(mix(vec3(1.0), uDark, dark) + uHot * scorch * uGlow * (1.0 - r) * 0.6, 1.0);
+  return;
+#endif
+  vec3 col = uDark + uHot * (vein * 3.0 * cellCool + molten * 2.0 + scorch * 0.1 * uGlow * (1.0 - r));
   float a = max(max(scorch * 0.9, vein * max(cellCool, 0.25)), molten) * uAlpha * reveal;
   if (a < 0.002) discard;
   gl_FragColor = vec4(col, a);
@@ -843,16 +1074,19 @@ export function decal(o) {
       uNoise: G.uNoise,
       uAlpha: { value: 0 }, uGlow: { value: 0 }, uSeed: { value: o.seed ?? 4 },
       uCracks: { value: o.cracks ?? 0 }, uReveal: { value: 0 }, uScorch: { value: o.scorch ?? 1 }, uSplat: { value: o.splat ? 1 : 0 },
+      uStrength: { value: o.strength ?? 0.6 },
       uDark: { value: color3(o.dark || '#120c0a', 1) },
       uHot: { value: color3(o.hot || '#ff5a1f', o.hotK ?? 2) },
     },
     vertexShader: PLANE_VS,
     fragmentShader: DECAL_FS,
+    defines: o.multiply ? { MULTIPLY: 1 } : {},
     transparent: true,
     depthWrite: false,
     polygonOffset: true,
     polygonOffsetFactor: -2,
   });
+  if (o.multiply) { mat.blending = THREE.MultiplyBlending; mat.premultipliedAlpha = true; }
   const mesh = new THREE.Mesh(geo, mat);
   mesh.rotation.x = -Math.PI / 2;
   mesh.position.set(...(o.pos || [0, 0.011, 0]));

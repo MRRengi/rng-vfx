@@ -40,3 +40,5 @@ Reference points: Dead Cells, Celeste, Hyper Light Drifter, Enter the Gungeon, B
 - Rotating sprites by arbitrary angles (pixels become uneven).
 - Bloom haze that blurs the grid.
 - Too many colors.
+- A palette with no neutral greys: smoke snaps to the nearest saturated colour (often purple or brown). Include 3 - 4 neutrals.
+- Shadow and light colours one step apart: they merge after quantization. Keep 2 steps of value between them.

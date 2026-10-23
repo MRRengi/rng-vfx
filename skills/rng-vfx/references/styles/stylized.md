@@ -40,3 +40,5 @@ Reference points: League of Legends (Riot published its VFX style guide publicly
 - Noise textures that are too fine; at gameplay distance fine noise becomes gray mush. Use big, readable noise features.
 - Area of effect drawn larger or smaller than the hitbox.
 - Smoke covering the character or the important part of the effect.
+- A slash that floats beside the target: it crosses the target's body, with one or two thinner secondary arcs a frame behind for volume.
+- Cores above HDR 1.5: bloom turns them into haze and the shape is lost.

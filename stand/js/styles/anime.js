@@ -28,7 +28,7 @@ export default {
         fx.impactFrame([[0, 0], [T - 0.001, 0], [T, 1], [T + 2 * D - 0.001, 1], [T + 2 * D, 0]]);
         fx.flash({
           pos: HIT, size: 1.6, hard: true, spikes: 5, spikeLen: 1.35, core: 0.16, sharp: 2.2, jitter: 1.0,
-          dir: HIT_DIR, aspect: 1.6, redraw: 12, core_color: '#ffffff', coreK: 1.1, edge_color: '#3fd8ff', edgeK: 1.0,
+          dir: HIT_DIR, aspect: 1.6, redraw: 12, bias: 0.6, angJitter: 0.35, depthTest: true, core_color: '#ffffff', coreK: 1.1, edge_color: '#3fd8ff', edgeK: 1.0,
           scaleCurve: [[0, 1], [4 * D, 1.08], [5 * D, 0.45]],
           alphaCurve: [[0, 1], [5 * D, 1], [5 * D + 0.001, 0]],
         }, T);
@@ -51,7 +51,7 @@ export default {
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: HIT_DIR, angle: 75, count: 12, sizeDist: [2, 4, 6], origin: HIT, spawnR: 0.15,
           speed: [1.5, 3.2], drag: 5, life: [6 * D, 9 * D], size: [0.55, 1.0], sizePow: 0.4, sizeIn: 0.15, bands: 2, outline: 0,
-          shadow: '#7088b8', erode: 1, noiseScale: 2.5, blend: 'alpha', fadeDist: 0.05,
+          shadow: '#4a5c90', holeScale: 1.1, erode: 1, noiseScale: 2.5, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#ffffff', 1.0], [1, '#dce8f2', 1]]),
         }, T + D);
         fx.target({
@@ -60,13 +60,14 @@ export default {
           rim: [[0, 0], [T + 3 * D, 1], [T + 7 * D, 0]],
           jolt: [[0, 0], [T, 0.05], [T + 4 * D, 0]],
           knock: [[0, 0], [T, 0], [T + D, 0.14, 'outQuad'], [T + 9 * D, 0, 'inOutSine']],
+          squash: [[0, 0], [T, 0], [T + D, 1], [T + 4 * D, 0]],
         });
         fx.light({ pos: HIT_LIGHT, color: '#7fe4ff', distance: 4, intensity: [[0, 0], [T, 0], [T + 0.001, 8], [T + 5 * D, 0]] });
         fx.shake([[0, 0], [T, 0], [T + 0.001, 0.1], [T + 5 * D, 0, 'outQuad']]);
       },
     },
     explosion: {
-      duration: 2.8,
+      duration: 1.9,
       contact: 2 * D,
       build(fx) {
         const T = 2 * D;
@@ -81,31 +82,31 @@ export default {
         fx.impactFrame([[0, 0], [T - 0.001, 0], [T, 1], [T + 2 * D - 0.001, 1], [T + 2 * D, 0]]);
         fx.flash({
           pos: C, size: 2.4, hard: true, spikes: 5, spikeLen: 1.4, core: 0.3, sharp: 2.0, jitter: 0.8,
-          dir: UP, aspect: 1.8, redraw: 12, core_color: '#fffbe6', coreK: 1.15, edge_color: '#ffb12a', edgeK: 1.0,
+          dir: UP, aspect: 1.8, redraw: 12, angJitter: 0.35, core_color: '#fffbe6', coreK: 1.15, edge_color: '#ffb12a', edgeK: 1.0,
           scaleCurve: [[0, 0.8], [3 * D, 1.1], [4 * D, 0.3]], alphaCurve: [[0, 1], [4 * D, 1], [4 * D + 0.001, 0]],
         }, T);
         // Stem: the fireball connects to the ground.
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 15, count: 5, origin: at(BLAST, 0, 0.1, 0), spawnR: 0.2,
           speed: [4, 6], drag: 4, life: [7 * D, 10 * D], size: [0.8, 1.2], sizeIn: 0.12, bands: 2, outline: 0, order: 2,
-          shadow: '#a8402c', erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
+          shadow: '#7a2418', holeScale: 1.1, erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff2c0', 1.2], [0.4, '#ffb02a', 1.0], [1, '#7a2a1a', 0.8]]),
         }, T);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 55, count: 16, sizeDist: [3, 5, 8], origin: C, spawnR: 0.4,
           speed: [3, 6], drag: 4, life: [8 * D, 13 * D], size: [1.3, 2.3], sizePow: 0.35, sizeIn: 0.1, bands: 2, outline: 0, order: 3,
-          shadow: '#a8402c', erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
+          shadow: '#7a2418', holeScale: 1.1, erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff7d6', 1.3], [0.25, '#ffd23f', 1.1], [0.55, '#ff6a1a', 1.0], [1, '#5a1e1e', 0.8]]),
         }, T);
         fx.burst({
-          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, count: 6, origin: C, spawnR: 0.3, speed: [6, 9], drag: 3,
-          life: [6 * D, 9 * D], size: [0.6, 0.3], stretch: 0.12, bands: 2, outline: 0, order: 4,
-          shadow: '#a8402c', erode: 1, noiseScale: 2, blend: 'alpha', fadeDist: 0.05,
+          shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 60, origin: C, spawnR: 0.3, speed: [6, 9], drag: 3,
+          count: 3, life: [6 * D, 9 * D], size: [0.6, 0.3], stretch: 0.05, bands: 2, outline: 0, order: 4,
+          shadow: '#7a2418', holeScale: 1.1, erode: 1, noiseScale: 2, blend: 'alpha', fadeDist: 0.05,
           ramp: fx.ramp([[0, '#fff2c0', 1.2], [0.5, '#ffb02a', 1.0], [1, '#c2401a', 0.9]]),
         }, T);
         fx.burst({
           shape: 'puff', cel: true, dir: 'cone', axis: UP, angle: 45, count: 12, sizeDist: [2, 4, 6], origin: at(BLAST, 0, 0.9, 0),
-          spawnR: 0.6, speed: [1.5, 2.6], gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [12 * D, 18 * D],
+          spawnR: 0.6, speed: [1.5, 2.6], gravity: [0, 2, 0], drag: 2, delay: [0, 2 * D], life: [10 * D, 14 * D],
           size: [1.2, 2.1], sizePow: 0.5, sizeIn: 0.1, bands: 1, outline: 0, order: 0, shadow: '#8a5070',
           erode: 1, noiseScale: 2.2, blend: 'alpha', fadeDist: 0.05,
           fireGlow: { color: '#e07a50', intensity: 0.6, height: 0.8, k: [[0, 1], [1.5, 0]] },
