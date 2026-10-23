@@ -14,8 +14,8 @@ Checks (thresholds from numbers.md / fundamentals.md, override with flags):
   straight-edges  long straight segments on the effect mask's outline (quad or strip cuts)
   size            effect height on screen at peak >= --min-px
   white-clip      share of the effect mask clipped to white at peak <= 10%
-  lum-rise        mean frame luminance at peak vs the frame before contact <= +25%
-  hue-at-peak     hottest 10% of effect pixels keep saturation >= 0.35 (and --hue +/- 15 deg)
+  haze            brightness rise outside the effect at peak vs the frame before contact <= +25%
+  hue-at-peak     the hot body (60-90th brightness percentile) keeps saturation >= 0.35 (and --hue +/- 15 deg)
   static-hold     no frame-to-frame mask change under 1% for more than --hold frames
   empty-tail      the mask still has content at 90% of the duration
 Exit code 1 when any check fails.
@@ -52,6 +52,22 @@ def effect_mask(fx, base, thr=0.06):
     return m.astype(bool)
 
 
+def has_corner(pts, idx, d, k=10, min_deg=35):
+    """A cut ends in a corner: the outline turns sharply right after the straight run.
+    A long gentle arc (a slash, a big puff) turns smoothly and is not a cut."""
+    n = len(pts)
+    for end, sign in ((idx[0], -1), (idx[-1], 1)):
+        j = (end + sign * k) % n
+        v = pts[j] - pts[end]
+        nv = np.linalg.norm(v)
+        if nv < 1e-6:
+            continue
+        cosang = abs(float(np.dot(v / nv, d)))
+        if np.degrees(np.arccos(min(1.0, cosang))) > min_deg:
+            return True
+    return False
+
+
 def straight_edges(mask, min_frac=0.2, min_px=40, max_ptp=1.6):
     """Dead-straight runs on the mask's outer contour: long (>= min_px and >= min_frac of
     the shape's size) whose points stay within max_ptp pixels of a line (pixel stair-steps
@@ -83,7 +99,7 @@ def straight_edges(mask, min_frac=0.2, min_px=40, max_ptp=1.6):
             u, sv, vt = np.linalg.svd(q - mu, full_matrices=False)
             dist = (q - mu) @ vt[1]
             span = np.linalg.norm(q[-1] - q[0])
-            if np.ptp(dist) < max_ptp and span > 0.9 * L:
+            if np.ptp(dist) < max_ptp and span > 0.9 * L and has_corner(pts, idx, vt[0]):
                 found.append((int(q[0][0]), int(q[0][1]), int(q[-1][0]), int(q[-1][1]), round(span / max(w, h), 3)))
                 i += L
             else:
@@ -117,6 +133,8 @@ def run_checks(fx_frames, base_frames, times, contact, duration, a):
     # straight edges, on every frame with content
     hits = []
     for t, m in zip(times, masks):
+        if m.mean() > 0.4:  # full-screen event (impact frame, screen flash): not a shape
+            continue
         for seg in straight_edges(m):
             hits.append({"t": round(t, 3), "seg": seg})
     res["straight-edges"] = {"pass": len(hits) == 0, "found": hits[:12], "count": len(hits)}
@@ -139,16 +157,27 @@ def run_checks(fx_frames, base_frames, times, contact, duration, a):
     res["white-clip"] = {"pass": share <= 0.10, "share": round(share, 3)}
 
     # luminance rise: peak vs last frame before contact
+    # Haze test: brightness rise OUTSIDE the effect (bloom spill, glow haze), peak vs the
+    # frame before contact. The effect's own pixels are allowed to be bright.
     pre = max([i for i, t in enumerate(times) if t < contact] or [0])
-    l0 = float(luminance(fx_frames[pre]).mean())
-    l1 = float(luminance(fx_frames[peak]).mean())
+    outside = ~m
+    if cv2 is not None:
+        outside = ~cv2.dilate(m.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    if outside.sum() > 100:
+        l0 = float(luminance(fx_frames[pre])[outside].mean())
+        l1 = float(luminance(fx_frames[peak])[outside].mean())
+    else:
+        l0 = l1 = 1.0
     rise = (l1 - l0) / max(l0, 1e-4)
-    res["lum-rise"] = {"pass": rise <= 0.25, "rise": round(rise, 3)}
+    res["haze"] = {"pass": rise <= 0.25, "rise_outside_effect": round(rise, 3)}
 
     # hue at peak: hottest 10% of effect pixels
     if m.any():
+        # The hot body, not the core: pixels between the 60th and 90th brightness
+        # percentile. Cores may be white by design (flat-white styles, flash cores);
+        # what must survive tone mapping is the colour of the body around them.
         lum = luminance(f)[m]
-        k = lum >= np.quantile(lum, 0.9)
+        k = (lum >= np.quantile(lum, 0.6)) & (lum <= np.quantile(lum, 0.9))
         h, s, v = rgb_to_hsv(f[m][k])
         sat = float(np.median(s))
         hue = float(np.degrees(np.angle(np.mean(np.exp(1j * np.radians(h))))) % 360)
@@ -157,7 +186,7 @@ def run_checks(fx_frames, base_frames, times, contact, duration, a):
             dh = abs((hue - a.hue + 180) % 360 - 180)
             ok = ok and dh <= 15
         res["hue-at-peak"] = {"pass": ok, "hue": round(hue, 1), "saturation": round(sat, 3),
-                              "target_hue": a.hue, "note": "flat white palette styles may skip with --min-sat 0"}
+                              "target_hue": a.hue, "note": "neutral bodies (white puffs, grey smoke) may pass --min-sat 0"}
     else:
         res["hue-at-peak"] = {"pass": False, "note": "no effect pixels at peak"}
 
@@ -220,10 +249,10 @@ def cmd_stand(a):
                 return np.asarray(Image.open(io.BytesIO(base64.b64decode(url.split(",")[1]))).convert("RGB")).astype(np.float32) / 255.0
 
             fx = [grab(t) for t in times]
-            # Base shot: the effect's lights stay on (they light the floor in both shots, so
-            # floor tiles do not enter the mask); every other layer is hidden. The target
+            # Base shot: the effect's lights and decals stay on (lights change the whole floor,
+            # decals are designed residue that is meant to stay still); every other layer is hidden. The target
             # reaction still plays.
-            pg.evaluate("window.rngStand.solo(window.rngStand.layers().filter(l => l.kind.startsWith('light')).map(l => l.i))")
+            pg.evaluate("window.rngStand.solo(window.rngStand.layers().filter(l => l.kind.startsWith('light') || l.kind.startsWith('decal')).map(l => l.i))")
             base = [grab(t) for t in times]
             pg.evaluate("window.rngStand.solo(null)")
             b.close()

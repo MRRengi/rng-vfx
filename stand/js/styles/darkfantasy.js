@@ -18,8 +18,8 @@ export default {
         fx.slash({
           pos: at(HIT, 0.35, 0.45, 0.2), swing: [-0.6, -0.8, 0], normal: [0.2, 0.45, 1], scale: 1.05, from: 160, to: -30, rIn: 1.1, rOut: 1.38,
           blend: 'alpha', hard: false, coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1,
-          rimColor: '#ff3a22', rimK: 2.0, rimW: 0.28, noise: 0.3, dissolve: 0.3, thick: 0.85,
-          burnColor: '#ff5a2a', burnK: 1.6, burnW: 0.05,
+          rimColor: '#ff2a10', rimK: 1.2, rimW: 0.28, noise: 0.3, dissolve: 0.3, thick: 0.85,
+          burnColor: '#ff3a10', burnK: 1.1, burnW: 0.05,
           head: [[0, 0], [0.05, 1.0, 'outQuart'], [0.083, 1.1], [0.25, 1.75, 'outQuad']], alpha: [[0, 1], [0.18, 1], [0.26, 0]], tail: 0.75,
         }, 0);
         // Claw strands: thin torn arcs riding the main slash, each a frame late.
@@ -27,7 +27,7 @@ export default {
           fx.slash({
             pos: at(HIT, 0, 0, 0.2), swing: [-0.6, -0.8, 0], normal: [0.2, 0.45, 1], scale: 1.05, from: 150, to: -20,
             rIn, rOut, torn: 0.4, blend: 'alpha', hard: false,
-            coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1, rimColor: '#ff3a22', rimK: 1.8, rimW: 0.6,
+            coreColor: '#1a0306', coreK: 1, edgeColor: '#5a0810', edgeK: 1, rimColor: '#ff2a10', rimK: 1.1, rimW: 0.6,
             noise: 0.4, dissolve: 0.8, thick: 1,
             head: [[0, 0], [0.09, 1.0, 'outQuart'], [0.3, 1.6, 'inQuad']], alpha: [[0, 1], [0.2, 1], [0.27, 0]], tail: 0.55,
           }, 0.017 * (k + 1));

@@ -76,7 +76,16 @@ python tools/vfxcheck.py frames --fx out/fx --base out/base --fps 60 --contact 0
 python tools/vfxcheck.py stand realism explosion --camera Gameplay      # renders the stand itself
 ```
 
-It reports PASS or FAIL for straight edges (long straight segments on the mask outline with effect on one side only), size at peak (1080p-equivalent pixels), white clip, luminance rise, hue and saturation of the hottest 10% at peak, static holds and empty tail, and exits 1 on any failure. Render the base frames with the effect hidden but the target reaction still playing, from the same camera and times.
+It reports PASS or FAIL and exits 1 on any failure:
+- **Straight edges.** Dead-straight runs on the mask's outline, long (40 px and 20% of the shape) and ending in a corner. Smooth arcs and round shapes pass; a quad, strip or ground cut fails. Full-screen frames (impact frames) are skipped.
+- **Size.** The effect's height at peak in 1080p-equivalent pixels. Run it once more with the gameplay camera for this check.
+- **White clip.** The share of the effect that clips to white at peak.
+- **Haze.** The brightness rise outside the effect at peak, which is bloom spill.
+- **Hue at peak.** Hue and saturation of the hot body (60 - 90th brightness percentile), so white cores are allowed. Pass `--min-sat 0` for effects whose body is neutral by design: white puffs, grey smoke, white sparks.
+- **Static hold.** No unchanged mask or image for more than 4 frames.
+- **Empty tail.** Content left at 90% of the duration.
+
+Render the base frames with the effect hidden but the target reaction, lights and decals still on, from the same camera and times. Lights change the whole floor; decals are residue meant to stay still.
 
 ### Mechanical checks
 

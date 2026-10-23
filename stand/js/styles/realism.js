@@ -87,14 +87,14 @@ export default {
           shape: 'fire', dir: 'cone', axis: UP, angle: 45, count: 5, sizeDist: [3, 2, 0], origin: C, spawnR: 0.6, spin: 0.35, sizeIn: 0.12,
           speed: [2.5, 5], drag: 3.5, gravity: [0, 0.8, 0], life: [0.9, 1.5], size: [1.8, 3.4], sizePow: 0.4, aspectY: 1.15,
           soft: 0.9, erode: 1, noiseScale: 3, vBias: 0.25, blend: 'premul', order: 3, fadeDist: 0.4,
-          ramp: fx.ramp([[0, '#fff8e6', 1.4], [0.2, '#ffd27a', 1.3], [0.45, '#ff7a1f', 1.2], [0.7, '#a3260f', 0.9], [0.88, '#2a1410', 1], [1, '#161210', 1]]),
+          ramp: fx.ramp([[0, '#ffe2a0', 1.3], [0.2, '#ffb040', 1.15], [0.45, '#ff6a10', 1.05], [0.7, '#a3260f', 0.9], [0.88, '#2a1410', 1], [1, '#161210', 1]]),
         }, 0);
         // Mid and small tiers from a flipbook: each quad plays a burning, breaking puff.
         fx.burst({
           shape: 'sheet', sheet: { url: './textures/fire_4x4.png', grid: [4, 4], frames: 16 },
           dir: 'sphere', count: 8, sizeDist: [0, 5, 3], seed: 52, origin: C, spawnR: 0.7, speed: [1.5, 4], drag: 3.5,
           gravity: [0, 0.8, 0], life: [0.7, 1.2], size: [1.2, 2.2], sizePow: 0.4, spin: 0.6, soft: 0.9, blend: 'premul', order: 3, fadeDist: 0.4,
-          fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffffff', 1.6], [0.5, '#ffffff', 1.2], [1, '#ffffff', 1.0]]),
+          fade: [0.02, 0.9], ramp: fx.ramp([[0, '#ffd9a0', 1.2], [0.5, '#ffc890', 1.05], [1, '#ffb080', 0.95]]),
         }, 0);
         // Stem and base: the fireball sits on the ground.
         fx.burst({

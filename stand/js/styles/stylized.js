@@ -17,7 +17,7 @@ export default {
         fx.hitstop(0.08, 4);
         fx.slash({
           pos: at(HIT, -0.4, 0.25, 0.2), swing: [0.85, -0.45, -0.15], normal: [0.25, 0.4, 1], scale: 1.15, from: 150, to: -35, rIn: 1.15, rOut: 1.42, torn: 0.15,
-          coreColor: '#ffffff', coreK: 1.4, edgeColor: '#7b5cff', edgeK: 1.2, noise: 0.25, dissolve: 0.7,
+          coreColor: '#e6dcff', coreK: 1.2, edgeColor: '#6a3cff', edgeK: 1.0, noise: 0.25, dissolve: 0.7,
           burnColor: '#d9ccff', burnK: 1.6, burnW: 0.06,
           head: [[0, 0], [0.08, 1, 'outQuart'], [0.1, 1.05], [0.2, 1.7, 'inQuad']], alpha: [[0, 1], [0.12, 1], [0.2, 0]], tail: 0.7,
         }, 0);
@@ -73,7 +73,7 @@ export default {
       },
     },
     explosion: {
-      duration: 3.0,
+      duration: 2.4,
       contact: 0,
       build(fx) {
         const C = at(BLAST, 0, 0.5, 0);
