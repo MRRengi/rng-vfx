@@ -124,24 +124,24 @@ export default {
           speed: [1, 2.2], gravity: [0, 1.4, 0], drag: 1.8, delay: [0.03, 0.6], life: [2.0, 2.8], size: [1.6, 3.2], sizePow: 0.45,
           shadow: '#4a2020', noiseScale: 2.4, erode: 0.3, blend: 'alpha', order: 2, fade: [0.06, 0.75], fadeDist: 0.4,
           fireGlow: { color: '#ff2a12', intensity: 0.5, height: 0.6, rim: 0.4, k: fireK },
-          ramp: fx.ramp([[0, '#2a1a1c', 1, 0.95], [0.7, '#2a1a1c', 1, 0.9], [1, '#241618', 1, 0]]),
+          ramp: fx.ramp([[0, '#2a1a1c', 1, 0.95], [0.7, '#2a1a1c', 1, 0.9], [1, '#2a1a1c', 1, 0]]),
         }, T);
         fx.burst({
           // Drawn black smoke keyframes, fire light baked into the bottom third; born inside the
           // fire's footprint and taking over as the tongues burn off.
           shape: 'sheet', sheet: { url: './textures/dark_smoke_2x2.png', grid: [2, 2], frames: 4 },
-          dir: 'cone', axis: UP, angle: 30, count: 5, sizeDist: [1, 3, 1], origin: at(BLAST, 0, 1.3, 0), spawnR: 0.6,
-          speed: [0.1, 0.35], gravity: [0, 0.25, 0], drag: 2, delay: [0.35, 0.8], life: [1.8, 2.4], size: [3.2, 4.0], sizeIn: 0.2, spin: 0.1,
+          dir: 'cone', axis: UP, angle: 30, count: 5, sizeDist: [1, 3, 1], origin: at(BLAST, 0, 1.15, 0), spawnR: 0.6,
+          speed: [0.05, 0.25], gravity: [0, 0.15, 0], drag: 2, delay: [0.35, 0.8], life: [1.8, 2.4], size: [3.2, 4.0], sizeIn: 0.2, spin: 0.1,
           blend: 'alpha', order: 2, fade: [0.1, 0.85], fadeDist: 0.4,
           // The drawn greys are mid value; dark fantasy smoke sits at a 0.08 - 0.12 floor.
-          ramp: fx.ramp([[0, '#6a6064', 1, 0.95], [1, '#5a5054', 1, 0.95]]),
+          ramp: fx.ramp([[0, '#857a7e', 1, 0.95], [1, '#7a7074', 1, 0.95]]),
         }, T);
         fx.burst({
           shape: 'smoke', dir: 'ring', lift: 0.05, count: 18, origin: at(BLAST, 0, 0.25, 0), speed: [5, 8], drag: 5,
-          life: [1.3, 1.9], size: [0.6, 1.6], sizePow: 0.5, shadow: '#4a2020', ground: 0, noiseScale: 3, erode: 0.3,
+          life: [2.0, 2.6], size: [0.8, 1.8], sizePow: 0.5, shadow: '#4a2020', ground: 0, noiseScale: 3, erode: 0.3,
           blend: 'alpha', order: 1, fade: [0.05, 0.75], fadeDist: 0.3,
           fireGlow: { color: '#ff2a12', intensity: 1.2, height: 0.8, k: fireK },
-          ramp: fx.ramp([[0, '#1e1012', 1, 0.9], [1, '#080506', 1, 0]]),
+          ramp: fx.ramp([[0, '#2a1a1c', 1, 0.9], [1, '#2a1a1c', 1, 0]]),
         }, T + 0.02);
         fx.burst({
           shape: 'glow', dir: 'hemi', count: 44, sizeDist: [2, 8, 20], origin: C, spawnR: 1, speed: [1, 3.5], gravity: [0, 1.6, 0],
