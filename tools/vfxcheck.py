@@ -22,7 +22,7 @@ Checks (thresholds from numbers.md / fundamentals.md):
   white-clip      share of the effect burned to white next to its coloured body <= 15% (OKLab)
   haze            brightness rise outside the effect (bloom spill) at the brightest frame <= +25%
   hue             on the frame with the most visible effect pixels (impacts: within 0.1 s of contact),
-                  >= 15% of them are saturated (OKLab chroma > 0.1) and >= 30% of those within 25 deg of --hue
+                  >= 15% of them are saturated and >= 30% of the saturated ones are within 25 deg of --hue
   static-hold     no unchanged mask and image for longer than 4 frames (full rate) or 2 drawings
   empty-tail      at 90% of the duration the mask still holds >= 2% of its peak area
   growth          (explosions) the first frame with content is <= 50% of the peak area
@@ -321,10 +321,7 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
             res["hue"] = {"pass": False, "note": "no visible effect pixels"}
         else:
             h, s_, _ = rgb_to_hsv(px)
-            # Saturated = OKLab chroma above 0.1: pale tinted shading (lavender puff shadows,
-            # warm-white cores) is not the effect's colour and does not vote on the hue.
-            _, A_, B_ = oklab(px)
-            sat = np.hypot(A_, B_) > 0.1
+            sat = s_ > 0.25
             frac = float(sat.mean())
             # Share of the saturated pixels near the target hue: two-colour designs
             # (a cyan spark with yellow sparks) pass as long as the target colour holds
