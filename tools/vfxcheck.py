@@ -288,8 +288,10 @@ def run_checks(fx, base, times, contact, duration, a, close=None, info=None):
     # wider than the shape is haze even when it sits "inside" the soft mask.
     cb = cores[bright].sum()
     # Only soft pixels that brighten the frame are glow; dark smoke around the core is not haze.
-    glow = m & ~cores[bright] & ((luminance(f) - luminance(base[bright])) > 0.03)
-    halo = float((glow.sum() + cb) / max(cb, 1)) if cb > 30 else 1.0
+    # The core is widened by 2 px first, so thin sparks are not judged by their 1 px width.
+    cd = cv2.dilate(cores[bright].astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) if cv2 is not None else cores[bright]
+    glow = m & ~cd & ((luminance(f) - luminance(base[bright])) > 0.03)
+    halo = float((glow.sum() + cd.sum()) / max(cd.sum(), 1)) if cb > 30 else 1.0
     res["haze"] = {"pass": rise <= 0.25 and halo <= 4.0, "rise_outside_effect": round(rise, 3),
                    "halo_over_core": round(halo, 2), "t": round(times[bright], 3)}
 

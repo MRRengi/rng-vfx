@@ -92,7 +92,7 @@ Use these when the user gives no references. Sizes are fractions of the target's
 ### Realism impact
 - **Contact:** an anisotropic flare along the hit, 0.3 H long, for 2 frames.
 - **Peak (+3 frames):** a fan of 40 - 70 sparks of very unequal length spraying along the reflected hit direction, 1 H spread; a dust jet.
-- **Break-up (+8 frames):** sparks arcing down and bouncing; the dust expanding and thinning; chips falling.
+- **Break-up (+8 frames):** the fan still rising and opening (sparks at 10 - 18 m/s take about 0.3 s to turn over and fall); the dust jet thrown back toward the attacker, expanding and thinning; chips falling. Sparks arc down and bounce later, around +20 frames.
 
 ### Realism explosion
 - **Contact:** a flash smaller than the coming fireball (0.8 H), an exposure dip.

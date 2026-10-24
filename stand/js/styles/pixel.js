@@ -80,9 +80,11 @@ export default {
           ramp: fx.ramp([[0, '#b4b2bc', 1], [1, '#8a8894', 1]]),
         }, 3 * D);
         fx.burst({
-          shape: 'square', cel: true, dir: 'hemi', count: 18, sizeDist: [4, 8, 6], origin: C, speed: [5, 9], gravity: [0, -14, 0], drag: 1,
-          life: [6 * D, 10 * D], size: [0.3, 0.24], ground: 0, bounce: 0.3, fade: [0, 0.999], minPx: 3, blend: 'alpha', fadeDist: 0,
-          ramp: fx.ramp([[0, '#ffe14d', 1], [0.5, '#ff7a1a', 1], [1, '#3a2a2a', 1]]),
+          // Debris flies out and cools to dark fast; bright orange chunks hanging around the fire
+          // read as more fire.
+          shape: 'square', cel: true, dir: 'hemi', count: 14, sizeDist: [3, 6, 5], origin: C, speed: [7, 11], gravity: [0, -14, 0], drag: 0.6,
+          life: [6 * D, 10 * D], size: [0.22, 0.16], ground: 0, bounce: 0.3, fade: [0, 0.999], minPx: 2, blend: 'alpha', fadeDist: 0,
+          ramp: fx.ramp([[0, '#ffe14d', 1], [0.2, '#ff7a1a', 1], [0.5, '#6a2a1a', 1], [1, '#3a2a2a', 1]]),
         }, D);
         fx.target({
           dir: AWAY, color: '#ffffff',

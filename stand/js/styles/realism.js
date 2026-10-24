@@ -159,7 +159,7 @@ export default {
           jolt: [[0, 0.05], [0.5, 0]],
           knock: [[0, 0], [0.1, 0.16, 'outQuad'], [1.0, 0, 'inOutSine']],
         });
-        fx.light({ pos: C, color: '#ffa860', distance: 5.5, shadow: true, flicker: 0.15, intensity: [[0, 0], [0.02, 28], [0.3, 13, 'outQuad'], [1.8, 0, 'outQuad']] });
+        fx.light({ pos: C, color: '#ffa860', distance: 5.5, shadow: true, flicker: 0.15, intensity: [[0, 0], [0.02, 28], [0.3, 10, 'outQuad'], [1.2, 0, 'outQuad']] });
         fx.shake([[0, 0.28], [1.0, 0, 'outQuad']]);
       },
     },
