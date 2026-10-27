@@ -96,7 +96,7 @@ Temporal upscalers smear thin, fast, translucent things: sparks turn into faint 
 
 - Sequencer for multi-part effects and for review renders: Niagara track, light and decal tracks, camera.
 - Anim Notifies (Play Niagara Effect, Timed Niagara Effect) bind effects to animation frames.
-- Stepped (held) animation: Sub UV with Sub UV Blending off on the renderer, and quantize time in materials with `Floor(Time * 12) / 12`.
+- Stepped (held) animation, for pixel art and drawn 2D only (`../motion.md` > Stepped animation): Sub UV with Sub UV Blending off on the renderer, and quantize time in materials with `Floor(Time * 12) / 12`.
 
 ## Headless renders (no editor UI)
 

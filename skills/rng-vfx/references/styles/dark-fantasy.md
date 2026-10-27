@@ -12,7 +12,7 @@ Diablo IV, Path of Exile, Elden Ring, Dark Souls, Lords of the Fallen. Grim, hea
 - Fire stays red-orange under the tone mapper: keep its body below the bloom threshold.
 - Heavy timing: big hits have hit stop, a long hold of the dark residue and slow smoke.
 
-## Timing defaults (60 fps)
+## Timing defaults (60 fps, typical)
 
 | Layer | Start | Peak | End |
 |---|---|---|---|

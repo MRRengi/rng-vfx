@@ -27,7 +27,7 @@ Use instanced quads, not `Points`: points cannot rotate or stretch along velocit
 
 ## Shapes in the fragment shader
 
-Build silhouettes as signed distance functions on the quad's UV (`../shapes.md` > Foundations):
+Build silhouettes as signed distance functions on the quad's UV (`../elements.md` > Foundations):
 
 ```glsl
 // Crescent: the difference of two circles, thick at one end through the offset.
@@ -48,7 +48,7 @@ float sdStar(vec2 p, float rOuter, float rInner, float n) {
 }
 ```
 
-Edge: `alpha = 1.0 - smoothstep(-aa, aa, dist)` with `aa = fwidth(dist)` for a crisp, resolution-independent edge; for cel looks step the bands on the distance or heat value. Break the edge with low-amplitude fbm added to `dist`, not by multiplying alpha with noise. A slash is an arc strip mesh whose midpoint sits on the impact point; orient its plane toward the camera (`../shapes.md` > Slash) and drive the head and tail reveal with the strip's U coordinate.
+Edge: `alpha = 1.0 - smoothstep(-aa, aa, dist)` with `aa = fwidth(dist)` for a crisp, resolution-independent edge; for cel looks step the bands on the distance or heat value. Break the edge with low-amplitude fbm added to `dist`, not by multiplying alpha with noise. A slash is an arc strip mesh whose midpoint sits on the impact point; orient its plane toward the camera (`../elements.md` > Slash) and drive the head and tail reveal with the strip's U coordinate.
 
 ## Pixel-size clamps
 
@@ -61,6 +61,7 @@ float width = max(uWidth, uMinPx * worldPerPx);                             // e
 
 ## Post-processing
 
+- `EffectComposer` loses the renderer's built-in anti-aliasing: pass it a multisampled target (`new THREE.WebGLRenderTarget(w, h, { samples: 4, type: THREE.HalfFloatType })`) or add an SMAA/FXAA pass (`../motion.md` > Anti-aliasing).
 - `EffectComposer` → `RenderPass` → distortion pass → `UnrealBloomPass` → effect passes on linear HDR (impact frame) → `OutputPass` (tone mapping and sRGB) → display-space passes (palette reduction for pixel art).
 - Bloom: `UnrealBloomPass(resolution, strength, radius, threshold)` compares linear luminance with the threshold and has a hard knee; raise `bloomPass.highPassUniforms.smoothWidth.value` to about 0.15x the threshold. Threshold above every body colour (`../brightness.md`) so only cores and flashes bloom; strength about 0.2 - 0.4 for realism, 0.5 - 0.9 for stylized and anime energy, where the glow halo is part of the look. Keep a switch to disable bloom for the review pass.
 - Distortion: render distortion meshes (rings, heat) into a half-resolution `HalfFloatType` target as signed UV offsets, and offset the scene colour lookup by it in a `ShaderPass`.
@@ -70,8 +71,8 @@ float width = max(uWidth, uMinPx * worldPerPx);                             // e
 
 ## Determinism and frame capture
 
-- Seed every random value (a small xorshift) and drive everything from one effect time, so `seek(t)` renders the same frame every time. Quantize time for held drawings: `floor(t * fps) / fps`.
-- Expose a small API on `window` so a headless browser can render frame strips: `fx.duration`, `fx.contact`, `fx.pause()`, `fx.seek(t)`, `fx.play()`, `fx.setCamera('gameplay' | 'close')`, and `fx.setBloom(on)` for the bloom-off review. `scripts/capture_strip.py` uses it.
+- Seed every random value (a small xorshift) and drive everything from one effect time, so `seek(t)` renders the same frame every time. Quantize time only for held drawings in pixel art and drawn 2D games: `floor(t * fps) / fps` (`../motion.md` > Stepped animation).
+- Expose a small API on `window` so a headless browser can render frame strips: `fx.duration`, `fx.contact`, `fx.pause()`, `fx.seek(t)`, `fx.play()`, `fx.setCamera('gameplay' | 'close')`, and optionally `fx.setBloom(on)`. `scripts/capture_strip.py` uses it.
 - Headless Chromium renders WebGL with SwiftShader (`--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`): fine for correctness, not for performance.
 
 ## Performance

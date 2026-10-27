@@ -1,126 +1,79 @@
 ---
 name: rng-vfx
-description: Use when designing or building real-time game visual effects - hits, slashes, impacts, explosions, fire, smoke, magic, projectiles, auras, lightning, trails, shockwaves - or their shaders, particles, timing and textures, in Unity (Shuriken, VFX Graph, Shader Graph), Unreal (Niagara) or three.js / WebGL, in any style from realistic to anime, toon, stylized MOBA, dark fantasy or pixel art. Also use when an existing effect looks cheap, weak, washed out or unreadable and needs fixing.
+description: Use when designing or building real-time game visual effects - hits, slashes, impacts, explosions, fire, smoke, magic, projectiles, auras, lightning, trails, shockwaves - or their shaders, particles, timing and textures, in Unity (Shuriken, VFX Graph, Shader Graph), Unreal (Niagara) or three.js / WebGL, in any style from realistic to anime, toon, stylized MOBA, dark fantasy or pixel art. Also use when an existing effect looks cheap, weak, washed out, jittery or unreadable and needs fixing.
 ---
 
 # Game VFX
 
-Work as the lead VFX artist on a shipped action game. Effects exist for the player: they tell what happened, where, and how hard, in a fraction of a second, from the camera the game is actually played with. Beauty in a close-up that does not read from the gameplay camera is a failure.
+Work as the lead VFX artist on a shipped action game. The goal is an effect that could ship next to the best work in its genre: when a player sees it from the camera the game is played with, it tells them what happened, where and how hard, and it feels good.
 
-## What generated effects get wrong
+You already know what the best effects in each genre look like. This skill does not replace that taste; it gives you a way of working that turns it into a finished effect, and the knowledge that is easy to get wrong: how real explosions and smoke behave, how things read at gameplay distance, how each engine handles brightness and blending, and what makes motion look polished. Numbers in the reference files are typical starting points taken from shipped games. Go past them whenever your reference does.
 
-Effects made by agents cluster around the same defaults. They are why an effect reads as cheap, so treat each as a decision you have to justify, not a starting point:
+## What a shipped effect has
 
-1. **Glow without a shape, or a shape without glow.** Two opposite mistakes. One: cores pushed to white and bloom turned up until the target blows out and the shape dissolves into a blob. Two: energy drawn as flat, outlined, unlit cartoon shapes, so a sword arc or a spell looks like a sticker. Energy in shipped action games glows: a luminous body with a hot core and a soft falloff, bloom on the core, and light cast onto the target and the ground. The glow sits on a designed shape you can still recognise, and the target stays readable under it.
-2. **Hairlines.** Rings, spikes, speed lines and sparks one or two pixels wide that look fine in the close-up and vanish at the gameplay camera.
-3. **No primary shape.** A soft glowing blob, a cloud of noise or several competing elements instead of one designed silhouette that reads in a single still frame.
-4. **Wrong timing.** A slow swell to a late peak, or a long full-screen moment, followed by everything vanishing at once. Shipped hits peak within 1 - 3 frames of contact, hold briefly, and spend most of their life dissipating.
-5. **No contact.** The target and the ground do not react: no light on the target, no dust, no mark, no knockback.
-6. **Weak dissipation.** Smoke that detaches and floats away as one lump, puffs that shrink uniformly, trails that pop off.
-7. **Timid scale.** Effects sized to the minimums below instead of to the event: a heavy hit that is a small arc beside the character, a spell burst smaller than the target. In shipped action games a heavy hit or a spell is the biggest thing on screen for a moment: 1 - 2x the character's height, wrapping around the target, with the target itself flaring on the hit. The minimums are a floor, not a size.
-8. **Noise as detail.** Procedural noise used as surface texture reads as dirt or grain. In shipped work, noise breaks edges and drives erosion of a designed shape; the detail comes from the shapes.
+These six qualities are what separate shipped effects from generated ones. Each is a judgement about the result, not a rule about the parts:
 
-## The process
+1. **It reads from the gameplay camera.** One primary shape carries the event and is recognisable in a single frame from the real camera. Close-up beauty that turns into a blur or vanishes at distance is a failure, so design with the on-screen size in mind (pixels per metre, below).
+2. **It has weight in proportion to the event.** A light jab is small and quick; a heavy hit, an ultimate or a big explosion owns the frame for a moment. Generated effects are usually timid, so when unsure, go bigger and bolder, as the reference does.
+3. **The world reacts.** The target flinches, flares and is lit by the hit; the ground takes light, dust and a mark; heavy hits freeze for a few frames and shake the camera. An effect floating in front of an unaffected scene looks pasted on.
+4. **Timing has contrast.** A fast arrival (with anticipation where the move has a wind-up), a short strong hold, then a long, uneven dissipation. A slow swell, an even fade or everything vanishing at once all read as weak.
+5. **Each material behaves like itself.** Energy emits light: hot core, saturated body, glow, light cast on the surroundings. Matter (smoke, dust, soil, debris, blood) is lit by the scene, occludes and obeys physics. Fire is both. The look of each comes from the genre: painted MOBA energy, crisp anime energy, believable realistic dirt.
+6. **The motion is polished.** Smooth, eased, continuous motion; edges anti-aliased; no flicker, popping, strobing or jitter; detail that moves with the shape instead of boiling. A great design with rough motion looks cheap (`references/motion.md`).
 
-Copy this checklist into your notes and work through it in order. The written plan comes before any code because the expensive mistakes (wrong primary shape, wrong timing, wrong palette) are design mistakes, and they are cheap to fix on paper and expensive to fix in shaders.
+Comic devices (outlines, straight-edged star polygons, "pow" bursts, outlined cartoon clouds) belong to the toon style. In other styles they turn the effect into a sticker, so use them only when the style or the user asks.
 
-```
-- [ ] 1. Brief and audit
-- [ ] 2. Reference breakdown
-- [ ] 3. Design plan (shape, colour and glow, timing, layers)
-- [ ] 4. Check the plan against the defaults above; revise
-- [ ] 5. Blockout: primary shape and timing at the gameplay camera; review frames
-- [ ] 6. Build: shading, detail, interaction, dissipation
-- [ ] 7. Review loop until every review question passes
-```
+## How to work
 
-### 1. Brief and audit
+### 1. Brief
 
-Write down: what event this is (hit, explosion, cast, buff), how important it is (a light attack, a heavy hit, an ultimate), the style, the engine, and the gameplay camera (distance, FOV, typical framing). In an existing project, also record the tone mapper, bloom settings, exposure and units, and render two existing effects for comparison; every brightness value depends on them (`references/brightness.md`).
+Write down the event (hit, explosion, cast, buff), its weight (light, heavy, ultimate), the style, the engine and the gameplay camera (distance, FOV, framing). In an existing project, record the tone mapper, bloom, exposure and units, and look at two of its existing effects; brightness depends on them (`references/brightness.md`).
 
-Work out how big things are on screen before designing: pixels per metre at the target is `screenHeight / (2 * distance * tan(fov / 2))`. A 1.8 m character 10 m away with a 40 degree FOV is about 270 px tall at 1080p, so a 2 cm spark is 3 px. Design to the gameplay camera's pixel sizes.
+Work out the on-screen scale: pixels per metre at the target is `screenHeight / (2 * distance * tan(fov / 2))`. A 1.8 m character 10 m away with a 40 degree FOV is about 270 px tall at 1080p, so a 2 cm spark is 3 px and a 2 m slash is 300 px. Elements narrower than about 3 px disappear.
 
 ### 2. Reference breakdown
 
-Pick two shipped effects in this genre that do the same job (name the game and the move) and describe each from memory at four moments: contact, +2 frames, +6 frames and the end. For each moment write the primary shape, its size relative to the character, the value structure (what is lightest, what is darkest), the colours and what is moving. If the user gave references, use theirs. This is your target; the style file for the genre lists its conventions and typical references (`references/styles/<style>.md`).
+This is the most important step: the reference is your target, and vague memories make vague effects. Pick two shipped effects in this genre that do the same job (name the game and the move; use the user's references if given) and describe each in detail at four moments: contact, +2 frames, +6 frames and the end. For each, write the primary shape and its size relative to the character, what is brightest and darkest, the colours, what the target and ground are doing, and what is moving and how. The style file lists the genre's typical references and look (`references/styles/<style>.md`).
 
-### 3. Design plan
+### 3. Plan
 
-Write the plan as a short block:
+Write a short plan before code, because the expensive mistakes (wrong shape, wrong scale, wrong timing, wrong material) are cheap to fix on paper:
 
-- **Primary shape:** the one silhouette that carries the event, drawn as you would see it from the gameplay camera at its peak frame (a few lines of ASCII or a one-sentence geometric description: "a crescent 2.2 m across, thick at the leading edge, tapering to a point, tilted 30 degrees toward the camera, passing through the target's chest"). Say how it faces the camera.
-- **Value and colour:** the ramp from the hottest value to the edge with hex colours, for example core `#ffffff`, body `#36d6ff`, falloff `#0b4f8c`. For energy, say how it glows (which part blooms, what light it casts and on what). For matter (smoke, dust, debris, blood), say how it is lit.
-- **Timing table:** each layer's start, peak and end in frames at 60 fps relative to contact, using the style file's defaults as the starting point.
-- **Layers**, each with one job:
-  - primary (the silhouette);
-  - secondary (support that shows direction and force: sparks, streaks, shards, rings);
-  - interaction (light on the target, hit reaction, ground dust, decal, camera shake);
-  - residue (what remains and how it leaves: smoke, embers, marks).
-- **Sizes at the gameplay camera:** the primary shape's height in pixels and the narrowest element's width in pixels (minimums below).
+- **Primary shape:** the one silhouette that carries the event at its peak, its size relative to the character and how it faces the camera.
+- **Colour and light:** the ramp from hottest to edge with hex values; what glows, what light it casts and on what; how the matter is lit.
+- **Timing:** each layer's start, peak and end in frames at 60 fps relative to contact.
+- **Layers**, each with one job: primary; secondary (sparks, streaks, shards, rings that show direction and force); interaction (target reaction and light, ground dust, marks, hit stop, shake); residue (what remains and how it leaves).
 
-### 4. Check the plan against the defaults
+Read the plan against the six qualities and against your reference breakdown. Where it is smaller, plainer or shorter-lived than the reference, ask whether that is a choice or a habit.
 
-Go through the eight defaults above against your plan. Where the plan matches one by habit rather than choice, change it and note what changed. Ask also: what would the effect look like in a single frame at the gameplay camera? If the answer is "a soft bright blob" or "a flat sticker", the plan is not done.
+### 4. Build in passes
 
-Outlines, straight-edged star polygons, "pow" bursts and outlined cartoon puffs belong to the toon style only. In any other style they make the effect read as a comic; do not use them unless the user asks.
+Blockout first: the primary shape and its timing, seen from the gameplay camera, so you can judge silhouette, scale and rhythm before spending time on detail. Then add the colour ramp and glow (or lighting), the secondary layers, interaction, residue and dissipation, and finally polish (distortion, motion quality). `references/elements.md` has construction notes for common elements, `references/physics.md` has motion, and the engine file has the implementation (`references/engines/threejs.md`, `unity.md`, `unreal.md`).
 
-### 5. Blockout
+### 5. Review against the reference
 
-Build the primary shape and the timing first, seen from the gameplay camera. Render a frame strip (step 7) and check the silhouette, direction and timing before polishing. Most of the quality is decided here.
+Look at the effect in two ways, because each catches different problems:
 
-### 6. Build
+- **Stills** at fixed times from contact (-2, 0, +2, +4, +8, +15, +30 frames, then 50%, 75% and 95% of the duration) from the gameplay camera and a close camera: shape, scale, colour, reaction, residue.
+- **Motion:** every frame from a few frames before contact to about half a second after, in order: jitter, popping, flicker and the rhythm of the hit only show up here.
 
-Then add, in order: the colour ramp and glow (or lighting, for matter), the secondary layers, interaction (light on the target and ground, reaction, dust, marks), residue and dissipation, and finally distortion. `references/shapes.md` has construction recipes for the common shapes (slash arcs, contact flashes, explosions, smoke, sparks, debris, shockwaves, impact frames, decals, hit reactions); `references/physics.md` has motion; the engine file has the implementation details (`references/engines/unity.md`, `unreal.md`, `threejs.md`).
-
-### 7. Review loop
-
-Render frame strips at fixed times relative to contact: -2, 0, +2, +4, +8, +15 and +30 frames, then 50%, 75% and 95% of the duration. Render them from the gameplay camera and from a close camera (a bloom-off pass is optional and only helps to see whether the shape exists under the glow). For a page with the `window.fx` API, `python scripts/capture_strip.py <folder> <out>` renders them; elsewhere use the engine's frame capture (engine files). Look at every strip and answer each question in writing, with the frame you checked:
-
-1. At its peak, does the primary shape read as one clear silhouette from the gameplay camera, and does it look like the genre's shipped effects rather than a sticker or a blob?
-2. Is the peak within 1 - 3 frames of contact (or the style's drawing equivalent), and does the effect then hold and dissipate rather than vanish?
-3. Is every element at least the minimum width below at the gameplay camera?
-4. Does the target react (a flash, light from the hit, knockback), and is it readable again within a few frames after contact?
-5. Does the ground or surroundings react where they would (dust, light, mark)?
-6. Does the residue stay attached to where it came from and leave unevenly, from the edges inward?
-7. Does the palette match the style file, does the energy glow and light its surroundings, and does it separate from the background?
-8. Does it hold up next to the reference breakdown from step 2 at the same four moments? Name the biggest remaining difference.
-
-Fix the biggest failure, render again, and repeat until all eight pass. Then compare the final strip with the reference breakdown once more and write down what you would improve next.
-
-## Minimums at the gameplay camera
-
-These are defaults for a 1080p frame; scale with the resolution.
-
-| | Minimum |
-|---|---|
-| Primary shape, light hit | 40 px |
-| Primary shape, heavy hit or cast | 80 px (aim for 1 - 2x the character's on-screen height) |
-| Primary shape, explosion or ultimate | 200 px |
-| Line, ring, spike or streak width | 3 px |
-| Spark length | 12 px, at least 3x its width |
-| Contact flash | 1 - 3 frames at full size |
-| Full-screen impact frame | anime and fighting styles, heavy hits: 2 - 4 frames (`references/shapes.md` > Impact frames); never in realism |
-
-Clamp minimum widths in the shader in pixels (world units per pixel at the particle's depth times the pixel minimum), so they survive distance without growing in the close-up.
-
-## Style files
-
-Read the one for the requested style before step 2. Each gives the genre's palette and value structure, timing defaults, signature shapes, typical references and the style's own failure modes.
-
-| Style | File |
-|---|---|
-| Realistic (AAA shooters, military, cinematic) | `references/styles/realism.md` |
-| Stylized MOBA and hero shooters (hand-painted) | `references/styles/stylized.md` |
-| Anime and anime action games | `references/styles/anime.md` |
-| Toon and cartoon | `references/styles/toon.md` |
-| Dark fantasy (ARPG, soulslike) | `references/styles/dark-fantasy.md` |
-| Pixel art | `references/styles/pixel.md` |
-
-A style the user names that is not listed: write its conventions in the same shape (palette, values, timing, shapes, references) from what you know of its games, and follow the same process.
+For a page with the `window.fx` API, `python scripts/capture_strip.py <folder> <out>` renders both; elsewhere use the engine's frame capture. Then critique it as a demanding art director would, next to your reference breakdown at the same moments: where is it weaker than the reference, and which of the six qualities is furthest off? Fix the biggest gap, render again and repeat until you would put it in the reel next to the reference. Write down what you would improve next.
 
 ## Reference files
 
-- `references/shapes.md`: how to build each common element so it reads, with the parameters that matter.
-- `references/brightness.md`: brightness relative to the bloom threshold, per engine, and why bright colours turn white.
-- `references/physics.md`: motion, drag, gravity, smoke, fire, explosions, sparks, debris, liquids.
-- `references/engines/threejs.md`, `references/engines/unity.md`, `references/engines/unreal.md`: systems, materials, post, frame capture and performance per engine.
+Read the style file before step 2, and the others when the step calls for them.
+
+| File | What it holds |
+|---|---|
+| `references/styles/realism.md` | AAA shooters, military, cinematic |
+| `references/styles/stylized.md` | MOBA and hero shooters (LoL, Overwatch, Dota) |
+| `references/styles/anime.md` | anime action games and sakuga (Genshin, ZZZ, Guilty Gear) |
+| `references/styles/toon.md` | cartoon (Wind Waker, Splatoon) |
+| `references/styles/dark-fantasy.md` | ARPG and soulslike (Diablo, Elden Ring, PoE) |
+| `references/styles/pixel.md` | pixel art |
+| `references/elements.md` | how to construct slashes, flashes, projectiles, rings, sparks, debris, explosions, smoke, fire, impact frames, hit reactions, decals, light |
+| `references/motion.md` | motion quality: easing, smoothness, anti-aliasing, flicker, popping, hit stop, frame rate |
+| `references/physics.md` | motion of particles, smoke, fire, explosions, debris, liquids |
+| `references/brightness.md` | brightness relative to bloom per engine, and why bright colours turn white |
+| `references/engines/threejs.md`, `unity.md`, `unreal.md` | systems, materials, post, frame capture, performance |
+
+A style the user names that is not listed: describe its look, timing and typical references in the same way from what you know of its games, and follow the same process.

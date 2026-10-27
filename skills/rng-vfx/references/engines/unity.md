@@ -83,7 +83,7 @@ TAA (HDRP, and URP in recent versions) smears thin fast sparks and blends flipbo
 
 - Timeline is the best place to time multi-part effects: Control Tracks for particle systems and VFX, Animation Tracks for lights and materials, Activation Tracks for meshes.
 - Prefab per effect, pooled, with a single entry component (`Play(position, direction, intensity)`).
-- Stepped (held) animation: drive the shader time and particle simulation with a quantized time, or use Texture Sheet Animation with constant frame curves; for VFX Graph pass a quantized time as a property.
+- Stepped (held) animation, for pixel art and drawn 2D only (`../motion.md` > Stepped animation): drive the shader time and particle simulation with a quantized time, or use Texture Sheet Animation with constant frame curves; for VFX Graph pass a quantized time as a property.
 
 ## Headless frame strips (no Play mode)
 

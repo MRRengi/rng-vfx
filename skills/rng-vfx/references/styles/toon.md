@@ -12,7 +12,7 @@ Cartoon games: The Legend of Zelda: The Wind Waker, Splatoon, Ratchet & Clank, F
 - Motion is squash and stretch with overshoot: pop in fast with an outBack curve, hold, shrink away with an ease-in. Shapes disappear by shrinking, rarely by fading.
 - Symbols are welcome: stars, sparkles, swirls, "pow" bursts.
 
-## Timing defaults (60 fps)
+## Timing defaults (60 fps, typical)
 
 | Layer | Start | Peak | End |
 |---|---|---|---|
@@ -26,7 +26,7 @@ Cartoon games: The Legend of Zelda: The Wind Waker, Splatoon, Ratchet & Clank, F
 ## Signature shapes
 
 - Star polygon burst with a thick outline, one long point along the hit.
-- Puff clusters with an outline around the union and one shade band, holes appearing late (`shapes.md` > Cel puffs).
+- Puff clusters with an outline around the union and one shade band, holes appearing late (`elements.md` > Cel puffs).
 - A skirt of small puffs on the ground instead of a ring.
 - Squash on the target and a bounce.
 

@@ -12,7 +12,7 @@ Modern AAA shooters, military and cinematic games. The effect has to be believab
 - Value: dark masses (soil, smoke) against the sky are what read from far away. A frag explosion that is mostly bright is wrong.
 - Filmic tone mapping (AgX or ACES) turns saturated hot colours toward white: keep fire bodies below the bloom threshold and let only the core exceed it (`brightness.md`).
 
-## Timing defaults (60 fps)
+## Timing defaults (60 fps, typical)
 
 | Layer | Start | Peak | End |
 |---|---|---|---|
@@ -35,7 +35,7 @@ Modern AAA shooters, military and cinematic games. The effect has to be believab
 - Sparks: blackbody streaks with quadratic drag and bounce.
 - Debris: angular, mixed sizes, a few big hero chunks with dust trails.
 - Decals: scorch with radial streaks, bullet holes, chips.
-- Simulated flipbooks (EmberGen, Houdini, Blender) with motion vectors are the shipped standard for fireballs and smoke where available; procedurally, use lit noise volumes built from designed shapes (`shapes.md`).
+- Simulated flipbooks (EmberGen, Houdini, Blender) with motion vectors are the shipped standard for fireballs and smoke where available; procedurally, use lit noise volumes built from designed shapes (`elements.md`).
 
 ## Failure modes in this style
 

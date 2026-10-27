@@ -1,9 +1,9 @@
-# Building the shapes
+# Building the elements
 
-How to construct each common element so it reads. Sizes are in metres for a 1.8 m character and frames at 60 fps; adjust to the project.
+How to construct common elements so they read and behave right. Sizes are typical values in metres for a 1.8 m character and frames at 60 fps, taken from shipped games; scale them to the event and to your reference, and go bigger when the reference does. The look of each element (palette, softness, how much it glows) comes from the style file.
 
 Contents:
-- Foundations: designed shapes, value bands, blending
+- Foundations: designed shapes, colour ramp, reading at distance, blending
 - Contact flash
 - Slash
 - Projectile
@@ -24,6 +24,8 @@ Contents:
 **Shapes come from math, not noise.** Build silhouettes from signed distance functions in the fragment shader: circles, capsules, crescents (difference of two circles), segments, and for toon star polygons. A designed silhouette with a crisp edge reads at any distance; then use noise only to break that edge (offset the distance by low-amplitude fbm) and to drive erosion over life. Noise sampled as colour or alpha on its own looks like grain or dirt.
 
 **Colour ramp.** Map a single 0..1 "heat" or "density" value through the plan's ramp: smooth falloff for energy, realism and painted looks, a hard step only for toon and pixel. Keep the hottest value to the core (10 - 20% of the shape's area) and let the saturated body carry the colour. For energy, add a soft glow halo outside the body (a wider, fainter copy of the shape, or bloom on the core) and cast its light onto the target and the ground (a point light or a light card). On bright backgrounds an additive shape needs a faint darker alpha under-shape; outlines are for toon only.
+
+**Reading at distance.** At the gameplay camera, lines, rings and streaks narrower than about 3 px (at 1080p) and sparks shorter than about 12 px vanish; clamp widths in pixels in the shader (world units per pixel at the particle's depth times the pixel minimum) so they survive distance without growing in the close-up. Typical primary-shape heights: a light hit about the size of the target's torso, a heavy hit or spell about the character's height or more, an explosion or ultimate several times that.
 
 **Erosion over life (a life map).** Give the shape a grayscale map that says when each pixel dies (big smooth blobs, not fine noise), and discard where `map < age01`. The shape then breaks into large pieces from the edges inward instead of fading or shrinking uniformly. Add a thin bright or dark band at the erosion edge for burning or dissolving looks.
 
@@ -46,7 +48,7 @@ The contact flash says where and how hard. It is small, hot and short.
 
 The slash is one shape: a crescent that passes through the target.
 
-- **Geometry:** an arc strip (or a crescent SDF on a quad) whose midpoint lies on the impact point. Radius about arm plus weapon (1.2 - 1.8 m for a sword); visible span 90 - 140 degrees. The visible band, start to end, sits 20 - 50 degrees from horizontal from the gameplay camera unless the attack is an overhead or a sweep.
+- **Geometry:** an arc strip (or a crescent SDF on a quad) whose midpoint lies on the impact point. Radius at least arm plus weapon (1.2 - 1.8 m for a sword); stylized heavy hits exaggerate it well past that so the target sits inside the arc. Visible span 90 - 140 degrees. The visible band, start to end, sits 20 - 50 degrees from horizontal from the gameplay camera unless the attack is an overhead or a sweep.
 - **Facing:** orient the arc plane toward the camera (tilt it until its normal is within about 40 degrees of the view direction). An arc seen edge-on reads as a line or a pole.
 - **Width profile:** widest just behind the leading edge (0.15 - 0.25 of the radius), tapering to a point at the tail; the outer edge sharp, the inner edge softer. The cut line is the bright outer edge of this same shape, not a separate element.
 - **Timing:** the head sweeps through the arc in 2 - 4 frames, reaching the target on the contact frame; the full shape holds 1 - 2 frames; then it fades and thins from the tail toward the head over 6 - 12 frames, wisps peeling off the trailing edge. It does not move or change shape after contact.
@@ -121,13 +123,12 @@ Layers and timing for a realistic ground explosion:
 - 2 - 3 hard value bands and an outline, lit from one consistent side.
 - Clusters of lobes with different sizes, never a single circle.
 - **Holes:** driven by a large-feature life map; the smallest hole is about 20% of the puff's radius; holes start at the silhouette edge and work inward while the puff shrinks a little; no outline drawn around small inner holes. Fine noise holes turn puffs into outlined donuts and worms.
-- Held drawings: in anime and pixel, change the shape on the drawing rate (every 2 - 3 frames), not continuously.
 
 ## Impact frames
 
-The anime and fighting-game impact frame sells the heaviest hits. Make it bold:
+The anime and fighting-game impact frame sells the heaviest hits (not used in realism). Make it bold:
 
-- Full screen, 2 - 4 frames on the contact, then straight into the burst.
+- Full screen, typically 2 - 4 frames on the contact, then straight into the burst.
 - Alternate the tones across those frames: dark silhouette on white, then white silhouette on the effect's deep colour (for cyan, a navy `#0a2a5e`), optionally an inverted or tinted frame between. Each frame redrawn, not one image held.
 - Content: the target's and the burst's silhouette at its strongest, plus thick radial speed lines converging on the hit. The shape must read; it is not a random blob.
 - Once per hit, never repeated in a rapid loop (photosensitivity).
