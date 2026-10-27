@@ -2,6 +2,8 @@
 
 Realism needs real physics; every other style needs believable physics bent on purpose. Know the real behaviour first, then decide what to exaggerate.
 
+Contents: particle motion; smoke; fire; explosions; sparks; liquids; debris; gpu simulation by engine.
+
 ## Particle motion
 
 ### Integration
@@ -18,7 +20,7 @@ p += v * dt
 
 ### Closed form (scrubbable)
 
-With constant gravity `g` and linear drag `k`, position at age `t` is solvable directly, so an effect can be evaluated at any time without stepping. The stand uses this:
+With constant gravity `g` and linear drag `k`, position at age `t` is solvable directly, so an effect can be evaluated at any time without stepping.:
 
 ```
 e = exp(-k t)
@@ -44,7 +46,7 @@ Terminal velocity under linear drag is `g / k`. Pick `k` from the terminal veloc
 
 - **Curl noise** gives divergence-free swirling (no sinks or sources), which looks like air. Use it for smoke, embers, magic motes. Built in: VFX Graph Turbulence block, Niagara Curl Noise Force.
 - Value or Perlin noise used directly as a force creates clumping and dead zones; prefer curl.
-- Periodic sine offsets per particle are not turbulence: they move in sync and repeat. Use curl from a noise texture (`shaders.md` > Curl turbulence).
+- Periodic sine offsets per particle are not turbulence: they move in sync and repeat. Use curl from a noise texture (sample curl from a noise texture: the curl of a vector potential, `(dPz/dy - dPy/dz, dPx/dz - dPz/dx, dPy/dx - dPx/dy)`, by finite differences).
 - Scale the turbulence frequency to the effect size; low frequency for big plumes, higher for small wisps. Increase turbulence with age so particles start coherent and break up.
 
 ### Other forces

@@ -2,6 +2,8 @@
 
 Covers URP (most common), HDRP and the Built-in pipeline where they differ.
 
+Contents: pick the system; shader graph for vfx; vfx graph; particle system (shuriken); brightness, materials and sorting; temporal anti-aliasing; lights, decals, camera; authoring and timing; headless frame strips (no play mode); performance notes.
+
 ## Pick the system
 
 | Need | Use |
@@ -17,7 +19,7 @@ WebGL builds: VFX Graph does not run on WebGL; use Shuriken there. Unity 6's Web
 
 - Graph type: Unlit (URP) or Unlit / HDRP Unlit; Surface Transparent; Blend Additive, Alpha or Premultiply; Render Face Both for flat meshes; Depth Write off.
 - For VFX Graph outputs, enable the **VFX Graph** support in the Shader Graph target ("Support VFX Graph") and pick the graph in the output context.
-- Particle data in Shader Graph with Shuriken: enable **Custom Vertex Streams** in the Renderer module (for example `UV2.xy = AgePercent, StableRandom.x`), read them through the UV nodes.
+- Particle data in Shader Graph with Shuriken: enable **Custom Vertex Streams** in the Renderer module and add the streams you need (AgePercent, StableRandom, Custom1); Unity packs them into texture coordinate channels in order, as described below, and you read them through the UV nodes.
 - Opaque Texture (URP asset) must be on for Scene Color (distortion); Depth Texture on for Scene Depth (soft particles, intersection glow).
 - Keep HDR on in the URP asset and on cameras so emission above 1 reaches bloom.
 
@@ -41,7 +43,7 @@ WebGL builds: VFX Graph does not run on WebGL; use Shuriken there. Unity 6's Web
 
 ## Brightness, materials and sorting
 
-- **HDR colour picker:** intensity is in stops; +1 doubles the value. URP's bloom threshold is in gamma space (0.9 is about 0.79 linear) and compares the brightest channel, not luminance. With the default 0.9, a core at 2 B is about intensity +0.66, a body at 0.7 B about -0.86 relative to 1.0. Write values from `numbers.md` in these terms. HDR must be on in the URP asset and on the camera.
+- **HDR colour picker:** intensity is in stops; +1 doubles the value. URP's bloom threshold is in gamma space (0.9 is about 0.79 linear) and compares the brightest channel, not luminance. With the default 0.9, a core at 2 B is about intensity +0.66, a body at 0.7 B about -0.86 relative to 1.0. Write the levels from `../brightness.md` in these terms. HDR must be on in the URP asset and on the camera.
 - **Lock exposure while designing in HDRP** (Exposure override: Fixed), or values drift between scenes.
 - **URP Particles shaders** (Particles/Unlit, Particles/Lit):
   - Blending Mode: Alpha, Premultiply, Additive or Multiply.
@@ -60,13 +62,13 @@ WebGL builds: VFX Graph does not run on WebGL; use Shuriken there. Unity 6's Web
   - Output Particle Unlit Quad / Lit Quad (lit smoke in HDRP, or URP with Lit outputs);
   - Output Particle Mesh;
   - Output ParticleStrip Quad (trails, slashes following a socket);
-  - Output Particle Six-way Smoke (recent versions) for six-way lightmapped flipbooks (`../recipes/smoke-lighting.md`).
+  - Output Particle Six-way Smoke (recent versions) for six-way lightmapped flipbooks.
 
 ## Temporal anti-aliasing
 
 TAA (HDRP, and URP in recent versions) smears thin fast sparks and blends flipbook frames.
 - **HDRP:** enable *Transparent Writes Motion Vectors* on materials of fast elements so TAA reprojects them.
-- **URP:** prefer SMAA or FXAA on cameras that show heavy effects. Otherwise keep sparks at least 2 px wide (`../recipes/screen-size.md`) so the history does not erase them.
+- **URP:** prefer SMAA or FXAA on cameras that show heavy effects. Otherwise keep sparks at least 2 px wide so the history does not erase them.
 - Always review strips with the project's real anti-aliasing on.
 
 ## Lights, decals, camera
@@ -127,7 +129,7 @@ public static class FxStrip
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = new Color(0.05f, 0.05f, 0.07f);
         cam.allowHDR = true;
-        rt = new RenderTexture(W, H, 24, RenderTextureFormat.ARGB32);
+        rt = new RenderTexture(W, H, 24, RenderTextureFormat.DefaultHDR);
         cam.targetTexture = rt;
         strip = new Texture2D(W * frames, H, TextureFormat.RGB24, false);
         frame = new Texture2D(W, H, TextureFormat.RGB24, false);
@@ -188,9 +190,9 @@ public static class FxStrip
 
 Check the first strip yourself: if VFX Graph frames are empty or all show the same particles while Shuriken frames move, the manager did not tick between steps in your Unity version; add a second wait phase, or record those frames in Play mode with the Recorder package.
 
-Notes: post-processing (bloom, tone mapping) only appears if the camera has a URP / HDRP camera data component with post-processing enabled and a Volume in the scene; set them up in a small stand scene and load that scene first (`EditorSceneManager.OpenScene`) for renders that match the game. Effects driven by gameplay scripts (not particles or Timeline) need their update method made callable with an explicit time to be sampled this way, which is good practice anyway.
+Notes: render into an HDR target (`DefaultHDR`) so bloom and tone mapping have real values to work with; `ReadPixels` into an RGB24 texture then stores the tone-mapped result. Post-processing (bloom, tone mapping) only appears if the camera has a URP / HDRP camera data component with post-processing enabled and a Volume in the scene; set them up in a small review scene (ground, a character-sized capsule, the gameplay camera, the game's Volume) and load that scene first (`EditorSceneManager.OpenScene`) for renders that match the game. Effects driven by gameplay scripts (not particles or Timeline) need their update method made callable with an explicit time to be sampled this way, which is good practice anyway.
 
-For video, render more frames at 30 or 60 fps into a folder and assemble with ffmpeg: `ffmpeg -framerate 60 -i frame_%04d.png -c:v libx264 -pix_fmt yuv420p out.mp4`. Upload the strip or video to the stand's Compare panel (`stand/renders/`).
+For video, render more frames at 30 or 60 fps into a folder and assemble with ffmpeg: `ffmpeg -framerate 60 -i frame_%04d.png -c:v libx264 -pix_fmt yuv420p out.mp4`.
 
 ## Performance notes
 

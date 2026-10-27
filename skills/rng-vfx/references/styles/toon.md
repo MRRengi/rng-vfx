@@ -1,44 +1,39 @@
-# Toon (cartoon)
+# Toon
 
-Reference points: Western cartoon animation, cel-shaded adventure games (The Legend of Zelda: The Wind Waker), rhythm action games like Hi-Fi Rush, Nintendo-style party games.
+Cartoon games: The Legend of Zelda: The Wind Waker, Splatoon, Ratchet & Clank, Fortnite's lighter effects, Cuphead's spirit in 3D. Friendly, round, bouncy, outlined.
 
-## What defines it
+**References to recall:** The Wind Waker (sword hits, bomb explosions with round puffs, enemy defeat puffs), Splatoon (ink bursts), Ratchet & Clank (weapon impacts). Describe the matching one at contact, +2, +6 frames and the end before building.
 
-- **Round, friendly shapes.** Puffs are circles and clusters of circles, stars have rounded points, splashes are blobs.
-- **Squash and stretch, overshoot.** Shapes pop past their final size and settle (outBack, elastic). Fast things stretch along their motion.
-- **Full frame rate,** usually 60 fps smooth motion; snappy because of easing, not frame holds. Holds can still be used for comic timing (a freeze before a pop).
-- **Thick outlines, two tones.** One light tone and one shadow tone, a confident dark outline (often a dark tint of the fill, not black).
-- **Dissipation by shrinking.** Puffs scale down to nothing, stars twinkle out. Rarely erosion, almost never alpha fades.
-- **Symbols.** Stars, sparkles, swirls, sweat drops, "pow" shapes are allowed and expected.
+## Look
 
-## Color and value
+- Round shapes: puffs are clusters of circles, stars have straight edges and slightly rounded tips, splashes are blobs.
+- Flat colour in 2 bands (light and shade) and a thick dark outline (6 - 8% of a shape's radius, at least 2 px); no gradients, little or no bloom.
+- Bright, friendly palette with a coloured outline instead of black. Example: star `#fff3a0` / `#ffc62e`, outline `#3a2a6a`; puffs `#ffffff` / `#c9c0e8`, outline `#2b2b55`; fire `#ffe14d` / `#ff7a1a`, outline `#5a1e1e`.
+- Motion is squash and stretch with overshoot: pop in fast with an outBack curve, hold, shrink away with an ease-in. Shapes disappear by shrinking, rarely by fading.
+- Symbols are welcome: stars, sparkles, swirls, "pow" bursts.
 
-- Bright saturated primaries and candy colors. Shadows are hue-shifted (lavender or blue shadows on white, red-pink shadows on yellow-orange).
-- High value overall; readability comes from outlines and shape rather than darkness.
-- Bloom: very little. A soft halo around a flash at most.
+## Timing defaults (60 fps)
 
-## Signature techniques
+| Layer | Start | Peak | End |
+|---|---|---|---|
+| Star | 0 | 3 - 4 (overshoot 1.1x) | shrinks out by 10 - 12 |
+| Puffs | 2 | 6 - 8 (outBack pop) | hold, then shrink by 25 - 35 |
+| Sparkles | 2 | | 30 - 40, twinkling |
+| Explosion fire puffs | 0 | 4 - 6 | shrink by 30 - 40 |
+| Smoke puffs | 15 | 25 | 50 - 60 |
+| Target squash | 0 | 2 | bounce settles by 20 |
 
-- **Two-tone puff:** circle silhouette with slight noise wobble, one shading band, outline. Size curve: pop up to full with outBack in 3 - 6 frames, hold, shrink with ease in. A size curve that only goes from big to small (born at full size) has no pop: give it an explicit size-in phase (the first 10 - 20% of life).
-- **Cluster puffs:** spawn 2 - 3 clusters of 3 - 5 puffs (tight spawn radius, low speed variance inside a cluster) so a cloud reads as a bunch of grapes, not balloons drifting apart. Draw one thick outline around each cluster's union, not one per puff.
-- **Curl tips:** the comic smoke swoosh is a spiral, a polar mask `r < f(angle + twist * r)`, at the ends of puff trails.
-- **Star burst:** 4 - 6 points with straight or slightly convex edges and softly rounded tips, unequal lengths (one long point along the hit), a thick dark outline, overshoot scale, then vanish in one frame or shrink. Concave, petal-like points read as a flower; needle-thin points read as anime. Build it as a star polygon: straight lines from each tip to the valley between tips, optionally bulged outward by 5 - 10%. A polar `pow(triangleWave, k)` radius bends those edges into curves at any k and gives the flower; a cosine gives petals. The stand's `flash({ poly: 0.08 })` is this shape.
-- **Rings and ground shocks:** a flat single-colour broken ring (alpha-blended, hard edge, the cel outline gives it its edge) that starts 2 - 3 frames after the star, covers about 60% of the circle and stays within 1.2x the star; on the ground use a skirt of small puffs running outward, never a flat additive white hoop.
-- **Sparkle:** four-point star particle, scale and rotation pulse, twinkle out.
-- **Rim and toon ramp on meshes:** a 1D ramp texture with 2 - 3 hard steps for lighting, a fresnel rim for magic.
+## Signature shapes
 
-## Default numbers
+- Star polygon burst with a thick outline, one long point along the hit.
+- Puff clusters with an outline around the union and one shade band, holes appearing late (`shapes.md` > Cel puffs).
+- A skirt of small puffs on the ground instead of a ring.
+- Squash on the target and a bounce.
 
-- Timings, sizes and brightness: `numbers.md` > Toon.
-- Outline width: `numbers.md` > Contrast floors (toon sits at the thick end).
-- Puffs pop in over 10 - 20% of life with overshoot, then shrink out.
+## Failure modes in this style
 
-## Common mistakes
-
-- Sharp aggressive spikes (that is anime or stylized combat).
-- Realistic smoke or volumetrics.
-- Fading instead of shrinking.
-- Linear motion: toon needs strong easing on everything.
-- Anything held still: every shape keeps squashing, bobbing or shrinking; a held toon puff reads as a sticker.
-- Two-colour rings with an outline colour: toon rings are one flat colour.
-- A target that only slides: toon targets squash, stretch and settle.
+- Concave petal-like star points: they read as a flower. Use a star polygon with straight edges.
+- Outlined donut puffs from fine-noise holes.
+- Soft glow and bloom: toon is flat colour.
+- Fades instead of shrinking; no overshoot, no squash.
+- A thin flat ring instead of a puff skirt.

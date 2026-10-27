@@ -1,48 +1,42 @@
-# Dark fantasy (ARPG, grimdark, horror magic)
+# Dark fantasy
 
-Reference points: Diablo II, III and IV, Path of Exile, Grim Dawn, Dark Souls, Elden Ring, Blasphemous.
+Diablo IV, Path of Exile, Elden Ring, Dark Souls, Lords of the Fallen. Grim, heavy, material: dark masses with hot edges, blood that has weight, fire that burns rather than glows.
 
-## What defines it
+**References to recall:** Diablo IV (Barbarian heavy hits, Necromancer blood spells, Sorcerer fire), Elden Ring (Bloodhound's Fang slashes, Rivers of Blood, greatsword impacts), Path of Exile (Cyclone, Heavy Strike). Describe the matching one at contact, +2, +6 frames and the end before building.
 
-- **Black is a color.** Dark cores, black smoke, shadow tendrils and alpha-blended darkness are as important as light. Effects subtract light as often as they add it.
-- **Hot rims on dark bodies.** A black or dark crimson shape with a thin burning edge (crimson, ember orange, sickly green, cold blue) is the signature look.
-- **Restrained palette.** Desaturated world, two strong effect hues at most: blood red and ember orange, corruption green and black, frost blue and gray, void purple and black.
-- **Weight and grit.** Heavier camera shake, longer residue, debris, ash, blood, cracks in the ground, lingering embers and smoke. Things fall and stay.
-- **Organic menace.** Shapes are jagged, torn, tendril-like, clawed; avoid clean geometric magic circles unless the theme is ritual.
-- **Telegraphs matter.** ARPGs show huge numbers of effects at once from a high camera. Danger zones must read through the clutter, often through value (bright red ground warnings on a dark world).
+## Look
 
-## Color and value
+- Value carries the effect: dark bodies with a thin hot edge (a dark torn slash with a red-orange rim), not bright glowing shapes.
+- Desaturated, heavy palette with one hot accent. Example blood: `#7a0a10` body, `#3a0206` dark, a small `#ff5a3c` glint; fire: `#ffb070` core, `#d8280c` body, `#6a0808` edge, `#120406` smoke base; smoke `#1e1416` to `#3a2e30`, never pure black (it must read against a dark background with a rim of fire light from below).
+- Torn, ragged, asymmetric shapes: claws, tears, splinters, cracks; nothing perfectly round or clean.
+- Fire stays red-orange under the tone mapper: keep its body below the bloom threshold.
+- Heavy timing: big hits have hit stop, a long hold of the dark residue and slow smoke.
 
-- Base: near black with a hue tint (never neutral gray-black, it looks like a hole in the screen).
-- Rim and core: one hot hue, above B, used sparingly so it pops against darkness.
-- Ground lighting from the effect is important: a red or green glow on the floor sells it.
-- Bloom: medium, tight radius. Haze washes out the darkness.
-- Filmic tone mapping (AgX, ACES) desaturates bright values toward white: an orange at 3 B comes out pale yellow-white, and reds turn salmon pink. Keep mid-tone hot colours at 1.2 B or less, reserve higher values for the small core, and check that the fireball's hue at peak is still red-orange. Black bodies need opaque dark smoke and an exposure dip, not more glow.
+## Timing defaults (60 fps)
 
-## Signature techniques
+| Layer | Start | Peak | End |
+|---|---|---|---|
+| Slash (dark body, hot rim) | -3 | 0 - 2 | erodes by 14 - 18 |
+| Torn contact flash | 0 | 1 | 4 - 5 |
+| Blood spray | 0 | | lands as splats at 18 - 27 |
+| Splat decals | 18 | | stay |
+| Embers | 2 | | 60 - 90, rising |
+| Ground cracks (explosions) | -15 (spread before) | 0 | cool unevenly until 180 |
+| Fire tongues | 0 | 4 - 8 | 40 - 60 |
+| Smoke | 4 | grows 60 - 120 | 180 - 300 |
 
-- **Alpha-blended dark smoke** layered under additive embers. Order matters: dark under, hot over. Black smoke must be lit from inside by its fire (add the fire colour to the smoke by height above the source, scaled by the fire's light curve) or rimmed; unlit black smoke on a dark stage is invisible. Check it on a mid background.
-- **Dark slash:** dark core, wide dark edge, hot rim band at the outer edge, tearing apart through ridged noise as the tail passes with a burning band at the dissolve edge.
-- **Torn splash instead of a lens flare:** the contact flash is an alpha-blended dark torn shape with a hot rim, stretched along the swing, plus a tiny additive core for 2 frames. A generic sparkle star has no menace.
-- **Radial cracks:** Voronoi evaluated in polar-log space (`x = angle / 2pi * P` with the cells wrapped in x so there is no seam, `y = log(r) * k`, plus a little domain warp) so cracks branch outward and get finer toward the centre. Line width tapers with radius (wide in the middle, thin at the edge), brightness falls off as `(1 - r)^1.5`, a molten pool sits in the centre, and each cell cools at its own pace (offset by a per-cell random). Put a dark scorch bed under them. Plain Cartesian Voronoi with equal cells reads as a tiled floor.
-- **Ember fields:** many tiny additive particles with curl noise drifting up, long lives, cooling ramp.
-- **Blood:** alpha-blended stretched droplets with gravity, a value range #7a0a10 to #3a0206 with a small specular glint and a dark rim (neon red like #c0101a reads as glowing sparks, not blood) (darker vanishes on dark ground), a tiny specular highlight, a cone along the swing, splat decals on landing. Never additive.
-- **Ash fall:** small gray shards drifting down slowly with curl noise after big events.
-- **Corruption:** noise-eroded black tendrils (ribbons with scrolling noise, or meshes with vertex offset) creeping outward.
+## Signature shapes
 
-## Default numbers
+- A dark crescent with a hot rim on its outer edge, burning off from the tail.
+- One torn blade along the swing as the contact flash, never a symmetric star or a cross.
+- Blood: dark teardrops stretched by speed, a bright glint on a few, landing as splats with satellite drops.
+- Glowing cracks that branch and cool unevenly.
+- Black smoke lit from below by the fire.
 
-- Timings, sizes and brightness: `numbers.md` > Dark fantasy.
-- Crack anticipation 10 - 20 frames before an eruption; cracks cool over 2 - 4 s.
-- Blood: 25 - 45 frames in flight, landing as splats that stay.
+## Failure modes in this style
 
-## Common mistakes
-
-- Pure black smoke with no tint and no rim (reads as missing pixels).
-- Too many saturated colors; dark fantasy is restrained.
-- Additive blending on dark elements (they disappear).
-- Pretty, clean, symmetrical magic that belongs to a high fantasy game.
-- Smoke glowing from the fire everywhere: fire light lives in the bottom 30% of the column plus a hot rim on the density edge.
-- A single slash for a claw or blade attack: add thin torn strands riding the main arc.
-- Round blood dots: drops stretch into teardrops along velocity and land as splats with satellite drops.
-- A target flash in bright red: dark fantasy tints the hit body dark (deep crimson) and lets the rim carry the heat.
+- Bright saturated red glow everywhere (neon blood, pink sprinkles).
+- The target repainted red on hit; the hit reads through the rim, the jolt and light.
+- Clean geometric shapes, symmetric crosses and stars.
+- Smoke that vanishes on dark backgrounds because it has no rim light.
+- Round dot splats.

@@ -1,44 +1,45 @@
-# Stylized (hand-painted, MOBA and hero shooter)
+# Stylized (MOBA, hero shooters, hand-painted)
 
-Reference points: League of Legends (Riot published its VFX style guide publicly; it is the best free document on readable stylized VFX), Overwatch, World of Warcraft, Hades, Fortnite.
+League of Legends, Overwatch, Dota 2, Heroes of the Storm, Fortnite, Smite. Readability for gameplay comes first: every ability must read instantly from a high or third-person camera among many others, so shapes are bold, graphic and clean, and textures look painted.
 
-## What defines it
+**References to recall:** League of Legends (Garen's Judgment and Decisive Strike, Yasuo's Steel Tempest, Riven's abilities, Jinx's rockets), Overwatch (Reinhardt's hammer swing and Earthshatter, Genji's Dragonblade, Junkrat's explosions), Dota 2 (Juggernaut's Omnislash). Describe the matching one at contact, +2, +6 frames and the end before building.
 
-- **Gameplay clarity above everything.** Effects show area, direction, power level and timing. Flavor is added only after the gameplay read is solid.
-- **Painterly shapes from noise.** Shapes come from gradient-mapped, eroding noise textures rather than hard cels. Edges are soft but defined. Use a large-feature tiling texture (billow Perlin `|n|`, inverted Worley, warped fbm, or painted brush noise) sampled with two pans at scales about 1.0 and 1.7 in different directions. For flames, bias the erosion threshold by height so the tops burn off first. Procedural value noise gives cauliflower mush; do not use it for bodies.
-- **Strong value hierarchy.** White core, saturated mid, darker painted secondary (smoke, outer flames). Three or four value steps.
-- **Full frame rate with punchy curves.** Fast in, slow out. Short holds on peak frames are fine.
-- **Primary and secondary separation.** The primary element (the spell's real area or projectile) gets the clearest shape and contrast; secondary elements (sparks, motes) are smaller, darker or less saturated.
-- **Painted smoke.** Smoke has visible brushy noise, two or three soft value bands, and a color tint from the effect's theme (purple smoke for arcane, warm brown for fire).
+## Look
 
-## Color and value
+- Bold silhouettes with simple, designed shapes: crescents, stars, petals, chunky shards, clean rings with gaps.
+- Hand-painted value structure: 2 - 3 hard or slightly soft bands (light core, saturated mid, darker rim), painted brush texture inside shapes rather than noise, very little gradient.
+- Bloom low or off: the shapes read on their own. Brightness never washes out the champion or the ground.
+- Colour: one saturated hero colour plus one secondary accent, chosen for the character or ability, with a dark rim for contrast on bright ground. Example for a heavy gold blade: core `#fffbe6`, mid `#ffc23a`, deep `#c2620e`, rim `#4a1d06`, accent `#5fd3ff`. Example for a cyan ability: core `#effdff`, mid `#36d6ff`, deep `#1478c8`, rim `#0b2d5a`, accent `#ffd34a`.
+- Fire and smoke are painted: posterized heat bands, the hottest band one connected shape; smoke in warm browns or purples with soft painted edges.
 
-- One theme color per ability, chosen from the character's identity. Accent sparingly.
-- Hue shift: core toward white or pale yellow, edges toward a deeper saturated hue, smoke toward a desaturated dark version.
-- Reserve pure white and maximum brightness for the strongest abilities (Riot's guide frames this as a scale of importance).
-- Bloom: medium, controlled. Only cores and sparks go above B.
+## Timing defaults (60 fps)
 
-## Signature techniques
+| Layer | Start | Peak | End |
+|---|---|---|---|
+| Wind-up / anticipation | -10 to -4 | | 0 |
+| Slash head sweep | -3 | 0 (reaches target) | |
+| Slash hold, then erode from tail | 0 | 0 - 2 | 10 - 16 |
+| Contact flash (star) | 0 | 1 | 4 - 6 |
+| Shards / sparks | 0 | | 15 - 30 |
+| Ground ring / crack | 1 | 6 - 10 | 20 - 30 |
+| Slash mark / afterimage | 0 | | 20 - 30 |
+| Hit stop (heavy) | 0 | | 3 - 5 frames freeze |
 
-- **Erosion with gradient map:** sample a noise, compute `heat = (noise - threshold(life)) / softness`, color from a ramp by heat, alpha from heat. One texture gives shape, color and dissipation.
-- **UV scrolling and panning noise** on meshes (cones, cylinders, half-spheres) for beams, tornadoes, shields.
-- **Shockwaves are distortion first:** a refraction ring that pushes the image outward, plus a thin bright leading edge. A wide soft coloured band on the ground reads as a UI selection circle. Tilt impact rings toward the hit instead of facing the camera.
-- **Slash wipe and burn:** the head reaches full length at contact and the tail starts eating it within 2 frames (hitstop counts toward that), with a bright burn band at the dissolve edge in the tail only.
-- **Swept slash mesh:** arc mesh, head and tail masks along U, white core to colored edge along V, erosion as the tail passes.
-- **Ribbon trails** with tapered width and scrolling noise.
-- **Fresnel shells** on characters for buffs and shields.
-- **Ground decals** for area of effect with a crisp edge and a soft interior.
+Heavy hits are bigger, not longer: the peak shape is 1.5 - 2x a light hit's size at the same speed.
 
-## Default numbers
+## Signature shapes
 
-- Timings, sizes and brightness: `numbers.md` > Stylized.
-- Fire: 2 - 4 posterized heat bands on large-feature noise; painted flipbooks for hero bodies.
+- Slash crescent facing the camera, thick leading edge, painted bands, eroding from the tail (`shapes.md` > Slash).
+- Star flash with 4 - 6 uneven blades, a dark rim.
+- Chunky shards thrown along the swing, rotating, with a bright edge.
+- Ground cracks or slash decals for heavy hits.
+- Painted puffs (2 - 3 bands, soft edge) for dust and smoke.
 
-## Common mistakes
+## Failure modes in this style
 
-- Everything at the same brightness (no hierarchy).
-- Noise textures that are too fine; at gameplay distance fine noise becomes gray mush. Use big, readable noise features.
-- Area of effect drawn larger or smaller than the hitbox.
-- Smoke covering the character or the important part of the effect.
-- A slash that floats beside the target: it crosses the target's body, with one or two thinner secondary arcs a frame behind for volume.
-- Body and slash cores far above B (`numbers.md` > Brightness): bloom turns them into haze and the shape is lost.
+- Glowy, bloomy energy with soft gradients instead of painted bands: reads as generic sci-fi.
+- Monotone gold or white-orange: no saturated mid band, no dark rim, no accent.
+- Hairline elements that vanish at the gameplay camera.
+- A 3D ribbon seen edge-on, or a slash plus a separate "cut line" competing as two shapes.
+- Noise patches inside shapes that read as dirt or burnt paper.
+- Everything gone at +0.3 s: no mark, no lingering shape, no weight.
