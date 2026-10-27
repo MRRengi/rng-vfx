@@ -38,7 +38,11 @@ def free_port():
 def grab(page, canvas, t):
     page.evaluate(f"window.fx.seek({t})")
     page.wait_for_timeout(30)
-    return Image.open(io.BytesIO(canvas.screenshot())).convert("RGB")
+    # A page screenshot clipped to the canvas: element screenshots wait for the
+    # page to settle and time out on slow software-rendered WebGL.
+    box = canvas.bounding_box()
+    shot = page.screenshot(clip=box, timeout=120000)
+    return Image.open(io.BytesIO(shot)).convert("RGB")
 
 
 def sheet(tiles, cols):
