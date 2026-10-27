@@ -19,8 +19,8 @@ Anime action games and TV sakuga: Genshin Impact, Honkai: Star Rail, Zenless Zon
 |---|---|---|---|
 | Anticipation / charge | -12 to -4 | | 0 |
 | Projectile travel | | | stops at 0, on the target |
-| Impact frame (heaviest hits only) | 0 | | 1 - 2 frames |
-| Contact burst (energy sphere, glow) | 0 - 2 | 2 - 4 | 12 - 20 |
+| Impact frame (heavy hits), full screen, alternating tones | 0 | | 2 - 4 frames |
+| Contact burst (energy sphere, glow) | 0 - 2 | 2 - 4 | 20 - 30 |
 | Speed streaks | 0 | | 6 - 10 |
 | Rings / shock | 2 | 8 - 12 | 16 - 24 |
 | Hang: big shape holds | 4 | | 12 - 20 |
@@ -31,8 +31,8 @@ The contrast is the point: a very fast hit, a held strong shape, then a slower b
 
 ## Signature shapes
 
-- Contact burst: a sphere or bloom of energy with a crisp, slightly irregular edge and spikes of light breaking out of it, layered with crossing arcs.
-- Impact frame: two-tone silhouette with radial speed lines, 1 - 2 frames (`shapes.md` > Impact frames).
+- Contact burst: a sphere of energy 1.5 - 2x the target's height that swallows the target, with a crisp, slightly irregular edge, spikes of light breaking out of it and bright crossing arcs and rings around it. It is the biggest thing on screen during the hang.
+- Impact frame: full-screen two-tone silhouette with thick radial speed lines, 2 - 4 frames with alternating tones (`shapes.md` > Impact frames).
 - Rings and arcs with real thickness, tilted in 3D around the target.
 - Speed streaks that taper, with thickness.
 - Sparkles: 4-point glints that pop and twinkle.
@@ -42,7 +42,8 @@ The contrast is the point: a very fast hit, a held strong shape, then a slower b
 - Flat, outlined cartoon stars and clouds: reads as toon or a comic, not anime action.
 - Soft, shapeless bloom domes with no crisp edge.
 - Pastel or washed colour instead of saturated energy.
-- Impact frames that run 3 frames or more, cover the screen with shapeless blobs, or repeat.
+- A timid impact frame (a small patch, one frame) or one with shapeless blobs.
+- A burst smaller than the target: the hit has no weight.
 - Hairline rings and speed lines that vanish at the gameplay camera.
 - The burst collapsing within a quarter second: no hang, no designed break-up.
 - Projectiles that pass through the target instead of stopping on it.

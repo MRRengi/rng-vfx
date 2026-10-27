@@ -17,7 +17,7 @@ Effects made by agents cluster around the same defaults. They are why an effect 
 4. **Wrong timing.** A slow swell to a late peak, or a long full-screen moment, followed by everything vanishing at once. Shipped hits peak within 1 - 3 frames of contact, hold briefly, and spend most of their life dissipating.
 5. **No contact.** The target and the ground do not react: no light on the target, no dust, no mark, no knockback.
 6. **Weak dissipation.** Smoke that detaches and floats away as one lump, puffs that shrink uniformly, trails that pop off.
-7. **Generic palette.** Everything warm white-orange, gold or pastel, regardless of genre and readability against the scene.
+7. **Timid scale.** Effects sized to the minimums below instead of to the event: a heavy hit that is a small arc beside the character, a spell burst smaller than the target. In shipped action games a heavy hit or a spell is the biggest thing on screen for a moment: 1 - 2x the character's height, wrapping around the target, with the target itself flaring on the hit. The minimums are a floor, not a size.
 8. **Noise as detail.** Procedural noise used as surface texture reads as dirt or grain. In shipped work, noise breaks edges and drives erosion of a designed shape; the detail comes from the shapes.
 
 ## The process
@@ -79,7 +79,7 @@ Render frame strips at fixed times relative to contact: -2, 0, +2, +4, +8, +15 a
 1. At its peak, does the primary shape read as one clear silhouette from the gameplay camera, and does it look like the genre's shipped effects rather than a sticker or a blob?
 2. Is the peak within 1 - 3 frames of contact (or the style's drawing equivalent), and does the effect then hold and dissipate rather than vanish?
 3. Is every element at least the minimum width below at the gameplay camera?
-4. Is the target still readable at every frame (no blow-out to white, no repaint), and does it react?
+4. Does the target react (a flash, light from the hit, knockback), and is it readable again within a few frames after contact?
 5. Does the ground or surroundings react where they would (dust, light, mark)?
 6. Does the residue stay attached to where it came from and leave unevenly, from the edges inward?
 7. Does the palette match the style file, does the energy glow and light its surroundings, and does it separate from the background?
@@ -94,12 +94,12 @@ These are defaults for a 1080p frame; scale with the resolution.
 | | Minimum |
 |---|---|
 | Primary shape, light hit | 40 px |
-| Primary shape, heavy hit or cast | 80 px |
+| Primary shape, heavy hit or cast | 80 px (aim for 1 - 2x the character's on-screen height) |
 | Primary shape, explosion or ultimate | 200 px |
 | Line, ring, spike or streak width | 3 px |
 | Spark length | 12 px, at least 3x its width |
-| Contact flash on screen | 1 - 3 frames, never more than about a quarter of the frame's area |
-| Full-screen effect (impact frame, flash) | 1 - 2 frames, on the heaviest hits only |
+| Contact flash | 1 - 3 frames at full size |
+| Full-screen impact frame | anime and fighting styles, heavy hits: 2 - 4 frames (`references/shapes.md` > Impact frames); never in realism |
 
 Clamp minimum widths in the shader in pixels (world units per pixel at the particle's depth times the pixel minimum), so they survive distance without growing in the close-up.
 

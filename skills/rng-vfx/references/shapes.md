@@ -125,15 +125,16 @@ Layers and timing for a realistic ground explosion:
 
 ## Impact frames
 
-The anime and fighting-game impact frame is a designed, rare accent.
+The anime and fighting-game impact frame sells the heaviest hits. Make it bold:
 
-- 1 - 2 frames, on the heaviest hits only.
-- Two tones (black on white or the inverse) of the hit's own silhouette and the attacker and target, plus radial speed lines. The shape must still read: it is the effect's silhouette at its strongest, not a random blob.
-- Often limited to a region around the hit or tinted rather than full-screen; full-screen flashing frames are a photosensitivity risk, so never more than 2 in a row and never repeated rapidly.
+- Full screen, 2 - 4 frames on the contact, then straight into the burst.
+- Alternate the tones across those frames: dark silhouette on white, then white silhouette on the effect's deep colour (for cyan, a navy `#0a2a5e`), optionally an inverted or tinted frame between. Each frame redrawn, not one image held.
+- Content: the target's and the burst's silhouette at its strongest, plus thick radial speed lines converging on the hit. The shape must read; it is not a random blob.
+- Once per hit, never repeated in a rapid loop (photosensitivity).
 
 ## Hit reaction and hit stop
 
-- **Flash:** tint the target toward the effect colour for 1 - 2 frames by lerping its albedo (an emissive add can only brighten and washes dark targets to pink or white). Keep it below the effect's own brightness: the target must stay readable.
+- **Flash:** on contact the target flares toward white or the effect's hot colour for 1 - 3 frames, then tints toward the effect colour and returns over a few more. Lerp its albedo toward the flash colour and add emissive for the flare. In dark fantasy and realism keep it subtle (a tint, a rim, light from the hit).
 - **Rim:** a thin rim light in the effect colour for a few frames.
 - **Motion:** squash on contact, knockback along the hit direction, a small jolt.
 - **Hit stop:** freeze the attacker, target and contact effects for 2 - 6 frames on heavy hits (scale with weight). Effects that started before contact freeze too; the burst continues after.
