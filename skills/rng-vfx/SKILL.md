@@ -11,7 +11,7 @@ Work as the lead VFX artist on a shipped action game. Effects exist for the play
 
 Effects made by agents cluster around the same defaults. They are why an effect reads as cheap, so treat each as a decision you have to justify, not a starting point:
 
-1. **Bloom does the work.** Cores pushed to white and bloom turned up, so the frame washes out, the target blows out and shapes dissolve into glow. Shipped effects are designed in value first and read with bloom off; bloom is an accent on the hottest few percent.
+1. **Glow without a shape, or a shape without glow.** Two opposite mistakes. One: cores pushed to white and bloom turned up until the target blows out and the shape dissolves into a blob. Two: energy drawn as flat, outlined, unlit cartoon shapes, so a sword arc or a spell looks like a sticker. Energy in shipped action games glows: a luminous body with a hot core and a soft falloff, bloom on the core, and light cast onto the target and the ground. The glow sits on a designed shape you can still recognise, and the target stays readable under it.
 2. **Hairlines.** Rings, spikes, speed lines and sparks one or two pixels wide that look fine in the close-up and vanish at the gameplay camera.
 3. **No primary shape.** A soft glowing blob, a cloud of noise or several competing elements instead of one designed silhouette that reads in a single still frame.
 4. **Wrong timing.** A slow swell to a late peak, or a long full-screen moment, followed by everything vanishing at once. Shipped hits peak within 1 - 3 frames of contact, hold briefly, and spend most of their life dissipating.
@@ -27,9 +27,9 @@ Copy this checklist into your notes and work through it in order. The written pl
 ```
 - [ ] 1. Brief and audit
 - [ ] 2. Reference breakdown
-- [ ] 3. Design plan (shape, value, colour, timing, layers)
+- [ ] 3. Design plan (shape, colour and glow, timing, layers)
 - [ ] 4. Check the plan against the defaults above; revise
-- [ ] 5. Blockout: flat shapes, bloom off, gameplay camera; review frames
+- [ ] 5. Blockout: primary shape and timing at the gameplay camera; review frames
 - [ ] 6. Build: shading, detail, interaction, dissipation
 - [ ] 7. Review loop until every review question passes
 ```
@@ -49,7 +49,7 @@ Pick two shipped effects in this genre that do the same job (name the game and t
 Write the plan as a short block:
 
 - **Primary shape:** the one silhouette that carries the event, drawn as you would see it from the gameplay camera at its peak frame (a few lines of ASCII or a one-sentence geometric description: "a crescent 2.2 m across, thick at the leading edge, tapering to a point, tilted 30 degrees toward the camera, passing through the target's chest"). Say how it faces the camera.
-- **Value bands:** 2 - 4 bands from lightest to darkest with hex colours, for example core `#ffffff`, mid `#36d6ff`, rim `#0b4f8c`. The effect must read in grayscale with bloom off; the darkest band is what separates it from bright backgrounds.
+- **Value and colour:** the ramp from the hottest value to the edge with hex colours, for example core `#ffffff`, body `#36d6ff`, falloff `#0b4f8c`. For energy, say how it glows (which part blooms, what light it casts and on what). For matter (smoke, dust, debris, blood), say how it is lit.
 - **Timing table:** each layer's start, peak and end in frames at 60 fps relative to contact, using the style file's defaults as the starting point.
 - **Layers**, each with one job:
   - primary (the silhouette);
@@ -60,27 +60,29 @@ Write the plan as a short block:
 
 ### 4. Check the plan against the defaults
 
-Go through the eight defaults above against your plan. Where the plan matches one by habit rather than choice, change it and note what changed. Ask also: what would the effect look like in a single frame, in grayscale, at the gameplay camera, with bloom off? If the answer is "a soft bright blob", the plan is not done.
+Go through the eight defaults above against your plan. Where the plan matches one by habit rather than choice, change it and note what changed. Ask also: what would the effect look like in a single frame at the gameplay camera? If the answer is "a soft bright blob" or "a flat sticker", the plan is not done.
+
+Outlines, straight-edged star polygons, "pow" bursts and outlined cartoon puffs belong to the toon style only. In any other style they make the effect read as a comic; do not use them unless the user asks.
 
 ### 5. Blockout
 
-Build the primary shape and the timing with flat, unlit colours, bloom off, seen from the gameplay camera. Render a frame strip (step 7) and check the silhouette, direction and timing before any shading. Most of the quality is decided here.
+Build the primary shape and the timing first, seen from the gameplay camera. Render a frame strip (step 7) and check the silhouette, direction and timing before polishing. Most of the quality is decided here.
 
 ### 6. Build
 
-Then add, in order: shading in the value bands, the secondary layers, interaction, residue and dissipation, and finally bloom, distortion and light as accents. `references/shapes.md` has construction recipes for the common shapes (slash crescents, star flashes, explosions, smoke, sparks, debris, shockwaves, impact frames, decals, hit reactions); `references/physics.md` has motion; the engine file has the implementation details (`references/engines/unity.md`, `unreal.md`, `threejs.md`).
+Then add, in order: the colour ramp and glow (or lighting, for matter), the secondary layers, interaction (light on the target and ground, reaction, dust, marks), residue and dissipation, and finally distortion. `references/shapes.md` has construction recipes for the common shapes (slash arcs, contact flashes, explosions, smoke, sparks, debris, shockwaves, impact frames, decals, hit reactions); `references/physics.md` has motion; the engine file has the implementation details (`references/engines/unity.md`, `unreal.md`, `threejs.md`).
 
 ### 7. Review loop
 
-Render frame strips at fixed times relative to contact: -2, 0, +2, +4, +8, +15 and +30 frames, then 50%, 75% and 95% of the duration. Render them from the gameplay camera and from a close camera, and once more from the gameplay camera with bloom off. For a page with the `window.fx` API, `python scripts/capture_strip.py <folder> <out>` renders them; elsewhere use the engine's frame capture (engine files). Look at every strip and answer each question in writing, with the frame you checked:
+Render frame strips at fixed times relative to contact: -2, 0, +2, +4, +8, +15 and +30 frames, then 50%, 75% and 95% of the duration. Render them from the gameplay camera and from a close camera (a bloom-off pass is optional and only helps to see whether the shape exists under the glow). For a page with the `window.fx` API, `python scripts/capture_strip.py <folder> <out>` renders them; elsewhere use the engine's frame capture (engine files). Look at every strip and answer each question in writing, with the frame you checked:
 
-1. At its peak, does the primary shape read as one clear silhouette from the gameplay camera, with bloom off?
+1. At its peak, does the primary shape read as one clear silhouette from the gameplay camera, and does it look like the genre's shipped effects rather than a sticker or a blob?
 2. Is the peak within 1 - 3 frames of contact (or the style's drawing equivalent), and does the effect then hold and dissipate rather than vanish?
 3. Is every element at least the minimum width below at the gameplay camera?
 4. Is the target still readable at every frame (no blow-out to white, no repaint), and does it react?
 5. Does the ground or surroundings react where they would (dust, light, mark)?
 6. Does the residue stay attached to where it came from and leave unevenly, from the edges inward?
-7. Does the palette match the style file and separate the effect from the background in value?
+7. Does the palette match the style file, does the energy glow and light its surroundings, and does it separate from the background?
 8. Does it hold up next to the reference breakdown from step 2 at the same four moments? Name the biggest remaining difference.
 
 Fix the biggest failure, render again, and repeat until all eight pass. Then compare the final strip with the reference breakdown once more and write down what you would improve next.
@@ -94,7 +96,7 @@ These are defaults for a 1080p frame; scale with the resolution.
 | Primary shape, light hit | 40 px |
 | Primary shape, heavy hit or cast | 80 px |
 | Primary shape, explosion or ultimate | 200 px |
-| Line, ring, spike or streak width | 3 px (5 px for the primary shape's outline) |
+| Line, ring, spike or streak width | 3 px |
 | Spark length | 12 px, at least 3x its width |
 | Contact flash on screen | 1 - 3 frames, never more than about a quarter of the frame's area |
 | Full-screen effect (impact frame, flash) | 1 - 2 frames, on the heaviest hits only |

@@ -1,6 +1,6 @@
 # Brightness
 
-Bloom is an accent. Design the effect to read with bloom off (value bands, `../SKILL.md` step 3), then let only the hottest few percent of it exceed the bloom threshold. This file is how to set those levels in each engine.
+Bloom is part of the look for energy, but it sits on a designed shape: the core and the flashes cross the bloom threshold, the saturated body stays just below it so it keeps its colour instead of going white. This file is how to set those levels in each engine.
 
 ## Brightness is relative to the project
 

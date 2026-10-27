@@ -4,7 +4,7 @@ How to construct each common element so it reads. Sizes are in metres for a 1.8 
 
 Contents:
 - Foundations: designed shapes, value bands, blending
-- Contact flash (star)
+- Contact flash
 - Slash
 - Projectile
 - Rings and shockwaves
@@ -13,7 +13,7 @@ Contents:
 - Explosions
 - Smoke and dust
 - Fire
-- Cel puffs and stylized smoke
+- Cel puffs (toon only)
 - Impact frames
 - Hit reaction and hit stop
 - Decals and marks
@@ -21,26 +21,26 @@ Contents:
 
 ## Foundations
 
-**Shapes come from math, not noise.** Build silhouettes from signed distance functions in the fragment shader: circles, capsules, crescents (difference of two circles), star polygons (straight edges from tip to valley), segments. A designed silhouette with a crisp edge reads at any distance; then use noise only to break that edge (offset the distance by low-amplitude fbm) and to drive erosion over life. Noise sampled as colour or alpha on its own looks like grain or dirt.
+**Shapes come from math, not noise.** Build silhouettes from signed distance functions in the fragment shader: circles, capsules, crescents (difference of two circles), segments, and for toon star polygons. A designed silhouette with a crisp edge reads at any distance; then use noise only to break that edge (offset the distance by low-amplitude fbm) and to drive erosion over life. Noise sampled as colour or alpha on its own looks like grain or dirt.
 
-**Value bands.** Map a single 0..1 "heat" or "density" value through the plan's bands: smoothstep between bands for realistic and painted looks, a hard step for anime, toon and pixel. Keep the brightest band to the core (10 - 20% of the shape's area), the mid band carrying the colour, and a dark rim or outline on anything that has to read against bright backgrounds.
+**Colour ramp.** Map a single 0..1 "heat" or "density" value through the plan's ramp: smooth falloff for energy, realism and painted looks, a hard step only for toon and pixel. Keep the hottest value to the core (10 - 20% of the shape's area) and let the saturated body carry the colour. For energy, add a soft glow halo outside the body (a wider, fainter copy of the shape, or bloom on the core) and cast its light onto the target and the ground (a point light or a light card). On bright backgrounds an additive shape needs a faint darker alpha under-shape; outlines are for toon only.
 
 **Erosion over life (a life map).** Give the shape a grayscale map that says when each pixel dies (big smooth blobs, not fine noise), and discard where `map < age01`. The shape then breaks into large pieces from the edges inward instead of fading or shrinking uniformly. Add a thin bright or dark band at the erosion edge for burning or dissolving looks.
 
 **Blending.**
 - Additive: light (flashes, energy, sparks). Brightens only; disappears on bright backgrounds, so give important additive shapes a dark alpha-blended under-shape.
-- Alpha: matter (smoke, dust, debris, blood, cel shapes).
+- Alpha: matter (smoke, dust, debris, blood, toon shapes).
 - Premultiplied: fire and anything that glows and occludes at once; the alpha says how much it blocks, the colour how much it emits.
 
-## Contact flash (star)
+## Contact flash
 
 The contact flash says where and how hard. It is small, hot and short.
 
-- Star polygon with 4 - 6 uneven blades; the longest one or two along the hit direction at 1.5 - 2x the others. Straight or slightly concave edges, sharp tips.
-- Size: 0.3 - 0.5 m across for a light hit, 0.6 - 1.0 m for a heavy one.
-- Value: white core about 20% of the radius, saturated colour band, thin dark outline in stylized styles.
-- Timing: full size on the contact frame or the next, holds 1 - 2 frames, shrinks or breaks over 2 - 4 frames. Redraw it each 2 frames with new blade lengths rather than rotating one shape.
-- Never cover the target: the flash sits on the impact point, in front of the surface, and is smaller than the character's torso.
+- Energy styles (stylized, anime, realism muzzle and impacts): a radial glow card with a white-hot centre, plus two or three long glints (thin tapered light streaks) stretched along the cut or the hit direction, and a shorter cross glint. The glints are 2 - 4x longer than the glow is wide. A point light at the impact lights the target and the ground for the same frames.
+- Toon only: a straight-edged star polygon with 4 - 6 uneven blades and an outline.
+- Size: 0.3 - 0.5 m across for a light hit, 0.6 - 1.0 m for a heavy one (glints can run longer).
+- Timing: full size on the contact frame or the next, holds 1 - 2 frames, then shrinks and fades over 2 - 4 frames.
+- Never cover the target: the flash sits on the impact point, in front of the surface, and is smaller than the character's torso; the target is lit by it, not hidden by it.
 
 ## Slash
 
@@ -49,8 +49,8 @@ The slash is one shape: a crescent that passes through the target.
 - **Geometry:** an arc strip (or a crescent SDF on a quad) whose midpoint lies on the impact point. Radius about arm plus weapon (1.2 - 1.8 m for a sword); visible span 90 - 140 degrees. The visible band, start to end, sits 20 - 50 degrees from horizontal from the gameplay camera unless the attack is an overhead or a sweep.
 - **Facing:** orient the arc plane toward the camera (tilt it until its normal is within about 40 degrees of the view direction). An arc seen edge-on reads as a line or a pole.
 - **Width profile:** widest just behind the leading edge (0.15 - 0.25 of the radius), tapering to a point at the tail; the outer edge sharp, the inner edge softer. The cut line is the bright outer edge of this same shape, not a separate element.
-- **Timing:** the head sweeps through the arc in 2 - 4 frames, reaching the target on the contact frame; the full shape holds 1 - 2 frames; then it erodes from the tail toward the head over 6 - 12 frames. It does not move or change shape after contact.
-- **Values:** bright edge, coloured body, darker or transparent inner edge. In stylized styles a hand-painted band structure (2 - 3 hard bands) with a dark rim.
+- **Timing:** the head sweeps through the arc in 2 - 4 frames, reaching the target on the contact frame; the full shape holds 1 - 2 frames; then it fades and thins from the tail toward the head over 6 - 12 frames, wisps peeling off the trailing edge. It does not move or change shape after contact.
+- **Layers and values:** a hot, thin leading edge (near white, blooms); a wider saturated body that falls off softly toward the inner edge; a faint wispy trail behind with streaky texture running along the arc. Build them as two or three overlapping strips with different widths and lifetimes so the slash has depth. Light the target from the cut side for a few frames.
 - **Afterwards:** a short slash mark on the target or the ground (a decal or an afterimage) for 0.3 - 0.5 s keeps the weight after the trail is gone.
 - From a real animation, sample the weapon tip and base each frame and build the strip from those points instead of an ideal arc.
 
@@ -116,9 +116,9 @@ Layers and timing for a realistic ground explosion:
 - Fire turns into smoke above it; that transition sells realism.
 - It lights its surroundings with a flickering light.
 
-## Cel puffs and stylized smoke
+## Cel puffs (toon only)
 
-- 2 - 3 hard value bands and an outline (for toon and anime), lit from one consistent side.
+- 2 - 3 hard value bands and an outline, lit from one consistent side.
 - Clusters of lobes with different sizes, never a single circle.
 - **Holes:** driven by a large-feature life map; the smallest hole is about 20% of the puff's radius; holes start at the silhouette edge and work inward while the puff shrinks a little; no outline drawn around small inner holes. Fine noise holes turn puffs into outlined donuts and worms.
 - Held drawings: in anime and pixel, change the shape on the drawing rate (every 2 - 3 frames), not continuously.

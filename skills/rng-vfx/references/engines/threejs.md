@@ -35,7 +35,7 @@ float sdCircle(vec2 p, float r) { return length(p) - r; }
 float crescent(vec2 p, float r, float offset, float inner) {
   return max(sdCircle(p, r), -sdCircle(p - vec2(offset, 0.0), inner));
 }
-// Star polygon with straight edges: fold the angle into one tip-to-valley wedge.
+// Star polygon with straight edges (toon only): fold the angle into one tip-to-valley wedge.
 float sdStar(vec2 p, float rOuter, float rInner, float n) {
   float a = atan(p.y, p.x), w = 3.14159265 / n;
   a = abs(mod(a + w, 2.0 * w) - w);
@@ -62,7 +62,7 @@ float width = max(uWidth, uMinPx * worldPerPx);                             // e
 ## Post-processing
 
 - `EffectComposer` → `RenderPass` → distortion pass → `UnrealBloomPass` → effect passes on linear HDR (impact frame) → `OutputPass` (tone mapping and sRGB) → display-space passes (palette reduction for pixel art).
-- Bloom: `UnrealBloomPass(resolution, strength, radius, threshold)` compares linear luminance with the threshold and has a hard knee; raise `bloomPass.highPassUniforms.smoothWidth.value` to about 0.15x the threshold. Start with strength 0.2 - 0.4 and a threshold above every body colour (`../brightness.md`). Keep a switch to disable bloom for the review pass.
+- Bloom: `UnrealBloomPass(resolution, strength, radius, threshold)` compares linear luminance with the threshold and has a hard knee; raise `bloomPass.highPassUniforms.smoothWidth.value` to about 0.15x the threshold. Threshold above every body colour (`../brightness.md`) so only cores and flashes bloom; strength about 0.2 - 0.4 for realism, 0.5 - 0.9 for stylized and anime energy, where the glow halo is part of the look. Keep a switch to disable bloom for the review pass.
 - Distortion: render distortion meshes (rings, heat) into a half-resolution `HalfFloatType` target as signed UV offsets, and offset the scene colour lookup by it in a `ShaderPass`.
 - Tone mapping: `renderer.toneMapping = THREE.AgXToneMapping` for realism, `NeutralToneMapping` for stylized looks that must keep hue.
 - `ShaderPass` clones its uniforms and cannot clone render-target textures: assign those after creating the pass.
