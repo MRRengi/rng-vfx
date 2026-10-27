@@ -37,3 +37,5 @@ The baseline prompt is the same without the skill paragraph.
 | 2: energy allowed to glow | skill better | baseline better | baseline better |
 | 3: bolder scale and impact frames | not run | tie | skill effect better, motion jittery |
 | 4: reference-driven rewrite | skill better | skill better | tie |
+
+Round 5 checked whether the skill holds on styles it was never tuned on, with three new briefs: a dark fantasy greataxe slam, a toon bomb and a pixel-art fireball. All three came out level with the baseline, different in style but equally good.
