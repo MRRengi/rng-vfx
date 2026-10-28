@@ -10,7 +10,7 @@ Modern AAA shooters, military and cinematic games. The effect has to be believab
 - Physically based light: the flash and fire light the surroundings through a real light, and smoke is lit by the sun and by the fire.
 - Colour comes from materials and temperature: blackbody ramps for hot things (`#fff6e0` white-hot, `#ffc46b` yellow, `#ff7a1f` orange, `#9b2a0c` dark red), earth tones for dirt (`#4a3a2c`, `#6b5a48`, `#8a7a66`), grey-browns for smoke (`#2a2622` base, `#55504a` body, `#8c857c` thin edges).
 - Value: dark masses (soil, smoke) against the sky are what read from far away. A frag explosion that is mostly bright is wrong.
-- Fire emits light: its body is bright, saturated orange and yellow, sitting just under the bloom threshold so filmic tone mapping (AgX or ACES) keeps it orange instead of white, with only the core above it (`brightness.md`). Under the threshold does not mean dark: a brown or muddy fireball reads as dirt, not fire.
+- Fire emits light: its body is bright, saturated orange and yellow, sitting just under the bloom threshold so filmic tone mapping (ACES keeps fire orange better than AgX, which pushes it toward salmon) keeps it orange instead of white, with only the core above it (`brightness.md`). Under the threshold does not mean dark: a brown or muddy fireball reads as dirt, not fire.
 
 ## Timing defaults (60 fps, typical)
 

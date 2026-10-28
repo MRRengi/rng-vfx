@@ -60,7 +60,7 @@ Look at the effect in two ways, because each catches different problems:
 - **Stills** at fixed times from contact (-2, 0, +2, +4, +8, +15, +30 frames, then 50%, 75% and 95% of the duration) from the gameplay camera and a close camera: shape, scale, colour, reaction, residue.
 - **Motion:** every frame from a few frames before contact to about half a second after, in order: jitter, popping, flicker and the rhythm of the hit only show up here.
 
-For a page with the `window.fx` API, `python scripts/capture_strip.py <folder> <out>` renders both; elsewhere use the engine's frame capture. Then critique it as a demanding art director would, next to your reference breakdown at the same moments: where is it weaker than the reference, and which of the seven qualities is furthest off? Fix the biggest gap, render again and repeat until you would put it in the reel next to the reference. Write down what you would improve next.
+For a page with the `window.fx` API, `python scripts/capture_strip.py <folder> <out>` renders both (add `--times 0.4,0.5` for a quick look at chosen frames while iterating); elsewhere use the engine's frame capture. Then critique it as a demanding art director would, next to your reference breakdown at the same moments: where is it weaker than the reference, and which of the seven qualities is furthest off? Fix the biggest gap, render again and repeat until you would put it in the reel next to the reference. Write down what you would improve next.
 
 ## Reference files
 

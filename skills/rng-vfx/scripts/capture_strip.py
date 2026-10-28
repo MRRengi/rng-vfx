@@ -13,6 +13,9 @@ Writes:
   30 frames after, in order, as a contact sheet. Use it to check jitter,
   popping, flicker and the rhythm of the hit, which stills cannot show.
 
+For quick iteration, `--times 0.4,0.45,0.6` renders only those times (seconds)
+from the gameplay camera into quick.png, which is much faster on software WebGL.
+
 Needs Playwright for Python with Chromium.
 """
 import argparse
@@ -59,6 +62,7 @@ def main():
     ap.add_argument("folder")
     ap.add_argument("out")
     ap.add_argument("--size", default="1280x720")
+    ap.add_argument("--times", help="comma-separated seconds: render only these frames (gameplay camera) into quick.png")
     a = ap.parse_args()
     w, h = (int(v) for v in a.size.split("x"))
     os.makedirs(a.out, exist_ok=True)
@@ -83,6 +87,18 @@ def main():
             if page.evaluate("typeof window.fx.setBloom === 'function'"):
                 page.evaluate("window.fx.setBloom(true)")
             canvas = page.query_selector("canvas")
+
+            if a.times:
+                page.evaluate("window.fx.setCamera('gameplay')")
+                tiles = []
+                for t in [float(v) for v in a.times.split(",")]:
+                    th = grab(page, canvas, t).resize((480, int(480 * h / w)))
+                    ImageDraw.Draw(th).text((6, 4), f"{t:.3f}s ({(t - contact) * 60:+.0f}f)", fill=(255, 255, 0))
+                    tiles.append(th)
+                sheet(tiles, min(5, len(tiles))).save(os.path.join(a.out, "quick.png"))
+                browser.close()
+                print(f"quick frames in {a.out}/quick.png")
+                return
 
             # Stills
             times = [contact - 2 * f, contact, contact + 2 * f, contact + 4 * f, contact + 8 * f,

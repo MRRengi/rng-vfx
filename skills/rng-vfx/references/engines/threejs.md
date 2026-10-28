@@ -65,7 +65,7 @@ float width = max(uWidth, uMinPx * worldPerPx);                             // e
 - `EffectComposer` → `RenderPass` → distortion pass → `UnrealBloomPass` → effect passes on linear HDR (impact frame) → `OutputPass` (tone mapping and sRGB) → display-space passes (palette reduction for pixel art).
 - Bloom: `UnrealBloomPass(resolution, strength, radius, threshold)` compares linear luminance with the threshold and has a hard knee; raise `bloomPass.highPassUniforms.smoothWidth.value` to about 0.15x the threshold. Threshold above every body colour (`../brightness.md`) so only cores and flashes bloom; strength about 0.2 - 0.4 for realism, 0.5 - 0.9 for stylized and anime energy, where the glow halo is part of the look. Keep a switch to disable bloom for the review pass.
 - Distortion: render distortion meshes (rings, heat) into a half-resolution `HalfFloatType` target as signed UV offsets, and offset the scene colour lookup by it in a `ShaderPass`.
-- Tone mapping: `renderer.toneMapping = THREE.AgXToneMapping` for realism, `NeutralToneMapping` for stylized looks that must keep hue.
+- Tone mapping: `THREE.ACESFilmicToneMapping` for realism with fire and explosions (AgX desaturates hot oranges toward salmon and white); AgX for realism without fire; `NeutralToneMapping` for stylized looks that must keep hue. Check a fireball frame after choosing.
 - `ShaderPass` clones its uniforms and cannot clone render-target textures: assign those after creating the pass.
 - Pixel art: render at low resolution (`renderer.setPixelRatio` and `setSize(w / px, h / px, false)` with CSS `image-rendering: pixelated`) and snap positions to the pixel grid.
 
