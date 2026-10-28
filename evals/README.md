@@ -39,3 +39,5 @@ The baseline prompt is the same without the skill paragraph.
 | 4: reference-driven rewrite | skill better | skill better | tie |
 
 Round 5 checked whether the skill holds on styles it was never tuned on, with three new briefs: a dark fantasy greataxe slam, a toon bomb and a pixel-art fireball. All three came out level with the baseline, different in style but equally good.
+
+Round 6 covered all six styles with new event types: a fuel barrel explosion, a MOBA lightning strike, an anime electro slash, a dark fantasy blood nova, a toon ink splat and a pixel-art sword slash. The skill won the lightning strike, the blood nova and the ink splat, lost the barrel explosion, and tied the anime slash (some parts better each way) and the pixel slash.
