@@ -6,11 +6,11 @@ Modern AAA shooters, military and cinematic games. The effect has to be believab
 
 ## Look
 
-- Matter first, light second. Most of a realistic explosion or impact is dirt, dust, smoke and debris; fire and flashes are short.
+- Match the event's real material. Ground bursts (grenades, artillery, mines) and bullet impacts are matter first: dirt, dust, smoke and debris, with fire and flashes short. Fuel explosions (barrels, vehicles, gas) are fire first: a bright rolling fireball that lights the scene, then black smoke.
 - Physically based light: the flash and fire light the surroundings through a real light, and smoke is lit by the sun and by the fire.
 - Colour comes from materials and temperature: blackbody ramps for hot things (`#fff6e0` white-hot, `#ffc46b` yellow, `#ff7a1f` orange, `#9b2a0c` dark red), earth tones for dirt (`#4a3a2c`, `#6b5a48`, `#8a7a66`), grey-browns for smoke (`#2a2622` base, `#55504a` body, `#8c857c` thin edges).
 - Value: dark masses (soil, smoke) against the sky are what read from far away. A frag explosion that is mostly bright is wrong.
-- Filmic tone mapping (AgX or ACES) turns saturated hot colours toward white: keep fire bodies below the bloom threshold and let only the core exceed it (`brightness.md`).
+- Fire emits light: its body is bright, saturated orange and yellow, sitting just under the bloom threshold so filmic tone mapping (AgX or ACES) keeps it orange instead of white, with only the core above it (`brightness.md`). Under the threshold does not mean dark: a brown or muddy fireball reads as dirt, not fire.
 
 ## Timing defaults (60 fps, typical)
 
@@ -39,7 +39,8 @@ Modern AAA shooters, military and cinematic games. The effect has to be believab
 
 ## Failure modes in this style
 
-- A bright orange cumulus fireball for every explosion (petrol-barrel look) instead of the type the brief asks for.
+- A bright orange cumulus fireball for every explosion (petrol-barrel look) when the brief is a grenade or shell; and the reverse, a fuel explosion drawn as a dark brown dirt cloud with the fire buried inside it.
+- Smoke that fills the frame for seconds and hides the event and the characters.
 - A full-screen white flash; a real flash is small and short and works through light.
 - Smoke as one detached lump floating away, unlit and noisy.
 - Uniform round debris blobs flying symmetrically.

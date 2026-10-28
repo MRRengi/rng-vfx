@@ -18,7 +18,8 @@ Agents already know what League of Legends, Genshin or Battlefield effects look 
 |---|---|
 | `SKILL.md` | the six qualities of a shipped effect and the process from brief to review |
 | `references/styles/` | realism, stylized (MOBA), anime, toon, dark fantasy, pixel: look, typical timing, signature shapes, how generated versions fall short |
-| `references/elements.md` | slashes, flashes, projectiles, rings, sparks, debris, explosions by type, smoke, fire, impact frames, hit reactions, decals, light |
+| `references/craft.md` | classical effects-animation principles (after Joseph Gilland's *Elemental Magic* I and II): animating energy, designed shapes, scale through timing and detail, choreography, magic |
+| `references/elements.md` | slashes, flashes, projectiles, rings, sparks, debris, explosions by type, smoke, fire, splashes and liquids, lightning, impact frames, hit reactions, decals, light |
 | `references/motion.md` | easing, flicker, stepped animation, popping, anti-aliasing, fast motion, hit stop, camera shake |
 | `references/physics.md` | closed-form motion with drag, smoke, fire, explosions, sparks, debris, liquids |
 | `references/brightness.md` | brightness relative to bloom in three.js, Unity URP and HDRP, Unreal |

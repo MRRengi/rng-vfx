@@ -13,6 +13,8 @@ Contents:
 - Explosions
 - Smoke and dust
 - Fire
+- Splashes and liquids
+- Lightning and arcs
 - Cel puffs (toon only)
 - Impact frames
 - Hit reaction and hit stop
@@ -81,15 +83,18 @@ The slash is one shape: a crescent that passes through the target.
 ## Debris
 
 - Angular pieces (low-poly irregular meshes or sharp polygon sprites), few big and many small, with random spin.
-- Ballistic arcs with low drag; a few hero chunks fly highest and last longest; big pieces bounce once with high friction and rest; small ones can vanish on landing.
+- Ballistic arcs with low drag; a few hero chunks fly highest and last longest; big pieces hang longer and rotate slower, small ones are quick; big pieces bounce once with high friction and rest; small ones can vanish on landing. A few pieces always end up much farther away than the rest.
+- The material decides how things break and land: glass splits into thin light shards that flutter and skitter; ceramic leaves a ring of pieces with one big piece sliding off and rocking; brick crumbles partly to powder and barely skids; soil clods burst into dust.
 - Darker than the ground, so they read against it; chunks of soil leave short dust trails.
 
 ## Explosions
 
 Decide the type first; it changes everything:
 - **Fragmentation grenade, artillery, mine:** mostly dirt and dust. A flash of 1 - 2 frames, a small fireball that is gone within about 0.1 - 0.2 s, a dark ejecta column of soil thrown up in a cone, a fast low dust skirt, grey-brown smoke, debris and a dark scorch.
-- **Fuel, vehicle, barrel:** a large rolling fireball that rises, cools from yellow to orange to dark red into black smoke, often with a stem.
+- **Fuel, vehicle, barrel:** the fireball is the star. A large, bright, luminous orange-yellow ball of flame that billows out in 3 - 6 frames, rolls and rises for half a second or more, lights everything around it, then cools through orange and dark red into black smoke rising in a column, often with a stem. Its body glows; keep it just under the bloom threshold so it stays orange rather than white, never dark or brown. The smoke is black to dark grey (soot), not brown dust, and it rises above the fire rather than burying the frame.
 - **Magic or stylized:** the genre's shapes and palette, the same structure of core, body, residue.
+
+Timing that sells any explosion (`craft.md` > Exaggeration): the first frame is already a big burst of pure directional energy; it expands faster than physics for 3 - 6 frames, then drops abruptly into a long, slow expansion and fade (seconds for big blasts) while debris reaches the top of its arc and falls. A frame of anticipation (the source shrinking or darkening just before) adds punch; stylized and anime styles can also add one or two punch frames (a negative or a high-contrast frame) on the detonation, realism keeps those to a flash and light. A second, smaller blast firing while the first slows adds overlap. The smoke starts with the same radial shapes and turns into billowing, mushrooming shapes as the energy dies.
 
 Layers and timing for a realistic ground explosion:
 - **Flash:** a hot, small card at the burst point and a point light, 1 - 2 frames. The light, not bloom, brightens the ground and the nearby character from that side.
@@ -104,19 +109,40 @@ Layers and timing for a realistic ground explosion:
 
 ## Smoke and dust
 
+- **Motion of rising smoke:** fast at first, pushed by the heat; slowing as it meets cooler air, where it meanders and twists; spreading and rolling back over itself near the top. A hot column hitting a ceiling of cool air mushrooms. Big plumes churn violently inside but move slowly overall.
+- **Roll direction follows the force:** smoke pushed down and out (a rocket on the ground, a landing) rolls outward from underneath; smoke pushed up and out (a campfire, a blast column) rolls up and over at the edges.
 - **Spawn over time from the source**, not as one lump: new puffs keep appearing near the ground for the first part of the effect, so the column stays attached while its top rises and spreads.
 - **Lit:** a normal from the density gradient (two offset texture taps, or a sphere normal per puff), lit by the scene's key light with wrap lighting, plus the fire's own light from below while it burns. Unlit smoke reads as a flat sprite.
-- **Value:** fresh combustion smoke is dark (darkest at the base and core), lightening and warming as it thins; dust is lighter and browner and spreads and settles more than it rises.
+- **Value:** fresh combustion smoke is dark (darkest at the base and core), lightening as it thins; dust is lighter and browner and spreads and settles more than it rises, falling back as soon as the force that raised it is gone; steam is white and vanishes quickly instead of thinning slowly.
 - **Growth:** size eases out, density drops with age, buoyancy slows as it rises.
 - **Dissipation:** erode from the edges inward with large-feature noise, unevenly across puffs; never a uniform fade of one blob.
 - **Shape:** the overall silhouette of the cloud matters more than individual puffs; check it in a single frame.
 
 ## Fire
 
-- Hottest at the base and core, cooling toward the tips; tongues break off at the top and vanish.
-- Noise scrolling upward drives the shape, with erosion stronger at the top; flicker frequency falls with size (about `1.5 / sqrt(diameter in m)` Hz).
-- Fire turns into smoke above it; that transition sells realism.
-- It lights its surroundings with a flickering light.
+- Fire is bubbles of hot, glowing gas rising through cooler air; the cool air presses on it, pinches it and curls it. The overall form is one or more tapering triangles feeding each other, waving like flags blown from below, with opposing curls on the two sides.
+- Hottest at the base and core, cooling toward the tips. The base clings to and wraps the burning object and moves slower and more fluidly than the top.
+- Tongues pinch and twist off near the top and live only 2 - 4 frames (larger ones a little longer), flipping their curl from one frame to the next as they go, which reads as flicker; they do not shrink neatly to a point.
+- Real fire is more erratic than it is usually animated: pieces appear and vanish unpredictably and the volume pulses irregularly. Keep the underlying wave motion smooth and let the shapes riding on it be wild. Predictable, evenly repeating fire is the common failure.
+- Keep a fire's size constant by opening elongated holes in its middle that split off pieces, rather than letting it slowly grow.
+- Noise scrolling upward drives the shape, with erosion stronger at the top; flicker frequency falls with size (about `1.5 / sqrt(diameter in m)` Hz). Bigger fires move slower and carry more detail; a candle flame only stretches and bobs, with no break-offs.
+- Embers and cinders ride the fire's arcs with varied size and spacing, and a few shoot off erratically sideways or spiralling.
+- Fire turns into smoke above it; that transition sells realism. Clean fuel burns bluer with little smoke; dirty fuel makes soot.
+- It lights its surroundings with a flickering light, and heat haze distorts the air above it.
+
+## Splashes and liquids
+
+- **Anatomy of a splash:** the impact throws liquid up and out explosively, already well formed on the first frame; an air pocket is dragged under and breaks into bubbles; the rising sheet thins, tears holes that open along its direction of travel (never at odd angles), and breaks into strings of droplets; it slows into the top of its arc, hangs, and falls back accelerating; a secondary jet then shoots up from the impact point as the air pocket closes, on its own overlapping timing, and collapses into ripples. Ripples spread and slow.
+- **Primary shapes:** a bowl, a sheet or pure spray. Fast, jagged or glancing hits (bullets, a blade) make spray; heavy objects make a big sheet and a solid surge instead of a jet; a buried air pocket rises later as a dome that rolls outward with bubbles surfacing long after.
+- Only a few of the falling droplets need their own small landing splash; one or two after-splashes tell the story.
+- **Viscosity sets shape and speed:** thicker liquids (oil, paint, ink, blood, mud, lava) stay together in round blobs, stretch into strings and move slower; thinner ones (alcohol, gasoline) break into fine sheets and droplets faster and spread wider. Gooey splats land with a flattening squash and satellite drops.
+- Ripples and splats on the ground keep the ground's perspective as they grow: they widen more than they deepen.
+- Big splashes are slow and hang in the air; a large splash can be built from copies of one good splash layered with staggered start times.
+
+## Lightning and arcs
+
+- A main channel that branches like a river delta or tree roots, the branches thinner and shorter, all asymmetric; push it more dramatic than a photo.
+- The strike lands in 1 - 2 frames with a bright flash of light on the ground and the target, flickers through two or three re-strikes along nearly the same path, then leaves glowing afterimages and crawling sparks. Redraw the jagged path each re-strike rather than sliding one shape.
 
 ## Cel puffs (toon only)
 
