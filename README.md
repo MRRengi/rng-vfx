@@ -16,7 +16,7 @@ Agents already know what League of Legends, Genshin or Battlefield effects look 
 
 | | |
 |---|---|
-| `SKILL.md` | the six qualities of a shipped effect and the process from brief to review |
+| `SKILL.md` | the seven qualities of a shipped effect and the process from brief to review |
 | `references/styles/` | realism, stylized (MOBA), anime, toon, dark fantasy, pixel: look, typical timing, signature shapes, how generated versions fall short |
 | `references/craft.md` | classical effects-animation principles (after Joseph Gilland's *Elemental Magic* I and II): animating energy, designed shapes, scale through timing and detail, choreography, magic |
 | `references/elements.md` | slashes, flashes, projectiles, rings, sparks, debris, explosions by type, smoke, fire, splashes and liquids, lightning, impact frames, hit reactions, decals, light |
