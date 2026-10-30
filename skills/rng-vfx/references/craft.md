@@ -13,6 +13,7 @@ Every detail follows the path of action of that force. Droplets leave a splash a
 ## Designed shapes
 
 - **Silhouette first.** The primary shape must read alone; the secondary shapes live inside it. Detailing secondary shapes while the silhouette is weak produces a busy, confusing effect.
+- **Large forms before detail.** Form comes from a few large shapes; detail rides on top of them. Sizes follow a power law: a few big masses define the shape, then progressively more and smaller pieces. Too much high-frequency detail (strong noise, turbulence, many overlapping sprites) eats the form. Test it by blurring the frame: if the silhouette disappears, it was never there.
 - **No twinning.** Repeated similar shapes, mirror symmetry, parallel edges and even spacing are what make effects look generated. Give every cluster big, medium and small members; pinch and widen tapering shapes instead of keeping their edges parallel; break the silhouette asymmetrically even when the physics would be symmetric (a real blast expands almost evenly, a good one does not look like a snowman). This applies to timing too: equal intervals and simultaneous endings look mechanical.
 - **No icons.** Scalloped water, hot-rod flames, popcorn clouds and symmetric star bursts are symbols, not elements. Real water and fire have chunky, irregular, surprising shapes.
 - **Interior tone describes volume.** Shadow or density bands inside smoke vary in width with the mass they describe; a band that just follows the outline flattens it.
@@ -33,6 +34,10 @@ Hang time at the apex of a trajectory (slowing into it and out of it) is one of 
 
 Nothing in an effect does the same thing at the same time. When a bottle smashes, some pieces bounce, some slide, some spin off through the air, and a few always land far away from the rest. Big pieces hang longer and rotate slower; small ones are quick. Layers overlap: the secondary jet of a splash rises while the primary falls; a second blast fires while the first is slowing. Overlapping timings and directions are what make an effect feel alive and steer the eye.
 
+Give every element one job and let it behave accordingly. The fast directional burst lives a few frames and is gone; the smoke that lingers is a different element with its own soft, slow motion; dust that falls and dust that rises are separate too. One element stretched to do two jobs makes the burst sluggish and the residue wrong.
+
+Rhythm can be planned by sound. Say the effect out loud ("ba-DOOM... shhh") and time the layers to it: the hit lands on the accent, and a secondary event (embers, a second pop, debris landing) comes after a pause about as long as a quick breath, so the effect seems to exhale instead of fizzling into one continuous blur. A pace faster than a heartbeat reads as aggressive; slower reads as calm or benign (heals, buffs).
+
 ## Cause and effect
 
 One event triggers others. Fire means light on its surroundings and smoke; an explosion means light, debris and dust; a splash means ripples and bubbles; water on a fire means steam, thicker smoke, dying flames, a dimming light. The strongest force sets the path of the chaos, and secondary reactions bend around it.
@@ -46,6 +51,8 @@ The most common mistake is not pushing far enough. Push the physics, motion, des
 ## Role in the scene
 
 Decide whether the effect is the star or a supporting player. Most effects support the action and must not upstage the character (a footstep splash, a torch); the star moments (an ultimate, a big explosion, a finishing blow) may own the frame. Either way the effect must look as if the same artist drew it as the characters and the world.
+
+Length is part of the message: how long an effect stays on screen tells the player how much it matters, and anything lingering clutters the view and hides the next event. If an effect feels long, it is much too long. The energy is short; only quiet residue stays.
 
 The same hierarchy holds inside an effect: the event is the star, and everything that follows it (marks, stains, smoke, lingering sparks) supports it. Residue arrives after the peak, sits behind or under the action and is quieter than it, so the eye reads the hit first and the aftermath second.
 

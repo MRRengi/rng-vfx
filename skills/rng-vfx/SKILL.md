@@ -18,7 +18,7 @@ These seven qualities are what separate shipped effects from generated ones. Eac
 1. **It reads from the gameplay camera.** One primary shape carries the event and is recognisable in a single frame from the real camera. Close-up beauty that turns into a blur or vanishes at distance is a failure, so design with the on-screen size in mind (pixels per metre, below).
 2. **It has weight in proportion to the event.** A light jab is small and quick; a heavy hit, an ultimate or a big explosion owns the frame for a moment. Take the scale from the reference breakdown, not from habit: size, contrast and timing should match what that game does for an event of this weight, while the shape stays readable and the target stays visible.
 3. **The world reacts.** The target flinches, flares and is lit by the hit; the ground takes light, dust and a mark; heavy hits freeze for a few frames and shake the camera. An effect floating in front of an unaffected scene looks pasted on.
-4. **Timing has contrast.** A fast arrival (with anticipation where the move has a wind-up), a short strong hold, then a long, uneven dissipation. A slow swell, an even fade or everything vanishing at once all read as weak.
+4. **Timing has contrast.** A fast arrival (with anticipation where the move has a wind-up), a short strong hold, then an uneven dissipation in which the energy goes quickly and only quieter residue lingers. A slow swell, a burst that overstays, an even fade or everything vanishing at once all read as weak.
 5. **Each material behaves like itself.** Energy emits light: hot core, saturated body, glow, light cast on the surroundings. Matter (smoke, dust, soil, debris, blood) is lit by the scene, occludes and obeys physics. Fire is both. The look of each comes from the genre: painted MOBA energy, crisp anime energy, believable realistic dirt.
 6. **The shapes are designed.** A strong asymmetric silhouette; big, medium and small pieces rather than repeats; no mirror symmetry, parallel edges or even spacing; every detail following the path of the force; shapes sharp and fast while the energy is high and soft and slow as it dies. Repetition and symmetry are the clearest signs of generated work (`references/craft.md`).
 7. **The motion is polished.** Smooth, eased, continuous motion; edges anti-aliased; no flicker, popping, strobing or jitter; detail that moves with the shape instead of boiling. A great design with rough motion looks cheap (`references/motion.md`).
@@ -44,7 +44,7 @@ Write a short plan before code, because the expensive mistakes (wrong shape, wro
 - **Force and material:** what drives the effect (impact, heat, pressure, wind, gravity, a spell's own logic) and what it moves (thin or thick liquid, soot, dust, glass, soil, light).
 - **Primary shape:** the one silhouette that carries the event at its peak, its size relative to the character and how it faces the camera.
 - **Colour and light:** the ramp from hottest to edge with hex values; what glows, what light it casts and on what; how the matter is lit.
-- **Timing:** each layer's start, peak and end in frames at 60 fps relative to contact.
+- **Timing:** each layer's start, peak and end in frames at 60 fps relative to contact. Saying the effect's sound out loud is a quick way to find its rhythm (`references/craft.md` > Choreography).
 - **Layers**, each with one job: primary; secondary (sparks, streaks, shards, rings that show direction and force); interaction (target reaction and light, ground dust, marks, hit stop, shake); residue (what remains and how it leaves).
 
 Read the plan against the seven qualities and against your reference breakdown. Where it is smaller, plainer or shorter-lived than the reference, ask whether that is a choice or a habit.
@@ -57,7 +57,7 @@ Blockout first: the primary shape and its timing, seen from the gameplay camera,
 
 Look at the effect in two ways, because each catches different problems:
 
-- **Stills** at fixed times from contact (-2, 0, +2, +4, +8, +15, +30 frames, then 50%, 75% and 95% of the duration) from the gameplay camera and a close camera: shape, scale, colour, reaction, residue.
+- **Stills** at fixed times from contact (-2, 0, +2, +4, +8, +15, +30 frames, then 50%, 75% and 95% of the duration) from the gameplay camera and a close camera: shape, scale, colour, reaction, residue. Squint or blur the peak frame: if the silhouette disappears, detail is standing in for form.
 - **Motion:** every frame from a few frames before contact to about half a second after, in order: jitter, popping, flicker and the rhythm of the hit only show up here.
 
 For a page with the `window.fx` API, `python scripts/capture_strip.py <folder> <out>` renders both (add `--times 0.4,0.5` for a quick look at chosen frames while iterating); elsewhere use the engine's frame capture. Then critique it as a demanding art director would, next to your reference breakdown at the same moments: where is it weaker than the reference, and which of the seven qualities is furthest off? Fix the biggest gap, render again and repeat until you would put it in the reel next to the reference. Write down what you would improve next.

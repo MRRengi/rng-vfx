@@ -3,7 +3,7 @@
 How to construct common elements so they read and behave right. Sizes are typical values in metres for a 1.8 m character and frames at 60 fps, taken from shipped games; scale them to the event and to your reference, and go bigger when the reference does. The look of each element (palette, softness, how much it glows) comes from the style file.
 
 Contents:
-- Foundations: designed shapes, colour ramp, reading at distance, blending
+- Foundations: designed shapes, colour ramp, focus, reading at distance, blending
 - Contact flash
 - Slash
 - Projectile
@@ -26,6 +26,8 @@ Contents:
 **Shapes come from math, not noise.** Build silhouettes from signed distance functions in the fragment shader: circles, capsules, crescents (difference of two circles), segments, and for toon star polygons. A designed silhouette with a crisp edge reads at any distance; then use noise only to break that edge (offset the distance by low-amplitude fbm) and to drive erosion over life. Noise sampled as colour or alpha on its own looks like grain or dirt.
 
 **Colour ramp.** Map a single 0..1 "heat" or "density" value through the plan's ramp: smooth falloff for energy, realism and painted looks, a hard step only for toon and pixel. Keep the hottest value to the core (10 - 20% of the shape's area) and let the saturated body carry the colour. For energy, add a soft glow halo outside the body (a wider, fainter copy of the shape, or bloom on the core) and cast its light onto the target and the ground (a point light or a light card). On bright backgrounds an additive shape needs a faint darker alpha under-shape; outlines are for toon only.
+
+**Focus.** Value and saturation are an attention budget. Put the strongest contrast where the player must look (the impact point, a projectile's tip, the leading edge of a slash) and keep the rest of the effect in the middle of the value and saturation range; pure white and full saturation are spent only there. One dominant colour with a secondary accent reads; several competing colours turn to noise.
 
 **Reading at distance.** At the gameplay camera, lines, rings and streaks narrower than about 3 px (at 1080p) and sparks shorter than about 12 px vanish; clamp widths in pixels in the shader (world units per pixel at the particle's depth times the pixel minimum) so they survive distance without growing in the close-up. Typical primary-shape heights: a light hit about the size of the target's torso, a heavy hit or spell about the character's height or more, an explosion or ultimate several times that.
 
@@ -55,8 +57,9 @@ A slash is the trail of a weapon swung by someone, so it lives in the world, not
 - **Facing:** the swing plane is real, so the camera sees the arc at an angle. If it is close to edge-on from the gameplay camera, rotate the plane about the swing direction toward the camera (a slight cheat players never notice) rather than drawing a different shape. Check from both cameras that the head moves in the swing direction and the arc is not twisted.
 - **Flat and pixel styles:** project the same swing to the screen and draw the arc from that projection, so it still agrees with the attacker, the target and the direction of the blow.
 - **Width profile:** widest just behind the leading edge (0.15 - 0.25 of the radius), tapering to a point at the tail; the outer edge sharp, the inner edge softer. The cut line is the bright outer edge of this same shape, not a separate element.
-- **Timing:** the head sweeps through the arc in 2 - 4 frames, reaching the target on the contact frame; the full shape holds 1 - 2 frames; then it fades and thins from the tail toward the head over 6 - 12 frames, wisps peeling off the trailing edge. It does not move or change shape after contact.
+- **Timing:** the head moves with the weapon tip, never lagging behind it, sweeps through the arc in 2 - 4 frames, reaching the target on the contact frame and continuing to the end of the swing; the full shape holds 1 - 2 frames; then it fades and thins from the tail toward the head over 6 - 12 frames, wisps peeling off the trailing edge. It does not move or change shape after contact.
 - **Layers and values:** a hot, thin leading edge (near white, blooms); a wider saturated body that falls off softly toward the inner edge; a faint wispy trail behind with streaky texture running along the arc. Build them as two or three overlapping strips with different widths and lifetimes so the slash has depth. Light the target from the cut side for a few frames.
+- **The hit carries the blade's momentum:** the contact flash stretches along the cut, and sparks, blood or shards leave in the swing direction with part of the blade's speed. A burst that sprays evenly from a point reads as a bullet hit, not a cut.
 - **Afterwards:** a short slash mark on the target or the ground (a decal or an afterimage) for 0.3 - 0.5 s keeps the weight after the trail is gone.
 
 ## Projectile
@@ -69,8 +72,8 @@ A slash is the trail of a weapon swung by someone, so it lives in the world, not
 
 - Born thick (0.1 - 0.15 of the final radius), thinning as they expand, radius on an outExpo or outQuart curve over 6 - 12 frames, alpha gone by the end.
 - Broken, not closed: 50 - 70% of the circle, the gap facing away from the camera or offset along the hit. A closed thin ring around the hit point reads as a targeting reticle.
-- On the ground: a fast radial dust skirt (alpha-blended puffs moving outward with high drag) reads better than a flat additive hoop.
-- A heat or pressure distortion ring (screen-space UV offset) sells force without adding brightness.
+- A real shockwave is invisible; you see it only where it disturbs something. On the ground, show it as dust kicked up where the front passes: the radius at which puffs are born grows on an outExpo curve over a short window, and each puff barely travels (a little upward and outward, high drag), starting at about half size, fading in fast and thinning slowly into a low haze. Sprites flying outward in a ring, or a flat additive hoop, read as a 2D screen effect.
+- A heat or pressure distortion ring (screen-space UV offset) sells force without adding brightness; keep it subtle and motivated (near the blast, over dust or heat), not a free-floating ripple.
 
 ## Sparks
 
@@ -83,10 +86,11 @@ A slash is the trail of a weapon swung by someone, so it lives in the world, not
 
 ## Debris
 
-- Angular pieces (low-poly irregular meshes or sharp polygon sprites), few big and many small, with random spin.
+- Angular pieces (low-poly irregular meshes or sharp polygon sprites), few big and many small, spinning about their own centre of mass.
+- Thrown in a few clumps or cones in different directions (for a ground burst mostly upward, about 45 degrees, the upward pieces fastest and farthest), never a uniform sphere from one point.
 - Ballistic arcs with low drag; a few hero chunks fly highest and last longest; big pieces hang longer and rotate slower, small ones are quick; big pieces bounce once with high friction and rest; small ones can vanish on landing. A few pieces always end up much farther away than the rest.
 - The material decides how things break and land: glass splits into thin light shards that flutter and skitter; ceramic leaves a ring of pieces with one big piece sliding off and rocking; brick crumbles partly to powder and barely skids; soil clods burst into dust.
-- Darker than the ground, so they read against it; chunks of soil leave short dust trails.
+- Made of the material that broke (the ground's soil and rock, the barrel's metal) and lit and shaded by the scene's light, so they belong to the world; unlit dark pieces read as black holes. Chunks of soil leave short dust trails.
 
 ## Explosions
 
@@ -101,8 +105,7 @@ Layers and timing for a realistic ground explosion:
 - **Flash:** a hot, small card at the burst point and a point light, 1 - 2 frames. The light, not bloom, brightens the ground and the nearby character from that side.
 - **Fireball (if any):** premultiplied, coloured by temperature (white-yellow core, orange, dark red edge) cooling over its life; grows on outExpo to full size in 3 - 6 frames; rises; rolls.
 - **Ejecta column (ground bursts):** dark soil and dust thrown upward in a cone 30 - 60 degrees wide, decelerating with high drag, then falling and drifting.
-- **Ground dust skirt:** puffs moving radially along the ground fast (8 - 14 m/s) with high drag, 0.6 - 1.2 s life, reaching 3 - 5 m.
-- **Shockwave:** a distortion ring and the dust skirt; nothing bright.
+- **Ground dust skirt (the shockwave):** dust kicked up where the front passes (Rings and shockwaves), the front reaching 3 - 5 m within a few frames, the low brown haze lingering 1 - 2 s and settling; nothing bright.
 - **Debris and sparks** as above, launched on the contact frame.
 - **Smoke:** takes over as the fire cools; anchored at the ground (see Smoke), rising and spreading for seconds.
 - **Decal:** a dark irregular scorch with radial ejecta streaks, revealed in the first frames and staying.
@@ -113,7 +116,7 @@ Layers and timing for a realistic ground explosion:
 - **Motion of rising smoke:** fast at first, pushed by the heat; slowing as it meets cooler air, where it meanders and twists; spreading and rolling back over itself near the top. A hot column hitting a ceiling of cool air mushrooms. Big plumes churn violently inside but move slowly overall.
 - **Roll direction follows the force:** smoke pushed down and out (a rocket on the ground, a landing) rolls outward from underneath; smoke pushed up and out (a campfire, a blast column) rolls up and over at the edges.
 - **Spawn over time from the source**, not as one lump: new puffs keep appearing near the ground for the first part of the effect, so the column stays attached while its top rises and spreads.
-- **Lit:** a normal from the density gradient (two offset texture taps, or a sphere normal per puff), lit by the scene's key light with wrap lighting, plus the fire's own light from below while it burns. Unlit smoke reads as a flat sprite.
+- **Lit:** a normal from the density gradient (two offset texture taps, or a sphere normal per puff), lit by the scene's key light with wrap lighting, plus the fire's own light from below while it burns, and a faint tint of bounce light from the sky above and the ground below. Unlit smoke reads as a flat sprite; a hard jump between its lit and shaded sides reads as a solid object.
 - **Value:** fresh combustion smoke is dark (darkest at the base and core), lightening as it thins; dust is lighter and browner and spreads and settles more than it rises, falling back as soon as the force that raised it is gone; steam is white and vanishes quickly instead of thinning slowly.
 - **Growth:** size eases out, density drops with age, buoyancy slows as it rises.
 - **Dissipation:** erode from the edges inward with large-feature noise, unevenly across puffs; never a uniform fade of one blob.
@@ -127,9 +130,12 @@ Layers and timing for a realistic ground explosion:
 - Real fire is more erratic than it is usually animated: pieces appear and vanish unpredictably and the volume pulses irregularly. Keep the underlying wave motion smooth and let the shapes riding on it be wild. Predictable, evenly repeating fire is the common failure.
 - Keep a fire's size constant by opening elongated holes in its middle that split off pieces, rather than letting it slowly grow.
 - Noise scrolling upward drives the shape, with erosion stronger at the top; flicker frequency falls with size (about `1.5 / sqrt(diameter in m)` Hz). Bigger fires move slower and carry more detail; a candle flame only stretches and bobs, with no break-offs.
-- Embers and cinders ride the fire's arcs with varied size and spacing, and a few shoot off erratically sideways or spiralling.
+- A large fire is a big, slow, rolling mass at the centre with smaller, faster flames around its edges; one flame size repeated everywhere looks artificial.
+- Flames lean away from motion and wind: blend each flame's up direction toward the negative of its velocity.
+- Embers and cinders ride the fire's arcs with varied size and spacing, and a few shoot off erratically sideways or spiralling. They start as bright as the fire and flicker as they cool, and there are more of them than feels necessary: small and dim, they vanish at gameplay distance.
 - Fire turns into smoke above it; that transition sells realism. Clean fuel burns bluer with little smoke; dirty fuel makes soot.
-- It lights its surroundings with a flickering light, and heat haze distorts the air above it.
+- It lights its surroundings with a flickering light, and heat haze distorts the air above it. The light is a pale warm yellow-orange from the blackbody ramp, much less saturated than the flames look; saturated orange light turns the scene orange.
+- Blend fire premultiplied or alpha, coloured by temperature; purely additive fire washes out and cannot show the deep reds and oranges of its cooler parts.
 
 ## Splashes and liquids
 
@@ -143,7 +149,11 @@ Layers and timing for a realistic ground explosion:
 ## Lightning and arcs
 
 - A main channel that branches like a river delta or tree roots, the branches thinner and shorter, all asymmetric; push it more dramatic than a photo.
-- The strike lands in 1 - 2 frames with a bright flash of light on the ground and the target, flickers through two or three re-strikes along nearly the same path, then leaves glowing afterimages and crawling sparks. Redraw the jagged path each re-strike rather than sliding one shape.
+- The main channel forks near the ground; a straight, ruler-like bolt reads as a laser.
+- A faint leader before the strike, if any, already has the bolt's jagged shape, so the strike reads as that path lighting up.
+- The strike lands in 1 - 2 frames with a bright flash of light on the ground and the target, flickers through two or three re-strikes along nearly the same path in a strike - pause - pop rhythm, then leaves glowing afterimages and crawling sparks. Redraw the jagged path each re-strike rather than sliding one shape.
+- Fewer, bolder strikes read better than many thin fizzling arcs. A bolt dies by breaking apart along its length, not by scrolling or fading as one piece.
+- Leave something that lingers and falls (sparks, embers, debris, smoke) so the eye has something to follow after the flash; an effect that stops dead with the light feels cut off.
 
 ## Cel puffs (toon only)
 
