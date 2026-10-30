@@ -47,6 +47,8 @@ The most common mistake is not pushing far enough. Push the physics, motion, des
 
 Decide whether the effect is the star or a supporting player. Most effects support the action and must not upstage the character (a footstep splash, a torch); the star moments (an ultimate, a big explosion, a finishing blow) may own the frame. Either way the effect must look as if the same artist drew it as the characters and the world.
 
+The same hierarchy holds inside an effect: the event is the star, and everything that follows it (marks, stains, smoke, lingering sparks) supports it. Residue arrives after the peak, sits behind or under the action and is quieter than it, so the eye reads the hit first and the aftermath second.
+
 ## Magic
 
 Build magic on a natural element (smoke, water, fire, sparks, wind), then break its rules with an internal logic of its own. Smoke that rises, pauses as if sniffing the air, recoils and darts on reads as a spirit; anything that defies gravity reads as magic. The departure from physics is what tells the audience it is magic, and the internal consistency is what makes it believable. Spirals and vortices are a natural vocabulary for it.

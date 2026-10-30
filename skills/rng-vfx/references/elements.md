@@ -48,15 +48,16 @@ The contact flash says where and how hard. It is small, hot and short.
 
 ## Slash
 
-The slash is one shape: a crescent that passes through the target.
+A slash is the trail of a weapon swung by someone, so it lives in the world, not on the screen. Its shape follows from the swing; drawn as a free-floating crescent it comes out twisted, crooked or pointing the wrong way.
 
-- **Geometry:** an arc strip (or a crescent SDF on a quad) whose midpoint lies on the impact point. Radius at least arm plus weapon (1.2 - 1.8 m for a sword); stylized heavy hits exaggerate it well past that so the target sits inside the arc. Visible span 90 - 140 degrees. The visible band, start to end, sits 20 - 50 degrees from horizontal from the gameplay camera unless the attack is an overhead or a sweep.
-- **Facing:** orient the arc plane toward the camera (tilt it until its normal is within about 40 degrees of the view direction). An arc seen edge-on reads as a line or a pole.
+- **Start from the swing.** Who swings, where they stand and face, the pivot (shoulder or hips), the reach (arm plus weapon, 1.2 - 1.8 m for a sword), and the swing's plane and direction in world space (for example, from high right to low left across the body). Use the attack animation when there is one: sample the weapon tip and base each frame. When there is no attacker in the scene, decide one and write it in the plan.
+- **Geometry:** the arc is the path of the tip around the pivot, in the swing plane, sweeping in the swing direction and passing through the target at contact. Visible span 90 - 140 degrees. The head (leading edge) is where the tip is now; the tail is where it was.
+- **Facing:** the swing plane is real, so the camera sees the arc at an angle. If it is close to edge-on from the gameplay camera, rotate the plane about the swing direction toward the camera (a slight cheat players never notice) rather than drawing a different shape. Check from both cameras that the head moves in the swing direction and the arc is not twisted.
+- **Flat and pixel styles:** project the same swing to the screen and draw the arc from that projection, so it still agrees with the attacker, the target and the direction of the blow.
 - **Width profile:** widest just behind the leading edge (0.15 - 0.25 of the radius), tapering to a point at the tail; the outer edge sharp, the inner edge softer. The cut line is the bright outer edge of this same shape, not a separate element.
 - **Timing:** the head sweeps through the arc in 2 - 4 frames, reaching the target on the contact frame; the full shape holds 1 - 2 frames; then it fades and thins from the tail toward the head over 6 - 12 frames, wisps peeling off the trailing edge. It does not move or change shape after contact.
 - **Layers and values:** a hot, thin leading edge (near white, blooms); a wider saturated body that falls off softly toward the inner edge; a faint wispy trail behind with streaky texture running along the arc. Build them as two or three overlapping strips with different widths and lifetimes so the slash has depth. Light the target from the cut side for a few frames.
 - **Afterwards:** a short slash mark on the target or the ground (a decal or an afterimage) for 0.3 - 0.5 s keeps the weight after the trail is gone.
-- From a real animation, sample the weapon tip and base each frame and build the strip from those points instead of an ideal arc.
 
 ## Projectile
 
@@ -91,7 +92,7 @@ The slash is one shape: a crescent that passes through the target.
 
 Decide the type first; it changes everything:
 - **Fragmentation grenade, artillery, mine:** mostly dirt and dust. A flash of 1 - 2 frames, a small fireball that is gone within about 0.1 - 0.2 s, a dark ejecta column of soil thrown up in a cone, a fast low dust skirt, grey-brown smoke, debris and a dark scorch.
-- **Fuel, vehicle, barrel:** the fireball is the star. A large, bright, luminous orange-yellow ball of flame that billows out in 3 - 6 frames, rolls and rises for half a second or more, lights everything around it, then cools through orange and dark red into black smoke rising in a column, often with a stem. Its body glows; keep it just under the bloom threshold so it stays orange rather than white, never dark or brown. The smoke is black to dark grey (soot), not brown dust, and it rises above the fire rather than burying the frame.
+- **Fuel, vehicle, barrel:** burning vapour, so fire comes first. A bright, emissive fireball billows out, rolls and rises, lighting everything around it, then cools through orange and dark red into black soot smoke rising in a column, often with a stem. Fire is light: its body glows bright orange (just under the bloom threshold keeps it orange rather than white), so a fireball that comes out dark or brown has been treated as matter.
 - **Magic or stylized:** the genre's shapes and palette, the same structure of core, body, residue.
 
 Timing that sells any explosion (`craft.md` > Exaggeration): the first frame is already a big burst of pure directional energy; it expands faster than physics for 3 - 6 frames, then drops abruptly into a long, slow expansion and fade (seconds for big blasts) while debris reaches the top of its arc and falls. A frame of anticipation (the source shrinking or darkening just before) adds punch; stylized and anime styles can also add one or two punch frames (a negative or a high-contrast frame) on the detonation, realism keeps those to a flash and light. A second, smaller blast firing while the first slows adds overlap. The smoke starts with the same radial shapes and turns into billowing, mushrooming shapes as the energy dies.
@@ -152,12 +153,11 @@ Layers and timing for a realistic ground explosion:
 
 ## Impact frames
 
-The anime and fighting-game impact frame sells the heaviest hits (not used in realism). Make it bold:
+An anime and fighting-game device for the heaviest hits (not realism): the frame freezes into a stark two-tone image of the moment of contact, which hits the eye like a camera flash.
 
-- Full screen, typically 2 - 4 frames on the contact, then straight into the burst.
-- Alternate the tones across those frames: dark silhouette on white, then white silhouette on the effect's deep colour (for cyan, a navy `#0a2a5e`), optionally an inverted or tinted frame between. Each frame redrawn, not one image held.
-- Content: the target's and the burst's silhouette at its strongest, plus thick radial speed lines converging on the hit. The shape must read; it is not a random blob.
-- Once per hit, never repeated in a rapid loop (photosensitivity).
+- One to a few frames on the contact, then straight into the burst; games differ (Guilty Gear, Dragon Ball FighterZ, Genshin), so take the length and look from the reference.
+- Content: the silhouettes of the target, the attacker or weapon and the burst at their strongest, with radial speed lines converging on the hit; it reads as a picture, not a random blob. Tones may invert or shift between its frames, each redrawn.
+- Once per hit, not repeated in a rapid loop (photosensitivity).
 
 ## Hit reaction and hit stop
 
@@ -169,7 +169,8 @@ The anime and fighting-game impact frame sells the heaviest hits (not used in re
 ## Decals and marks
 
 - Scorch: multiply-darkening, irregular outline, radial streaks; the ground texture stays visible under it. An alpha-black disc reads as a hole.
-- Slash marks, cracks, splats: revealed in the first frames, holding for seconds, fading slowly; splats have satellite drops.
+- Slash marks, cracks, splats: they appear as the hit peaks and hold for seconds, fading slowly; splats have satellite drops.
+- Marks are the residue, not the event: they sit on the surface under the action, lower in contrast, and grow in after the peak rather than covering the attack while it plays (`craft.md` > Role in the scene).
 
 ## Light
 
