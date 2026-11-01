@@ -21,6 +21,7 @@ Drawn styles hold drawings (on twos or threes) because the whole game is drawn t
 - Elements other than the contact flash grow or fade in over 1 - 3 frames rather than appearing at full size; the flash is the one thing that pops, which is why it reads as the moment of contact.
 - Spread particle births over a few frames so a burst unfolds instead of switching on.
 - Elements leave by eroding, thinning, shrinking or fading on an eased curve, unevenly across a group. A whole layer vanishing on one frame is a visible pop.
+- The construction never shows. A viewer should see fire, smoke or energy, not sprites: no hard card edges as particles spawn or fade (fade them in, let size grow while opacity drops, soften each sprite's falloff toward its edges), no gaps between particles in a stream (emit densely enough), and no straight line where a card cuts the ground (fade by depth near surfaces).
 - Keep the draw order of transparent layers stable; sort changes between layers or instances show as pops.
 
 ## Anti-aliasing and shimmer
