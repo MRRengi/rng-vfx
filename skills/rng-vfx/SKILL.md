@@ -51,7 +51,7 @@ Read the plan against the seven qualities and against your reference breakdown. 
 
 ### 4. Build in passes
 
-Blockout first: the primary shape and its timing, seen from the gameplay camera, so you can judge silhouette, scale and rhythm before spending time on detail. Then add the colour ramp and glow (or lighting), the secondary layers, interaction, residue and dissipation, and finally polish (distortion, motion quality). `references/craft.md` has the classical effects-animation principles (energy, designed shapes, scale, choreography, magic), `references/elements.md` has construction notes for common elements, `references/physics.md` has motion, and the engine file has the implementation (`references/engines/threejs.md`, `unity.md`, `unreal.md`).
+Blockout first: the primary shape and its timing, seen from the gameplay camera, so you can judge silhouette, scale and rhythm before spending time on detail. Then add the colour ramp and glow (or lighting), the secondary layers, interaction, residue and dissipation, and finally polish (motion quality). Distortion belongs to the event, not to polish, whenever its energy bends light (heat, a pressure front, gravity: `references/elements.md` > Distortion). `references/craft.md` has the classical effects-animation principles (energy, designed shapes, scale, choreography, magic), `references/elements.md` has construction notes for common elements, `references/physics.md` has motion, and the engine file has the implementation (`references/engines/threejs.md`, `unity.md`, `unreal.md`).
 
 ### 5. Review against the reference
 

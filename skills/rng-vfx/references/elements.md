@@ -19,6 +19,7 @@ Contents:
 - Impact frames
 - Hit reaction and hit stop
 - Decals and marks
+- Distortion
 - Light
 
 ## Foundations
@@ -124,6 +125,7 @@ Layers and timing for a realistic ground explosion:
 
 ## Fire
 
+- Build the fire's shape from motion (`craft.md` > The whole emerges from motion): soft blobs of heat rising, converging and shrinking as they cool, animated sequences of real or drawn fire per particle, or a shader field. A single still flame image repeated on every particle reads as a pile of copies, not as fire.
 - Fire is bubbles of hot, glowing gas rising through cooler air; the cool air presses on it, pinches it and curls it. The overall form is one or more tapering triangles feeding each other, waving like flags blown from below, with opposing curls on the two sides.
 - Hottest at the base and core, cooling toward the tips. The base clings to and wraps the burning object and moves slower and more fluidly than the top.
 - Tongues pinch and twist off near the top and live only 2 - 4 frames (larger ones a little longer), flipping their curl from one frame to the next as they go, which reads as flicker; they do not shrink neatly to a point.
@@ -181,6 +183,15 @@ An anime and fighting-game device for the heaviest hits (not realism): the frame
 - Scorch: multiply-darkening, irregular outline, radial streaks; the ground texture stays visible under it. An alpha-black disc reads as a hole.
 - Slash marks, cracks, splats: they appear as the hit peaks and hold for seconds, fading slowly; splats have satellite drops.
 - Marks are the residue, not the event: they sit on the surface under the action, lower in contrast, and grow in after the peak rather than covering the attack while it plays (`craft.md` > Role in the scene).
+
+## Distortion
+
+Some energy does not glow, it bends light: heat, a pressure front, gravity, a force field, glass and water. It is drawn by shifting the pixels behind it (a screen-space UV offset of the scene, see the engine file), not by adding colour, and it is part of the event, not optional polish: a hot fire with a dead-still background behind it reads as pasted on. Keep it subtle and tie its strength to the energy; it is never the only cue.
+
+- **Heat:** fire, explosions, hot metal, exhausts and fiery projectiles shimmer the air over and behind them: fine noise drifting upward, strongest just above the source and fading with height. One large area or a few large cards over the hot zone read better than many small distorting sprites. Expected in realism; softer and optional in stylized styles.
+- **Pressure front:** a blast throws out a thin ring of displacement that races outward with the front and is gone in a few frames, bending the scene once as it passes; it rides on the dust it kicks up (Rings and shockwaves).
+- **Gravity and space warp:** black holes, singularities, portals, time or space magic pull the image toward or around their centre, strongest near it, often twisting it into a swirl (gravitational lensing); a dark core or a thin ring of bent light at the edge sells the depth.
+- **Fields and surfaces:** shields, glass and water bend the background at their edges and where they ripple, more than in their flat middle.
 
 ## Light
 
