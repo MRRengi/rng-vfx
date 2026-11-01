@@ -1,7 +1,7 @@
 {
   "name": "rng-vfx",
   "description": "Real-time game VFX skill for coding agents: realism, stylized MOBA, anime, toon, dark fantasy and pixel styles in Unity, Unreal and three.js, with a reference-driven process and frame-by-frame review.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Maks",
     "url": "https://rengi.dev"
