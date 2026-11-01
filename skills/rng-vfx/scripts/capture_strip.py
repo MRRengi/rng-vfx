@@ -12,6 +12,11 @@ Writes:
 - motion_gameplay.png: every frame at 60 fps from 6 frames before contact to
   30 frames after, in order, as a contact sheet. Use it to check jitter,
   popping, flicker and the rhythm of the hit, which stills cannot show.
+  An effect with several events (hits, bursts, a projectile's launch and
+  impact) passes them as `--events 0.35,0.78,1.15` (seconds), or exposes
+  `window.fx.events` as an array of times; each gets its own sheet,
+  motion_gameplay_<n>.png, starting 12 frames before the event so the
+  approach is visible too.
 
 For quick iteration, `--times 0.4,0.45,0.6` renders only those times (seconds)
 from the gameplay camera into quick.png, which is much faster on software WebGL.
@@ -62,6 +67,7 @@ def main():
     ap.add_argument("folder")
     ap.add_argument("out")
     ap.add_argument("--size", default="960x540")
+    ap.add_argument("--events", help="comma-separated seconds: a motion sheet around each event instead of only fx.contact")
     ap.add_argument("--times", help="comma-separated seconds: render only these frames (gameplay camera) into quick.png")
     a = ap.parse_args()
     w, h = (int(v) for v in a.size.split("x"))
@@ -115,17 +121,24 @@ def main():
                     tiles.append(th)
                 sheet(tiles, 5).save(os.path.join(a.out, f"{cam}.png"))
 
-            # Motion: consecutive frames around contact, gameplay camera
+            # Motion: consecutive frames around contact (or around every event), gameplay camera
             page.evaluate("window.fx.setCamera('gameplay')")
-            tiles = []
-            for k in range(-6, 31):
-                t = contact + k * f
-                if t < 0 or t > dur:
-                    continue
-                th = grab(page, canvas, t).resize((320, int(320 * h / w)))
-                ImageDraw.Draw(th).text((4, 3), f"{k:+d}f", fill=(255, 255, 0))
-                tiles.append(th)
-            sheet(tiles, 6).save(os.path.join(a.out, "motion_gameplay.png"))
+            if a.events:
+                events = [float(v) for v in a.events.split(",")]
+            else:
+                events = page.evaluate("Array.isArray(window.fx.events) ? window.fx.events : null")
+            sheets = [("motion_gameplay.png", contact, -6)] if not events else \
+                [(f"motion_gameplay_{n + 1}.png", float(e), -12) for n, e in enumerate(events)]
+            for name, at, first in sheets:
+                tiles = []
+                for k in range(first, 31):
+                    t = at + k * f
+                    if t < 0 or t > dur:
+                        continue
+                    th = grab(page, canvas, t).resize((320, int(320 * h / w)))
+                    ImageDraw.Draw(th).text((4, 3), f"{k:+d}f", fill=(255, 255, 0))
+                    tiles.append(th)
+                sheet(tiles, 6).save(os.path.join(a.out, name))
 
             browser.close()
     finally:

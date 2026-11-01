@@ -65,7 +65,7 @@ A slash is the trail of a weapon swung by someone, so it lives in the world, not
 ## Projectile
 
 - A hard-edged core (bright, small) inside a larger coloured shape stretched along the direction of travel (1.5 - 3x longer than wide), plus a trail that tapers and dissipates behind it.
-- It stops at the contact point: the projectile ends where the impact begins, on the same frame. Nothing passes through the target unless the design says it pierces.
+- It stops at the contact point: the projectile ends where the impact begins, on the same frame, without lingering there (`motion.md` > Momentum). Nothing passes through the target unless the design says it pierces.
 - Anticipation: a short charge or muzzle flash at the source tells the player where it came from.
 
 ## Rings and shockwaves
