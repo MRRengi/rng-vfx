@@ -7,8 +7,10 @@
 | ![Realistic grenade explosion](docs/realism-explosion.gif) | ![MOBA sword slash](docs/moba-slash.gif) | ![Anime cyan energy hit](docs/anime-magic.gif) |
 | **Divine slash, isometric survivors-like** | **Dark fantasy blood nova** | **Realistic fuel barrel explosion** |
 | ![Divine gold slash hitting three enemies](docs/divine-slash.gif) | ![Dark fantasy blood nova](docs/dark-fantasy-nova.gif) | ![Fuel barrel explosion](docs/realism-barrel.gif) |
+| **Sci-fi shield with floating breaches** | | |
+| ![Seamless sci-fi shield with floating holes from hits](docs/scifi-shield.gif) | | |
 
-Every effect above was made by a fresh agent in three.js, using only this skill and procedural shaders: no textures, no image generation, no hand edits. The divine slash came from one line a game developer would actually type: *"make me a slash on enemies in a divine style for my isometric top-down survivors-like"*.
+Every effect above was made by a fresh agent in three.js, using only this skill and procedural shaders: no textures, no image generation, no hand edits. The divine slash came from one line a game developer would actually type: *"make me a slash on enemies in a divine style for my isometric top-down survivors-like"*. The shield came from *"a seamless sci-fi shield around the character, hits make beautiful floating holes in it"*.
 
 ## Why
 
