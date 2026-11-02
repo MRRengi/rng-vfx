@@ -12,6 +12,18 @@
 
 Every effect above was made by a fresh agent in three.js, using only this skill and procedural shaders: no textures, no image generation, no hand edits. The divine slash came from one line a game developer would actually type: *"make me a slash on enemies in a divine style for my isometric top-down survivors-like"*. The shield came from *"a seamless sci-fi shield around the character, hits make beautiful floating holes in it"*.
 
+### Same request, with and without the skill
+
+*"A portal in the forest for an RPG like Dragon Age 2"*, given word for word to four fresh agents: one without the skill, three with it.
+
+| Without the skill | With the skill, run 1 |
+|---|---|
+| ![Portal without the skill](docs/portal-without-skill.gif) | ![Portal with the skill, run 1](docs/portal-with-skill.gif) |
+| **With the skill, run 2** | **With the skill, run 3** |
+| ![Portal with the skill, run 2](docs/portal-with-skill-run2.gif) | ![Portal with the skill, run 3](docs/portal-with-skill-run3.gif) |
+
+All three skill runs build a dark swirling well with a torn hot rim, bend the air around it, light the trees and the dummy, and open from a crack with anticipation; the run without the skill is a washed-out disc cropped by its own camera.
+
 ## Why
 
 Agents already know what League of Legends, Genshin or Battlefield effects look like. What they get wrong is the rest: a grenade drawn as a fuel fireball, smoke that floats off as one lump, effects too timid to have weight, nothing reacting on the target or the ground, jittery or aliased motion, and brightness that behaves differently in every engine. rng-vfx gives the agent the way a lead VFX artist works (brief, reference breakdown, plan, build in passes, review stills and motion against the reference) plus the knowledge that is easy to get wrong, and leaves the look to the genre's real references.
