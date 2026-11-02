@@ -37,7 +37,10 @@ Anything that moves keeps moving until something stops it, and the stop is the e
 
 ## Fast motion
 
-Anything moving more than a few pixels per frame strobes (reads as separate copies) unless it is stretched along its velocity or leaves a trail: velocity-stretched sparks, ribbon trails on projectiles and hero sparks, a smear on the slash's leading edge. The stretch length is about the distance moved in one to two frames.
+Anything moving more than a few pixels per frame strobes (reads as separate copies) unless its motion is filled in. How depends on what it is:
+
+- **Small, hard, bright things** (sparks, embers, droplets, bullets, shards) are stretched along their velocity, which is motion blur; the stretch length is about the distance moved in one to two frames. Ribbon trails on projectiles and hero sparks and a smear on a slash's leading edge do the same job.
+- **Soft volumes** (fire, smoke, dust, glow, magic mist) do not streak. Each element stays round and soft, and a fast-moving volume leaves a continuous trail by spawning along the whole path it covered since the last frame, its elements overlapping. A stretched or pointed blob of fire or smoke reads as a hair or a comet tail, not as gas.
 
 ## Hit stop and camera shake
 
