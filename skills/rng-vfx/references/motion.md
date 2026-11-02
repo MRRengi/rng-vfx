@@ -2,7 +2,7 @@
 
 A strong design still looks cheap when its motion is rough. Players read polish from smoothness: shapes that ease, edges that stay clean, detail that moves with the shape. Most of this is invisible in single stills, so review it on consecutive frames (`../SKILL.md` step 5).
 
-Contents: easing; continuity and flicker; stepped animation; birth and death; anti-aliasing and shimmer; fast motion; hit stop and camera shake; overlap; frame rate.
+Contents: easing; continuity and flicker; stepped animation; birth and death; anti-aliasing and shimmer; momentum; fast motion; hit stop and camera shake; overlap; frame rate.
 
 ## Easing
 
@@ -31,9 +31,16 @@ Drawn styles hold drawings (on twos or threes) because the whole game is drawn t
 - Thin lines and small sparks shimmer as they cross pixels; keep them above the minimum widths (`elements.md` > Reading at distance).
 - Fine noise detail sparkles and boils at distance. Keep its features several pixels wide at the gameplay camera, or fade the detail out with distance.
 
+## Momentum
+
+Anything that moves keeps moving until something stops it, and the stop is the event: a projectile that reaches its target is replaced by the impact on that same frame, never parked at the contact point while its trail catches up. A moving element that holds still for even two frames, with no hit stop or design behind it, reads as the game lagging, not as a choice. The same goes for the start: a moving thing appears already moving, out of its source or charge. Movement has to be readable too: anything the player should track (a projectile, a thrown blade) stays on screen for at least a few frames, so its speed from the gameplay camera may need to be lower than the physical value; a shot too fast to see is drawn as a hitscan streak, not as an object.
+
 ## Fast motion
 
-Anything moving more than a few pixels per frame strobes (reads as separate copies) unless it is stretched along its velocity or leaves a trail: velocity-stretched sparks, ribbon trails on projectiles and hero sparks, a smear on the slash's leading edge. The stretch length is about the distance moved in one to two frames.
+Anything moving more than a few pixels per frame strobes (reads as separate copies) unless its motion is filled in. How depends on what it is:
+
+- **Small, hard, bright things** (sparks, embers, droplets, bullets, shards) are stretched along their velocity, which is motion blur; the stretch length is about the distance moved in one to two frames. Ribbon trails on projectiles and hero sparks and a smear on a slash's leading edge do the same job.
+- **Soft volumes** (fire, smoke, dust, glow, magic mist) do not streak. Each element stays round and soft, and a fast-moving volume leaves a continuous trail by spawning along the whole path it covered since the last frame, its elements overlapping. A stretched or pointed blob of fire or smoke reads as a hair or a comet tail, not as gas.
 
 ## Hit stop and camera shake
 
