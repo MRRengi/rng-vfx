@@ -1,6 +1,6 @@
 """Render review frames of a web effect page: stills and a motion sequence.
 
-    python scripts/capture_strip.py <folder with index.html> <output folder> [--size 960x540]
+    python scripts/capture_strip.py <folder with index.html> <output folder> [--size 1280x720]
 
 The page must expose window.fx with: duration, contact, pause(), seek(t),
 setCamera('gameplay' | 'close'), and optionally setBloom(on).
@@ -66,7 +66,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("folder")
     ap.add_argument("out")
-    ap.add_argument("--size", default="960x540")
+    ap.add_argument("--size", default="1280x720")
     ap.add_argument("--events", help="comma-separated seconds: a motion sheet around each event instead of only fx.contact")
     ap.add_argument("--times", help="comma-separated seconds: render only these frames (gameplay camera) into quick.png")
     a = ap.parse_args()
