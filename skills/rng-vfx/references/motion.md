@@ -51,6 +51,8 @@ Anything moving more than a few pixels per frame strobes (reads as separate copi
 
 Layers start and end at slightly different times: the flash, then the burst, then rings, sparks and residue each with their own curve. Everything starting and stopping together looks like one switch being flipped.
 
+The same holds for anything animated by bones (a creature, a summon, a weapon trail rig, a tentacle, a cloth or chain rig): its joints never switch poses together. The root leads, the joints further down the chain follow and settle a few frames later; poses change along arcs with easing, a bigger pose change gets more frames, and a pose that is still moving when the next one starts flows into it instead of stopping first. A whole rig snapping into a new pose on one curve reads as a glitch.
+
 ## Frame rate
 
 Animate from time in seconds, not frame counts, so the effect plays the same at 30, 60 or 144 fps and `seek(t)` renders the same frame every time. Timing tables in the style files are written in 60 fps frames for convenience.
