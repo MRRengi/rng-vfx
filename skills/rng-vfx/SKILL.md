@@ -15,7 +15,7 @@ Think of every effect as energy made visible: an impact moving water, heat carry
 
 These seven qualities are what separate shipped effects from generated ones. Each is a judgement about the result, not a rule about the parts:
 
-1. **It reads from the gameplay camera.** One primary shape carries the event and is recognisable in a single frame from the real camera. Close-up beauty that turns into a blur or vanishes at distance is a failure, so design with the on-screen size in mind (pixels per metre, below).
+1. **It reads from the gameplay camera, and it shows where it acts.** One primary shape carries the event and is recognisable in a single frame from the real camera. That shape also tells the player the effect's gameplay footprint: a single target, a radius, a cone, a line, a zone that lasts. At its biggest and brightest moment the primary shape fills that footprint, so a player knows at once whether they were hit; details inside it (columns, spikes, runes) support it and never replace it, and it neither spills far past the area nor shrinks to a small mark in its centre. Visuals that disagree with the hitbox are what players find most frustrating. Close-up beauty that turns into a blur or vanishes at distance is a failure too, so design with the on-screen size in mind (pixels per metre, below).
 2. **It has weight in proportion to the event.** A light jab is small and quick; a heavy hit, an ultimate or a big explosion owns the frame for a moment. Take the scale from the reference breakdown, not from habit: size, contrast and timing should match what that game does for an event of this weight, while the shape stays readable and the target stays visible.
 3. **The world reacts.** The target flinches, flares and is lit by the hit; the ground takes light, dust and a mark; heavy hits freeze for a few frames and shake the camera. An effect floating in front of an unaffected scene looks pasted on.
 4. **Timing has contrast.** A fast arrival (with anticipation where the move has a wind-up), a short strong hold, then an uneven dissipation in which the energy goes quickly and only quieter residue lingers. A slow swell, a burst that overstays, an even fade or everything vanishing at once all read as weak.
@@ -29,7 +29,7 @@ Comic devices (outlines, straight-edged star polygons, "pow" bursts, outlined ca
 
 ### 1. Brief
 
-Write down the event (hit, explosion, cast, buff), its weight (light, heavy, ultimate), the style, the engine and the gameplay camera (distance, FOV, framing). In an existing project, record the tone mapper, bloom, exposure and units, and look at two of its existing effects; brightness depends on them (`references/brightness.md`).
+Write down the event (hit, explosion, cast, buff), its gameplay footprint (single target, a radius in metres, a cone, a line, a zone and how long it lasts; decide one when nobody gave it), its weight (light, heavy, ultimate), the style, the engine and the gameplay camera (distance, FOV, framing). In an existing project, record the tone mapper, bloom, exposure and units, and look at two of its existing effects; brightness depends on them (`references/brightness.md`).
 
 Work out the on-screen scale: pixels per metre at the target is `screenHeight / (2 * distance * tan(fov / 2))`. A 1.8 m character 10 m away with a 40 degree FOV is about 270 px tall at 1080p, so a 2 cm spark is 3 px and a 2 m slash is 300 px. Elements narrower than about 3 px disappear.
 
