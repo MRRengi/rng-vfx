@@ -9,8 +9,8 @@
 | ![Black hole with an accretion disk pulling units in](docs/black-hole.gif) | ![Seamless sci-fi shield with floating holes from hits](docs/scifi-shield.gif) | ![Stylized fireball thrown from the hand, particles burning out](docs/stylized-fireball.gif) |
 | **Divine slash, isometric survivors-like** | **Dark fantasy blood nova** | **Realistic fuel barrel explosion** |
 | ![Divine gold slash hitting three enemies](docs/divine-slash.gif) | ![Dark fantasy blood nova](docs/dark-fantasy-nova.gif) | ![Fuel barrel explosion](docs/realism-barrel.gif) |
-| **Realistic frag grenade** | **Stylized MOBA slash** | **Anime magic hit** |
-| ![Realistic grenade explosion](docs/realism-explosion.gif) | ![MOBA sword slash](docs/moba-slash.gif) | ![Anime cyan energy hit](docs/anime-magic.gif) |
+| **Isometric pixel-art healing aura** | **Realistic frag grenade** | **Stylized MOBA slash** |
+| ![Isometric pixel-art healing aura](docs/pixel-heal.gif) | ![Realistic grenade explosion](docs/realism-explosion.gif) | ![MOBA sword slash](docs/moba-slash.gif) |
 
 Every effect above was made by a fresh agent in three.js, using only this skill and procedural shaders: no textures, no image generation, no hand edits. The divine slash came from one line a game developer would actually type: *"make me a slash on enemies in a divine style for my isometric top-down survivors-like"*. The shield came from *"a seamless sci-fi shield around the character, hits make beautiful floating holes in it"*, the black hole from *"a black hole with a singularity that pulls units inside"*.
 
