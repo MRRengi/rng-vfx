@@ -2,15 +2,17 @@
 
 **A game VFX skill for coding agents.** Six styles, three engines, built and tested the way skills should be: by letting a fresh agent make effects with it and judging the results blind against an agent without it.
 
-| Realistic frag grenade | Stylized MOBA slash | Anime magic hit |
+![rng-vfx showreel: black hole, portal, sci-fi shield, fireball, divine slash, blood nova, barrel explosion, AoE](docs/showreel.gif)
+
+| Black hole pulling units in | Sci-fi shield with floating breaches | Stylized fireball with burning particles |
 |---|---|---|
-| ![Realistic grenade explosion](docs/realism-explosion.gif) | ![MOBA sword slash](docs/moba-slash.gif) | ![Anime cyan energy hit](docs/anime-magic.gif) |
+| ![Black hole with an accretion disk pulling units in](docs/black-hole.gif) | ![Seamless sci-fi shield with floating holes from hits](docs/scifi-shield.gif) | ![Stylized fireball thrown from the hand, particles burning out](docs/stylized-fireball.gif) |
 | **Divine slash, isometric survivors-like** | **Dark fantasy blood nova** | **Realistic fuel barrel explosion** |
 | ![Divine gold slash hitting three enemies](docs/divine-slash.gif) | ![Dark fantasy blood nova](docs/dark-fantasy-nova.gif) | ![Fuel barrel explosion](docs/realism-barrel.gif) |
-| **Sci-fi shield with floating breaches** | **Stylized fireball with burning particles** | |
-| ![Seamless sci-fi shield with floating holes from hits](docs/scifi-shield.gif) | ![Stylized fireball thrown from the hand, particles burning out](docs/stylized-fireball.gif) | |
+| **Realistic frag grenade** | **Stylized MOBA slash** | **Anime magic hit** |
+| ![Realistic grenade explosion](docs/realism-explosion.gif) | ![MOBA sword slash](docs/moba-slash.gif) | ![Anime cyan energy hit](docs/anime-magic.gif) |
 
-Every effect above was made by a fresh agent in three.js, using only this skill and procedural shaders: no textures, no image generation, no hand edits. The divine slash came from one line a game developer would actually type: *"make me a slash on enemies in a divine style for my isometric top-down survivors-like"*. The shield came from *"a seamless sci-fi shield around the character, hits make beautiful floating holes in it"*.
+Every effect above was made by a fresh agent in three.js, using only this skill and procedural shaders: no textures, no image generation, no hand edits. The divine slash came from one line a game developer would actually type: *"make me a slash on enemies in a divine style for my isometric top-down survivors-like"*. The shield came from *"a seamless sci-fi shield around the character, hits make beautiful floating holes in it"*, the black hole from *"a black hole with a singularity that pulls units inside"*.
 
 ### Same request, with and without the skill
 
