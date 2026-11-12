@@ -37,6 +37,8 @@ Work out the on-screen scale: pixels per metre at the target is `screenHeight / 
 
 This is the most important step: the reference is your target, and vague memories make vague effects. Pick two shipped effects in this genre that do the same job (name the game and the move; use the user's references if given) and describe each in detail at four moments: contact, +2 frames, +6 frames and the end. For each, write the primary shape and its size relative to the character, what is brightest and darkest, the colours, what the target and ground are doing, and what is moving and how. The style file lists the genre's typical references and look (`references/styles/<style>.md`).
 
+The person's own words come first: a colour, a feature, a look or a reference they named is part of the brief, and the style file fills in what they left open. When the two disagree (they ask for black and red, the style's default is ash bones with a thin red rim), do not quietly pick one: ask them which they want, saying in a sentence what each gives. If nobody can answer, follow what they asked for and write the conflict in your notes so they can change it.
+
 ### 3. Plan
 
 Write a short plan before code, because the expensive mistakes (wrong shape, wrong scale, wrong timing, wrong material) are cheap to fix on paper:
