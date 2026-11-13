@@ -14,6 +14,14 @@
 
 Every effect above was made by a fresh agent in three.js, using only this skill and procedural shaders: no textures, no image generation, no hand edits. The divine slash came from one line a game developer would actually type: *"make me a slash on enemies in a divine style for my isometric top-down survivors-like"*. The shield came from *"a seamless sci-fi shield around the character, hits make beautiful floating holes in it"*, the black hole from *"a black hole with a singularity that pulls units inside"*.
 
+### A process, not a hit
+
+*"An object gradually turning frozen, as if ice comes rushing in with the wind from one side and freezes it."*
+
+![A dummy freezing in gusts of icy wind: frost crawls from the windward side, rime grows into the wind, glazed ice with cracks forms behind the front](docs/wind-freeze.gif)
+
+No flash, no shake: the freeze front follows four gusts of wind, speeding up and stalling, with grey frost, a white feathery edge and glazed, lit ice behind it. Rime grows upwind and snow sticks to the windward side.
+
 ### Same request, with and without the skill
 
 *"A portal in the forest for an RPG like Dragon Age 2"*, given word for word to four fresh agents: one without the skill, three with it.
