@@ -14,6 +14,7 @@ Contents:
 - Smoke and dust
 - Fire
 - Splashes and liquids
+- Translucent matter
 - Lightning and arcs
 - Cel puffs (toon only)
 - Impact frames
@@ -147,6 +148,18 @@ Layers and timing for a realistic ground explosion:
 - **Viscosity sets shape and speed:** thicker liquids (oil, paint, ink, blood, mud, lava) stay together in round blobs, stretch into strings and move slower; thinner ones (alcohol, gasoline) break into fine sheets and droplets faster and spread wider. Gooey splats land with a flattening squash and satellite drops.
 - Ripples and splats on the ground keep the ground's perspective as they grow: they widen more than they deepen.
 - Big splashes are slow and hang in the air; a large splash can be built from copies of one good splash layered with staggered start times.
+
+## Translucent matter
+
+Ice, crystal, glass, water, gel, slime and amber are lit matter: all their brightness is scene light reflected off them or passing through them, never their own glow. What sells them is how light gets in, travels and comes out.
+
+- **Thickness sets the colour.** Light loses its colour the further it travels inside, so thin edges and splinters are nearly clear and pale, and thick parts take the material's body colour, deeper and darker (cyan in ice, orange in amber, green in slime). One flat tint over the whole object reads as painted plastic. Estimate thickness from the shell's depth, the distance between back and front faces, or how edge-on the surface is.
+- **Reflection by angle (Fresnel).** Face-on you look into the material; at grazing angles its surface turns into a mirror of the sky and surroundings, so the silhouette edges brighten. That needs something to reflect: an environment map made from the scene's own sky, not a generic one.
+- **You see through it.** What lies behind and inside shows through, shifted by refraction (offset the background sample along the surface normal), dimmed and tinted by thickness. Anything frozen inside stays faintly readable.
+- **Light passes through.** Thin parts with the key light or a fire behind them light up in that light's colour, strongest when the light sits behind them; with no light behind they stay dark. This is how backlit ice or a leaf seems to glow without being an energy source.
+- **Inner structure gives volume.** Bubbles, cracks, fracture planes, a cloudy core and suspended specks, set at different depths so they shift with parallax as the camera moves. A clean, empty interior reads as a solid tinted shape.
+- **The surface tells its state.** Facets with crisp highlights and a few stable glints on edges; frost and rime are opaque white (countless tiny crystals scatter all light) and turn clear as they become glaze ice, so the change from white rough to clear smooth shows age; wet surfaces darken and their highlights sharpen.
+- **Check it by moving.** Turn the camera or the light: highlights, reflections, the light passing through and the inner structure all change. A look that stays the same from every angle has no light passing through it.
 
 ## Lightning and arcs
 
